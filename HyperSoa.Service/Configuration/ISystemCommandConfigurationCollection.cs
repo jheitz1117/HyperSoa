@@ -21,7 +21,7 @@ namespace HyperSoa.Service.Configuration
         /// </summary>
         /// <param name="commandName">The name of the <see cref="ISystemCommandConfiguration"/> object to get.</param>
         /// <returns></returns>
-        ISystemCommandConfiguration GetByCommandName(string commandName);
+        ISystemCommandConfiguration? GetByCommandName(string commandName);
 
         /// <summary>
         /// Determines whether the <see cref="ISystemCommandConfigurationCollection"/> contains an instance of <see cref="ISystemCommandConfiguration"/> with the specified name.

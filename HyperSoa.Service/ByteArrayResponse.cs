@@ -1,6 +1,7 @@
-﻿using ProtoBuf;
+﻿using HyperSoa.Contracts;
+using ProtoBuf;
 
-namespace HyperSoa.Contracts
+namespace HyperSoa.Service
 {
     [ProtoContract]
     public sealed class ByteArrayResponse : ICommandResponse

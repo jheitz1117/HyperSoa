@@ -15,7 +15,7 @@ namespace HyperSoa.Service
         /// <summary>
         /// The name of the <see cref="IHyperNodeService"/>. This property is required.
         /// </summary>
-        string HyperNodeName { get; }
+        string? HyperNodeName { get; }
 
         /// <summary>
         /// Indicates whether the task progress cache will be enabled when the <see cref="IHyperNodeService"/> starts.
@@ -45,13 +45,13 @@ namespace HyperSoa.Service
         /// The assembly qualified name of a type that implements <see cref="ITaskIdProvider"/>. If this property is not supplied, a default
         /// implementation is used by the <see cref="IHyperNodeService"/>. Otherwise, an instance of the specified type will be used instead.
         /// </summary>
-        string TaskIdProviderType { get; }
+        string? TaskIdProviderType { get; }
 
         /// <summary>
         /// The assembly qualified name of a type that derives from <see cref="HyperNodeEventHandlerBase"/>. If this property is not supplied, a default
         /// implementation is used by the <see cref="IHyperNodeService"/>. Otherwise, an instance of the specified type will be used instead.
         /// </summary>
-        string HyperNodeEventHandlerType { get; }
+        string? HyperNodeEventHandlerType { get; }
 
         /// <summary>
         /// A collection of <see cref="IActivityMonitorConfiguration"/> objects specifying how user-defined <see cref="HyperNodeServiceActivityMonitor"/> objects should be configured in the <see cref="IHyperNodeService"/>.
@@ -61,11 +61,11 @@ namespace HyperSoa.Service
         /// <summary>
         /// A collection of <see cref="ISystemCommandConfiguration"/> objects specifying how system-level <see cref="ICommandModule"/> objects should be configured in the <see cref="IHyperNodeService"/>.
         /// </summary>
-        ISystemCommandConfigurationCollection SystemCommands { get; }
+        ISystemCommandConfigurationCollection? SystemCommands { get; }
 
         /// <summary>
         /// A collection of <see cref="ICommandModuleConfiguration"/> objects specifying how user-defined <see cref="ICommandModule"/> objects should be configured in the <see cref="IHyperNodeService"/>.
         /// </summary>
-        ICommandModuleConfigurationCollection CommandModules { get; }
+        ICommandModuleConfigurationCollection? CommandModules { get; }
     }
 }

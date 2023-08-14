@@ -1,8 +1,8 @@
 ﻿using HyperSoa.Contracts.RemoteAdmin;
-using HyperSoa.Contracts.Serialization;
 using HyperSoa.Service.ActivityTracking;
 using HyperSoa.Service.CommandModules;
 using HyperSoa.Service.EventTracking;
+using HyperSoa.Service.Serialization;
 using HyperSoa.Service.TaskIdProviders;
 
 namespace HyperSoa.Service.Configuration

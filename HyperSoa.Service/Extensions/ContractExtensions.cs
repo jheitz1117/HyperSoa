@@ -4,14 +4,6 @@ namespace HyperSoa.Service.Extensions
 {
     internal static class ContractExtensions
     {
-        public static EmptyCommandResponse ToEmptyCommandResponse(this MessageProcessStatusFlags statusFlags)
-        {
-            return new EmptyCommandResponse
-            {
-                ProcessStatusFlags = statusFlags
-            };
-        }
-
         public static bool TaskTraceRequested(this HyperNodeMessageRequest request)
         {
             return request.ProcessOptionFlags.HasFlag(MessageProcessOptionFlags.ReturnTaskTrace);

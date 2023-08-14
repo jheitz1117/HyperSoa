@@ -2,7 +2,7 @@
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using HyperSoa.Contracts;
-using HyperSoa.Contracts.Serialization;
+using HyperSoa.Contracts.Extensions;
 using HyperSoa.Service.ActivityTracking;
 using HyperSoa.Service.ActivityTracking.Monitors;
 using HyperSoa.Service.ActivityTracking.Trackers;
@@ -10,6 +10,7 @@ using HyperSoa.Service.CommandModules;
 using HyperSoa.Service.Configuration;
 using HyperSoa.Service.EventTracking;
 using HyperSoa.Service.Extensions;
+using HyperSoa.Service.Serialization;
 using HyperSoa.Service.TaskIdProviders;
 
 namespace HyperSoa.Service
@@ -24,7 +25,7 @@ namespace HyperSoa.Service
         #region Defaults
 
         private static readonly IContractSerializer DefaultContractSerializer = new NoOpContractSerializer();
-        private static readonly IHyperNodeConfigurationProvider DefaultConfigurationProvider = new InMemoryHyperNodeConfigurationProvider(); // TODO: Would prefer to reference a JSON provider that reads the appsettings.json file (possibly using DI?)
+        private static readonly IHyperNodeConfigurationProvider DefaultConfigurationProvider = new InMemoryHyperNodeConfigurationProvider();
 
         #endregion Defaults
 

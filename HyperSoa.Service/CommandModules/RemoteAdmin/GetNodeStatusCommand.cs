@@ -1,6 +1,6 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
-using HyperSoa.Contracts.Serialization;
+using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {

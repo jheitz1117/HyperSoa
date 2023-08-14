@@ -11,13 +11,13 @@ namespace HyperSoa.Service.Configuration
         /// <summary>
         /// The name of the <see cref="HyperNodeServiceActivityMonitor"/> object. This property is required.
         /// </summary>
-        string MonitorName { get; }
+        string? MonitorName { get; }
 
         /// <summary>
         /// The assembly qualified name of a type that inherits <see cref="HyperNodeServiceActivityMonitor"/>.
         /// This property is required.
         /// </summary>
-        string MonitorType { get; }
+        string? MonitorType { get; }
 
         /// <summary>
         /// Indicates whether the <see cref="HyperNodeServiceActivityMonitor"/> object will be enabled when the <see cref="IHyperNodeService"/> starts.

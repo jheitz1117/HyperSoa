@@ -1,4 +1,6 @@
-﻿namespace HyperSoa.Contracts.Serialization
+﻿using HyperSoa.Contracts;
+
+namespace HyperSoa.Service.Serialization
 {
     public sealed class ProtoContractSerializer<TRequest, TResponse> : IContractSerializer<TRequest, TResponse>
         where TRequest : ICommandRequest

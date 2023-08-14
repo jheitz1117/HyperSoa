@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,12 +8,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HyperSoa.Service.Configuration.Xml\HyperSoa.Service.Configuration.Xml.csproj" />
-    <ProjectReference Include="..\HyperSoa.ServiceHosting\HyperSoa.ServiceHosting.csproj" />
-    <ProjectReference Include="..\HyperSoa.Service\HyperSoa.Service.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HyperSoa.Service.Configuration.Json\HyperSoa.Service.Configuration.Json.csproj" />
+    <ProjectReference Include="..\HyperSoa.Service.Configuration.Xml\HyperSoa.Service.Configuration.Xml.csproj" />
+    <ProjectReference Include="..\HyperSoa.ServiceHosting\HyperSoa.ServiceHosting.csproj" />
+    <ProjectReference Include="..\HyperSoa.Service\HyperSoa.Service.csproj" />
+    <ProjectReference Include="..\NodeModuleTest\NodeModuleTest.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -1,10 +1,7 @@
-﻿using HyperSoa.Contracts.Serialization;
-
-namespace HyperSoa.Contracts
+﻿namespace HyperSoa.Contracts
 {
     /// <summary>
-    /// Defines a class that is returned from a custom command module. Classes implementing this interface can be serialized
-    /// and deserialized using an instance of <see cref="IContractSerializer"/>.
+    /// Defines a class that is returned from a custom command module.
     /// </summary>
     public interface ICommandResponse
     {

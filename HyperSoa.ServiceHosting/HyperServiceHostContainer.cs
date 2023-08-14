@@ -31,7 +31,7 @@ namespace HyperSoa.ServiceHosting
         /// </summary>
         /// <param name="factory">The delegate that is invoked to create the <see cref="HyperCoreServiceHost"/> object to wrap.</param>
         /// <param name="exceptionHandler">The <see cref="IServiceHostExceptionHandler"/> implementation to use when any is thrown.</param>
-        public HyperServiceHostContainer(Func<HyperCoreServiceHost> factory, IServiceHostExceptionHandler exceptionHandler)
+        public HyperServiceHostContainer(Func<HyperCoreServiceHost> factory, IServiceHostExceptionHandler? exceptionHandler)
             : this(factory, exceptionHandler, exceptionHandler, exceptionHandler)
         { }
 
@@ -43,9 +43,9 @@ namespace HyperSoa.ServiceHosting
         /// <param name="communicationExceptionHandler">The <see cref="IServiceHostExceptionHandler"/> implementation to use when a <see cref="CommunicationException"/> is thrown.</param>
         /// <param name="genericExceptionHandler">The <see cref="IServiceHostExceptionHandler"/> implementation to use when an <see cref="Exception"/> is thrown that is not a <see cref="TimeoutException"/> or a <see cref="CommunicationException"/>.</param>
         public HyperServiceHostContainer(Func<HyperCoreServiceHost> factory,
-                           IServiceHostExceptionHandler timeoutExceptionHandler,
-                           IServiceHostExceptionHandler communicationExceptionHandler,
-                           IServiceHostExceptionHandler genericExceptionHandler)
+                           IServiceHostExceptionHandler? timeoutExceptionHandler,
+                           IServiceHostExceptionHandler? communicationExceptionHandler,
+                           IServiceHostExceptionHandler? genericExceptionHandler)
             : this(new ServiceHostFactoryMethodWrapper(factory), timeoutExceptionHandler, communicationExceptionHandler, genericExceptionHandler)
         { }
 
@@ -66,9 +66,9 @@ namespace HyperSoa.ServiceHosting
         /// <param name="communicationExceptionHandler">The <see cref="IServiceHostExceptionHandler"/> implementation to use when a <see cref="CommunicationException"/> is thrown.</param>
         /// <param name="genericExceptionHandler">The <see cref="IServiceHostExceptionHandler"/> implementation to use when an <see cref="Exception"/> is thrown that is not a <see cref="TimeoutException"/> or a <see cref="CommunicationException"/>.</param>
         public HyperServiceHostContainer(IServiceHostFactory hostFactory, 
-                           IServiceHostExceptionHandler timeoutExceptionHandler,
-                           IServiceHostExceptionHandler communicationExceptionHandler,
-                           IServiceHostExceptionHandler genericExceptionHandler)
+                           IServiceHostExceptionHandler? timeoutExceptionHandler,
+                           IServiceHostExceptionHandler? communicationExceptionHandler,
+                           IServiceHostExceptionHandler? genericExceptionHandler)
         {
             _hostFactory = hostFactory ?? throw new ArgumentNullException(nameof(hostFactory));
             _timeoutExceptionHandler = timeoutExceptionHandler ?? throw new ArgumentNullException(nameof(timeoutExceptionHandler));
