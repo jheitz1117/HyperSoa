@@ -2,7 +2,7 @@
 using HyperSoa.Service;
 using HyperSoa.Service.TaskIdProviders;
 
-namespace NodeModuleTest.TaskIdProviders
+namespace HostingTest.Modules.TaskIdProviders
 {
     public class NumericTaskIdProvider : TaskIdProviderBase, IDisposable
     {

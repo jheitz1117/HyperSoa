@@ -3,7 +3,7 @@ using HyperSoa.Contracts;
 using HyperSoa.Contracts.Extensions;
 using HyperSoa.Service.CommandModules;
 
-namespace NodeModuleTest.CommandModules
+namespace HostingTest.Modules.CommandModules
 {
     public class DisposableCommandModule : ICommandModule, IDisposable
     {

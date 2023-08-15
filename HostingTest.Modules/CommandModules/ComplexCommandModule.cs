@@ -1,9 +1,9 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Service.CommandModules;
 using HyperSoa.Service.Serialization;
-using NodeModuleTest.Contracts;
+using HostingTest.Contracts;
 
-namespace NodeModuleTest.CommandModules
+namespace HostingTest.Modules.CommandModules
 {
     internal class ComplexCommandModule: ICommandModule, IContractSerializerFactory
     {

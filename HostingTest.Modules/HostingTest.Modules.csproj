@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HostingTest.Contracts\HostingTest.Contracts.csproj" />
     <ProjectReference Include="..\HyperSoa.Service\HyperSoa.Service.csproj" />
-    <ProjectReference Include="..\NodeModuleTest.Contracts\NodeModuleTest.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using HyperSoa.Service.ActivityTracking;
 
-namespace NodeModuleTest.ActivityMonitors
+namespace HostingTest.Modules.ActivityMonitors
 {
     public class MondayLogFileActivityMonitor : HyperNodeServiceActivityMonitor
     {

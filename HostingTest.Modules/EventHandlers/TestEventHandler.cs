@@ -1,6 +1,6 @@
 ﻿using HyperSoa.Service.EventTracking;
 
-namespace NodeModuleTest.EventHandlers
+namespace HostingTest.Modules.EventHandlers
 {
     public class TestEventHandler : HyperNodeEventHandlerBase
     {

@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using HyperSoa.Service.ActivityTracking;
 
-namespace NodeModuleTest.ActivityMonitors
+namespace HostingTest.Modules.ActivityMonitors
 {
     /// <summary>
     /// Stock <see cref="HyperNodeServiceActivityMonitor"/> that calls <see cref="Trace"/>.WriteLine() for each activity event. This monitor

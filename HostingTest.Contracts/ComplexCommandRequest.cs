@@ -1,7 +1,7 @@
 ﻿using HyperSoa.Contracts;
 using ProtoBuf;
 
-namespace NodeModuleTest.Contracts
+namespace HostingTest.Contracts
 {
     [ProtoContract]
     public class ComplexCommandRequest : ICommandRequest

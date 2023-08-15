@@ -21,9 +21,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.Service.Configurat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.Service.Configuration.Json", "HyperSoa.Service.Configuration.Json\HyperSoa.Service.Configuration.Json.csproj", "{121AAE36-9F36-4473-9C21-AF31EB0400FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeModuleTest", "NodeModuleTest\NodeModuleTest.csproj", "{62193DDA-2050-4683-AAB1-FEC5FD100E1C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.EveNode", "HostingTest.EveNode\HostingTest.EveNode.csproj", "{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeModuleTest.Contracts", "NodeModuleTest.Contracts\NodeModuleTest.Contracts.csproj", "{A15F1FAC-5F86-41D1-A36C-45CA2E512254}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.Modules", "HostingTest.Modules\HostingTest.Modules.csproj", "{463B8BD5-7496-4081-B476-499095B0C1A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.Contracts", "HostingTest.Contracts\HostingTest.Contracts.csproj", "{EF438186-0E40-49BC-A6E7-9B1A75563DEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,14 +61,18 @@ Global
 		{121AAE36-9F36-4473-9C21-AF31EB0400FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{121AAE36-9F36-4473-9C21-AF31EB0400FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{121AAE36-9F36-4473-9C21-AF31EB0400FA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62193DDA-2050-4683-AAB1-FEC5FD100E1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62193DDA-2050-4683-AAB1-FEC5FD100E1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62193DDA-2050-4683-AAB1-FEC5FD100E1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62193DDA-2050-4683-AAB1-FEC5FD100E1C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A15F1FAC-5F86-41D1-A36C-45CA2E512254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A15F1FAC-5F86-41D1-A36C-45CA2E512254}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A15F1FAC-5F86-41D1-A36C-45CA2E512254}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A15F1FAC-5F86-41D1-A36C-45CA2E512254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{463B8BD5-7496-4081-B476-499095B0C1A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{463B8BD5-7496-4081-B476-499095B0C1A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{463B8BD5-7496-4081-B476-499095B0C1A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{463B8BD5-7496-4081-B476-499095B0C1A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
