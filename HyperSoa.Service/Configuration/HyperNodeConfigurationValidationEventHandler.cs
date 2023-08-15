@@ -63,11 +63,11 @@ namespace HyperSoa.Service.Configuration
                 }
             }
 
-            if (config.SystemCommands != null)
+            if (config.RemoteAdminCommands != null)
             {
-                foreach (var systemCommand in config.SystemCommands)
+                foreach (var remoteAdminCommand in config.RemoteAdminCommands)
                 {
-                    ValidateConfiguration(systemCommand);
+                    ValidateConfiguration(remoteAdminCommand);
                 }
             }
 
@@ -115,7 +115,7 @@ namespace HyperSoa.Service.Configuration
             }
         }
 
-        private void ValidateConfiguration(ISystemCommandConfiguration config)
+        private void ValidateConfiguration(IRemoteAdminCommandConfiguration config)
         {
             var configClassName = config.GetType().FullName;
 
@@ -134,7 +134,7 @@ namespace HyperSoa.Service.Configuration
                     RaiseValidationEvent(
                         new HyperNodeConfigurationException(
                             string.Format(
-                                "The value '{0}' is not a valid system command name. The following is a list of all recognized system command names:{1}{1}{2}",
+                                "The value '{0}' is not a valid remote admin command name. The following is a list of all recognized remote admin command names:{1}{1}{2}",
                                 config.CommandName,
                                 Environment.NewLine,
                                 string.Join(

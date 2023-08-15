@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using ProtoBuf;
+﻿using ProtoBuf;
 
 namespace HyperSoa.Contracts
 {
@@ -13,25 +12,25 @@ namespace HyperSoa.Contracts
         /// <summary>
         /// Specifies that the recipient node should process this message synchronously without returning a task trace or caching activity events
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         None = 0,
 
         /// <summary>
         /// Specifies that the recipient node should return an activity event trace for this message.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         ReturnTaskTrace = 1 << 0,
 
         /// <summary>
         /// Specifies that the recipient node should run the request in a child thread.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         RunConcurrently = 1 << 1,
 
         /// <summary>
         /// Specifies that the recipient node should cache task progress for this message.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         CacheTaskProgress = 1 << 2,
     }
 }

@@ -1,10 +1,10 @@
 ﻿namespace HyperSoa.Service.Configuration.Json.Models
 {
-    internal class RemoteAdminCommandConfiguration : ISystemCommandConfiguration
+    internal class RemoteAdminCommandConfiguration : IRemoteAdminCommandConfiguration
     {
         public string Name { get; set; }
         public bool Enabled { get; set; }
 
-        string ISystemCommandConfiguration.CommandName => Name;
+        string IRemoteAdminCommandConfiguration.CommandName => Name;
     }
 }

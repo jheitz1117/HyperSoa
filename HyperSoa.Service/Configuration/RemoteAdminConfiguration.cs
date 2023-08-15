@@ -1,11 +1,11 @@
 ﻿namespace HyperSoa.Service.Configuration
 {
-    internal class SystemCommandConfiguration : ISystemCommandConfiguration
+    internal class RemoteAdminConfiguration : IRemoteAdminCommandConfiguration
     {
         public string CommandName { get; set; }
         public bool Enabled { get; set; }
 
-        public SystemCommandConfiguration(string commandName, bool enabled)
+        public RemoteAdminConfiguration(string commandName, bool enabled)
         {
             CommandName = commandName;
             Enabled = enabled;

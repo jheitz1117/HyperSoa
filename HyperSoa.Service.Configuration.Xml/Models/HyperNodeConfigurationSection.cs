@@ -100,7 +100,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
         /// <summary>
         /// This property must be implemented explicitly because its sibling property of the same name must have a specific return type to satisfy the .NET framework.
         /// </summary>
-        ISystemCommandConfigurationCollection IHyperNodeConfiguration.SystemCommands => SystemCommands;
+        IRemoteAdminConfigurationCollection IHyperNodeConfiguration.RemoteAdminCommands => SystemCommands;
 
         /// <summary>
         /// This property must be implemented explicitly because its sibling property of the same name must have a specific return type to satisfy the .NET framework.

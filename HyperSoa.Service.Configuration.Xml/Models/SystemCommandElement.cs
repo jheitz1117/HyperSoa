@@ -2,7 +2,7 @@
 
 namespace HyperSoa.Service.Configuration.Xml.Models
 {
-    internal sealed class SystemCommandElement : ConfigurationElement, ISystemCommandConfiguration
+    internal sealed class SystemCommandElement : ConfigurationElement, IRemoteAdminCommandConfiguration
     {
         [ConfigurationProperty("name", IsRequired = true, IsKey = true)]
         public string CommandName

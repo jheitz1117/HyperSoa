@@ -1,4 +1,4 @@
-﻿namespace HyperSoa.Service
+﻿namespace HyperSoa.Service.Configuration
 {
     /// <summary>
     /// Defines a method to provide an instance of <see cref="IHyperNodeConfiguration"/>.

@@ -17,7 +17,7 @@
         string? IHyperNodeConfiguration.HyperNodeName => Name;
         int? IHyperNodeConfiguration.TaskProgressCacheDurationMinutes => TaskProgressCacheDuration;
         IActivityMonitorConfigurationCollection? IHyperNodeConfiguration.ActivityMonitors => ActivityMonitors;
-        ISystemCommandConfigurationCollection? IHyperNodeConfiguration.SystemCommands => RemoteAdmin;
+        IRemoteAdminConfigurationCollection? IHyperNodeConfiguration.RemoteAdminCommands => RemoteAdmin;
         ICommandModuleConfigurationCollection? IHyperNodeConfiguration.CommandModules => CommandConfig;
     }
 }

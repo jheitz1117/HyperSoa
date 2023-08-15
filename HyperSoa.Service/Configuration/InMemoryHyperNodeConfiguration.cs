@@ -4,7 +4,7 @@
     {
         private readonly EmptyActivityMonitorConfigurationCollection _activityMonitors = new();
         private readonly EmptyCommandModuleConfigurationCollection _commandModules = new();
-        private readonly FullAdminSystemCommandModuleConfigurationCollection _systemCommands = new();
+        private readonly FullRemoteAdminConfigurationCollection _remoteAdminCommands = new();
 
         public string HyperNodeName => "InMemoryNode";
         public bool? EnableTaskProgressCache => true;
@@ -16,7 +16,7 @@
 
 
         public IActivityMonitorConfigurationCollection? ActivityMonitors => _activityMonitors;
-        public ISystemCommandConfigurationCollection SystemCommands => _systemCommands;
+        public IRemoteAdminConfigurationCollection RemoteAdminCommands => _remoteAdminCommands;
         public ICommandModuleConfigurationCollection CommandModules => _commandModules;
     }
 }

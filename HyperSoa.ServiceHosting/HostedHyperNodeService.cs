@@ -1,4 +1,5 @@
 ﻿using HyperSoa.Service;
+using HyperSoa.Service.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace HyperSoa.ServiceHosting
@@ -16,6 +17,7 @@ namespace HyperSoa.ServiceHosting
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            // Create and configure here just in case we haven't done it yet
             HyperNodeService.CreateAndConfigure(_configProvider);
 
             return Task.CompletedTask;

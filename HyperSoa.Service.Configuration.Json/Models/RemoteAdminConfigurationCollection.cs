@@ -2,17 +2,17 @@
 
 namespace HyperSoa.Service.Configuration.Json.Models
 {
-    internal class RemoteAdminConfigurationCollection : ISystemCommandConfigurationCollection
+    internal class RemoteAdminConfigurationCollection : IRemoteAdminConfigurationCollection
     {
         public bool Enabled { get; set; }
         public RemoteAdminCommandConfiguration[]? Commands { get; set; }
 
-        public IEnumerator<ISystemCommandConfiguration> GetEnumerator()
+        public IEnumerator<IRemoteAdminCommandConfiguration> GetEnumerator()
         {
             return Commands?.OfType<RemoteAdminCommandConfiguration>().GetEnumerator();
         }
 
-        public ISystemCommandConfiguration? GetByCommandName(string commandName)
+        public IRemoteAdminCommandConfiguration? GetByCommandName(string commandName)
         {
             return Commands?.FirstOrDefault(c => c.Name == commandName);
         }

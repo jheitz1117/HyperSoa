@@ -62,7 +62,7 @@ namespace HyperSoa.Service
                 MaxConcurrentTasks = config.MaxConcurrentTasks ?? DefaultMaxConcurrentTasks
             };
 
-            ConfigureSystemCommands(service, config);
+            ConfigureRemoteAdminCommands(service, config);
             ConfigureTaskProvider(service, config);
             ConfigureActivityMonitors(service, config);
             ConfigureCommandModules(service, config);
@@ -71,75 +71,75 @@ namespace HyperSoa.Service
             return service;
         }
 
-        private static void ConfigureSystemCommands(HyperNodeService service, IHyperNodeConfiguration config)
+        private static void ConfigureRemoteAdminCommands(HyperNodeService service, IHyperNodeConfiguration config)
         {
-            // Grab our user-defined default for system commands being enabled or disabled
-            bool? userDefinedSystemCommandsEnabledDefault = null;
-            var systemCommandsCollection = config.SystemCommands;
-            if (systemCommandsCollection != null)
-                userDefinedSystemCommandsEnabledDefault = systemCommandsCollection.Enabled;
+            // Grab our user-defined default for remote admin commands being enabled or disabled
+            bool? userDefinedRemoteAdminCommandsEnabledDefault = null;
+            var remoteAdminCommandsCollection = config.RemoteAdminCommands;
+            if (remoteAdminCommandsCollection != null)
+                userDefinedRemoteAdminCommandsEnabledDefault = remoteAdminCommandsCollection.Enabled;
 
-            // If the user didn't configure the system commands, they will be on by default (so that we can get task statuses and such)
-            var actualDefaultEnabled = userDefinedSystemCommandsEnabledDefault ?? true;
+            // If the user didn't configure the remote admin commands, they will be on by default (so that we can get task statuses and such)
+            var actualDefaultEnabled = userDefinedRemoteAdminCommandsEnabledDefault ?? true;
 
             // Make all commands enabled or disabled according to the user-defined default, or the HyperNode's default if the user did not define a default
-            var systemCommandConfigs = new List<CommandModuleConfiguration>
+            var remoteAdminCommandConfigs = new List<CommandModuleConfiguration>
             {
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.GetCachedTaskProgressInfo,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(GetCachedTaskProgressInfoCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.GetNodeStatus,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(GetNodeStatusCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.Echo,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(EchoCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.EnableCommand,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(EnableCommandModuleCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.EnableActivityMonitor,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(EnableActivityMonitorCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.RenameActivityMonitor,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(RenameActivityMonitorCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.EnableTaskProgressCache,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(EnableTaskProgressCacheCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.EnableDiagnostics,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(EnableDiagnosticsCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.CancelTask,
                     Enabled = actualDefaultEnabled,
                     CommandModuleType = typeof(CancelTaskCommand)
                 },
-                new CommandModuleConfiguration
+                new()
                 {
                     CommandName = RemoteAdminCommandName.SetTaskProgressCacheDuration,
                     Enabled = actualDefaultEnabled,
@@ -147,18 +147,18 @@ namespace HyperSoa.Service
                 }
             };
 
-            foreach (var systemCommandConfig in systemCommandConfigs)
+            foreach (var remoteAdminCommandConfig in remoteAdminCommandConfigs)
             {
-                // Allow each system command to be enabled or disabled individually. This takes precedence over any defaults defined previously
-                if (config.SystemCommands != null && config.SystemCommands.ContainsCommandName(systemCommandConfig.CommandName))
+                // Allow each remote admin command to be enabled or disabled individually. This takes precedence over any defaults defined previously
+                if (config.RemoteAdminCommands != null && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandConfig.CommandName))
                 {
-                    var userConfig = config.SystemCommands.GetByCommandName(systemCommandConfig.CommandName);
+                    var userConfig = config.RemoteAdminCommands.GetByCommandName(remoteAdminCommandConfig.CommandName);
                     if (userConfig != null)
-                        systemCommandConfig.Enabled = userConfig.Enabled;
+                        remoteAdminCommandConfig.Enabled = userConfig.Enabled;
                 }
 
-                // Finally, try to add this system command to our collection
-                service.AddCommandModuleConfiguration(systemCommandConfig);
+                // Finally, try to add this remote admin command to our collection
+                service.AddCommandModuleConfiguration(remoteAdminCommandConfig);
             }
         }
 

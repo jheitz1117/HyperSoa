@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.Modules", "Host
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.Contracts", "HostingTest.Contracts\HostingTest.Contracts.csproj", "{EF438186-0E40-49BC-A6E7-9B1A75563DEE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.ServiceHosting.Configuration.Json", "HyperSoa.ServiceHosting.Configuration.Json\HyperSoa.ServiceHosting.Configuration.Json.csproj", "{73F17B06-8B10-4F25-AFDE-C75E3A24059E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -73,6 +75,10 @@ Global
 		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF438186-0E40-49BC-A6E7-9B1A75563DEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -84,6 +90,7 @@ Global
 		{B132C041-4C97-4A05-9F2B-1C58489F1320} = {EA6FCDFF-B317-4A49-9134-E32B447848A4}
 		{0D7C339E-652B-4AC2-A29A-24B1623F6535} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
 		{121AAE36-9F36-4473-9C21-AF31EB0400FA} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
+		{73F17B06-8B10-4F25-AFDE-C75E3A24059E} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A88D42C3-4E37-4546-A124-C60A9E37840F}

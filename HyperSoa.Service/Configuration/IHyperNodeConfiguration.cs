@@ -1,11 +1,10 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Service.ActivityTracking;
 using HyperSoa.Service.CommandModules;
-using HyperSoa.Service.Configuration;
 using HyperSoa.Service.EventTracking;
 using HyperSoa.Service.TaskIdProviders;
 
-namespace HyperSoa.Service
+namespace HyperSoa.Service.Configuration
 {
     /// <summary>
     /// Defines configurable properties of an <see cref="IHyperNodeService"/>.
@@ -59,9 +58,9 @@ namespace HyperSoa.Service
         IActivityMonitorConfigurationCollection? ActivityMonitors { get; }
 
         /// <summary>
-        /// A collection of <see cref="ISystemCommandConfiguration"/> objects specifying how system-level <see cref="ICommandModule"/> objects should be configured in the <see cref="IHyperNodeService"/>.
+        /// A collection of <see cref="IRemoteAdminCommandConfiguration"/> objects specifying how system-level <see cref="ICommandModule"/> objects should be configured in the <see cref="IHyperNodeService"/>.
         /// </summary>
-        ISystemCommandConfigurationCollection? SystemCommands { get; }
+        IRemoteAdminConfigurationCollection? RemoteAdminCommands { get; }
 
         /// <summary>
         /// A collection of <see cref="ICommandModuleConfiguration"/> objects specifying how user-defined <see cref="ICommandModule"/> objects should be configured in the <see cref="IHyperNodeService"/>.

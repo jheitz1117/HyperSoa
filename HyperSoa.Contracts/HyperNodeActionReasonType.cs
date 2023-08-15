@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using ProtoBuf;
+﻿using ProtoBuf;
 
 namespace HyperSoa.Contracts
 {
@@ -12,49 +11,55 @@ namespace HyperSoa.Contracts
         /// <summary>
         /// Indicates that no reason was specified for the action taken by the receiving <see cref="IHyperNodeService"/>.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Unknown = 0,
 
         /// <summary>
         /// Indicates that the message was rejected by user-defined code for a user-defined reason.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Custom = 1,
 
         /// <summary>
         /// Indicates that the message was valid and this <see cref="IHyperNodeService"/> is ready to process it.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         ValidMessage = 5,
 
         /// <summary>
         /// Indicates that the receiving <see cref="IHyperNodeService"/> generated a task ID for a task that was already running.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         DuplicateTaskId = 6,
 
         /// <summary>
         /// Indicates that the receiving <see cref="IHyperNodeService"/> has already reached its maximum number of concurrent tasks.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         MaxConcurrentTaskCountReached = 7,
 
         /// <summary>
         /// Indicates that the Cancel() method has been called on the receiving <see cref="IHyperNodeService"/> and no new tasks are being started.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         CancellationRequested = 8,
 
         /// <summary>
         /// Indicates that the ITaskIdProvider implementation threw an exception while generating a task ID.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         TaskIdProviderThrewException = 9,
 
         /// <summary>
         /// Indicates that the ITaskIdProvider implementation generated an invalid task ID.
         /// </summary>
-        [EnumMember]
-        InvalidTaskId = 10
+        [ProtoEnum]
+        InvalidTaskId = 10,
+
+        /// <summary>
+        /// Indicates that an exception was thrown while attempting to communicate over the network.
+        /// </summary>
+        [ProtoEnum]
+        CommunicationException = 11
     }
 }

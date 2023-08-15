@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using ProtoBuf;
+﻿using ProtoBuf;
 
 namespace HyperSoa.Contracts
 {
@@ -13,49 +12,49 @@ namespace HyperSoa.Contracts
         /// <summary>
         /// Indicates that the message was not processed
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         None                  = 0,
 
         /// <summary>
         /// Indicates that the message was processed successfully.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Success               = 1 << 0,
 
         /// <summary>
         /// Indicates that the message could not be processed.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Failure               = 1 << 1,
 
         /// <summary>
         /// Indicates that the message contained an invalid command name.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         InvalidCommand        = 1 << 2,
 
         /// <summary>
         /// Indicates that some non-fatal errors occurred while processing the message.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         HadNonFatalErrors     = 1 << 3,
 
         /// <summary>
         /// Indicates that some warnings occurred while processing the message.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         HadWarnings           = 1 << 4,
 
         /// <summary>
         /// Indicates that the service was cancelled before it completed.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Cancelled             = 1 << 5,
 
         /// <summary>
         /// Indicates that the ICommandRequest implementation was invalid.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         InvalidCommandRequest = 1 << 6
     }
 }

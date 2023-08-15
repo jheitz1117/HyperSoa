@@ -1,5 +1,4 @@
-﻿using System.Runtime.Serialization;
-using ProtoBuf;
+﻿using ProtoBuf;
 
 namespace HyperSoa.Contracts
 {
@@ -12,19 +11,19 @@ namespace HyperSoa.Contracts
         /// <summary>
         /// Indicates that the receiving <see cref="IHyperNodeService"/> was completely unable to recognize, forward, or otherwise process the message in any capacity.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         None = 0,
 
         /// <summary>
         /// Indicates that the receiving <see cref="IHyperNodeService"/> accepted responsibility for processing the message.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Accepted = 1,
 
         /// <summary>
         /// Indicates that the receiving <see cref="IHyperNodeService"/> rejected the message because the message would have caused the service to enter an invalid state.
         /// </summary>
-        [EnumMember]
+        [ProtoEnum]
         Rejected = 3
     }
 }
