@@ -12,19 +12,19 @@ namespace HyperSoa.Contracts
         /// The name of the agent that created this <see cref="HyperNodeMessageRequest"/>.
         /// </summary>
         [ProtoMember(1)]
-        public string CreatedByAgentName { get; set; }
+        public string? CreatedByAgentName { get; set; }
 
         /// <summary>
         /// The name of the command to execute.
         /// </summary>
         [ProtoMember(2)]
-        public string CommandName { get; set; }
+        public string? CommandName { get; set; }
 
         /// <summary>
         /// A string containing the request parameters for the command to execute.
         /// </summary>
         [ProtoMember(3)]
-        public byte[] CommandRequestBytes { get; set; }
+        public byte[]? CommandRequestBytes { get; set; }
 
         /// <summary>
         /// A bitwise combination of <see cref="MessageProcessOptionFlags"/> values indicating how this <see cref="HyperNodeMessageRequest"/> should be processed.

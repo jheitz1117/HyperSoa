@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HostingTest.Contracts\HostingTest.Contracts.csproj" />
+    <ProjectReference Include="..\HyperSoa.Client\HyperSoa.Client.csproj" />
+    <ProjectReference Include="..\HyperSoa.Contracts.RemoteAdmin\HyperSoa.Contracts.RemoteAdmin.csproj" />
+    <ProjectReference Include="..\HyperSoa.Contracts\HyperSoa.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

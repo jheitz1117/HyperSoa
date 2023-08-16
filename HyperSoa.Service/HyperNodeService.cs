@@ -94,7 +94,8 @@ namespace HyperSoa.Service
                 RespondingNodeName = HyperNodeName,
                 NodeAction = HyperNodeActionType.None,
                 NodeActionReason = HyperNodeActionReasonType.Unknown,
-                ProcessStatusFlags = MessageProcessStatusFlags.None
+                ProcessStatusFlags = MessageProcessStatusFlags.None,
+                TaskTrace = new List<HyperNodeActivityItem>()
             };
 
             var currentTaskInfo = new HyperNodeTaskInfo(HyperNodeName, _masterTokenSource.Token, message, response, message.TaskTraceRequested() || EnableDiagnostics);

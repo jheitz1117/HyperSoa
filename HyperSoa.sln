@@ -15,19 +15,27 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperSoa.Contracts", "Hyper
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperSoa.Service", "HyperSoa.Service\HyperSoa.Service.csproj", "{3168D1CB-1DDB-419A-AB7D-5D2535D52925}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.Contracts.RemoteAdmin", "HyperSoa.Contracts.RemoteAdmin\HyperSoa.Contracts.RemoteAdmin.csproj", "{B132C041-4C97-4A05-9F2B-1C58489F1320}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperSoa.Contracts.RemoteAdmin", "HyperSoa.Contracts.RemoteAdmin\HyperSoa.Contracts.RemoteAdmin.csproj", "{B132C041-4C97-4A05-9F2B-1C58489F1320}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.Service.Configuration.Xml", "HyperSoa.Service.Configuration.Xml\HyperSoa.Service.Configuration.Xml.csproj", "{0D7C339E-652B-4AC2-A29A-24B1623F6535}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperSoa.Service.Configuration.Xml", "HyperSoa.Service.Configuration.Xml\HyperSoa.Service.Configuration.Xml.csproj", "{0D7C339E-652B-4AC2-A29A-24B1623F6535}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.Service.Configuration.Json", "HyperSoa.Service.Configuration.Json\HyperSoa.Service.Configuration.Json.csproj", "{121AAE36-9F36-4473-9C21-AF31EB0400FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperSoa.Service.Configuration.Json", "HyperSoa.Service.Configuration.Json\HyperSoa.Service.Configuration.Json.csproj", "{121AAE36-9F36-4473-9C21-AF31EB0400FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.EveNode", "HostingTest.EveNode\HostingTest.EveNode.csproj", "{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HostingTest.EveNode", "HostingTest.EveNode\HostingTest.EveNode.csproj", "{D2F35ED6-ECBF-426B-A39D-E1186748C5D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.Modules", "HostingTest.Modules\HostingTest.Modules.csproj", "{463B8BD5-7496-4081-B476-499095B0C1A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HostingTest.Modules", "HostingTest.Modules\HostingTest.Modules.csproj", "{463B8BD5-7496-4081-B476-499095B0C1A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HostingTest.Contracts", "HostingTest.Contracts\HostingTest.Contracts.csproj", "{EF438186-0E40-49BC-A6E7-9B1A75563DEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HostingTest.Contracts", "HostingTest.Contracts\HostingTest.Contracts.csproj", "{EF438186-0E40-49BC-A6E7-9B1A75563DEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.ServiceHosting.Configuration.Json", "HyperSoa.ServiceHosting.Configuration.Json\HyperSoa.ServiceHosting.Configuration.Json.csproj", "{73F17B06-8B10-4F25-AFDE-C75E3A24059E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HyperSoa.ServiceHosting.Configuration.Json", "HyperSoa.ServiceHosting.Configuration.Json\HyperSoa.ServiceHosting.Configuration.Json.csproj", "{73F17B06-8B10-4F25-AFDE-C75E3A24059E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ServerTests", "ServerTests", "{BF3A4095-8176-4637-A9BC-0524EB6550F5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ClientTests", "ClientTests", "{BBFF9B97-1B0B-4B83-8478-FAF94102BA4C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient", "TestClient\TestClient.csproj", "{CBA72703-C24D-4391-ADFE-B4B3023839E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HyperSoa.Client", "HyperSoa.Client\HyperSoa.Client.csproj", "{253B33C5-9E43-4B17-B28A-DB5237202602}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,18 +87,32 @@ Global
 		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73F17B06-8B10-4F25-AFDE-C75E3A24059E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBA72703-C24D-4391-ADFE-B4B3023839E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBA72703-C24D-4391-ADFE-B4B3023839E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBA72703-C24D-4391-ADFE-B4B3023839E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBA72703-C24D-4391-ADFE-B4B3023839E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{253B33C5-9E43-4B17-B28A-DB5237202602}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{253B33C5-9E43-4B17-B28A-DB5237202602}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{253B33C5-9E43-4B17-B28A-DB5237202602}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{253B33C5-9E43-4B17-B28A-DB5237202602}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{3E1A1A2D-D9A5-4351-8872-94E662473447} = {BF3A4095-8176-4637-A9BC-0524EB6550F5}
 		{B4B249DC-1C5E-40DF-8DC6-D742A980DFE0} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
 		{1770B083-41F0-4B71-B044-FCCA8DA0714C} = {EA6FCDFF-B317-4A49-9134-E32B447848A4}
 		{3168D1CB-1DDB-419A-AB7D-5D2535D52925} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
 		{B132C041-4C97-4A05-9F2B-1C58489F1320} = {EA6FCDFF-B317-4A49-9134-E32B447848A4}
 		{0D7C339E-652B-4AC2-A29A-24B1623F6535} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
 		{121AAE36-9F36-4473-9C21-AF31EB0400FA} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
+		{D2F35ED6-ECBF-426B-A39D-E1186748C5D4} = {BF3A4095-8176-4637-A9BC-0524EB6550F5}
+		{463B8BD5-7496-4081-B476-499095B0C1A8} = {BF3A4095-8176-4637-A9BC-0524EB6550F5}
+		{EF438186-0E40-49BC-A6E7-9B1A75563DEE} = {BF3A4095-8176-4637-A9BC-0524EB6550F5}
 		{73F17B06-8B10-4F25-AFDE-C75E3A24059E} = {3CCBEBC9-121E-4345-86C7-90E52F03F15F}
+		{CBA72703-C24D-4391-ADFE-B4B3023839E4} = {BBFF9B97-1B0B-4B83-8478-FAF94102BA4C}
+		{253B33C5-9E43-4B17-B28A-DB5237202602} = {EA6FCDFF-B317-4A49-9134-E32B447848A4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A88D42C3-4E37-4546-A124-C60A9E37840F}

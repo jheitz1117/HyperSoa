@@ -28,9 +28,9 @@ namespace HyperSoa.Service
             ProcessStatusFlags = response.ProcessStatusFlags;
             CommandResponseBytes = response.CommandResponseBytes;
             TaskTrace = new ReadOnlyCollection<HyperNodeActivityItem>(
-                response.TaskTrace.Select(
-                    t => t.Clone()
-                ).ToList()
+                response.TaskTrace?.Select(
+                    t => t.Clone() // Create deep copies so user-defined code can't modify the original objects
+                ).ToArray() ?? Array.Empty<HyperNodeActivityItem>()
             );
         }
     }

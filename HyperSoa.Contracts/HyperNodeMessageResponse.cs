@@ -13,13 +13,13 @@ namespace HyperSoa.Contracts
         /// may be null or white space if no task could be started.
         /// </summary>
         [ProtoMember(1)]
-        public string TaskId { get; set; }
+        public string? TaskId { get; set; }
 
         /// <summary>
         /// The name of the <see cref="IHyperNodeService"/> that sent this <see cref="HyperNodeMessageResponse"/>.
         /// </summary>
         [ProtoMember(2)]
-        public string RespondingNodeName { get; set; }
+        public string? RespondingNodeName { get; set; }
 
         /// <summary>
         /// If the task completed, contains the total run time of the task.
@@ -52,7 +52,7 @@ namespace HyperSoa.Contracts
         /// trace will likely be incomplete because the main thread could have completed before the task was finished.
         /// </summary>
         [ProtoMember(7)]
-        public List<HyperNodeActivityItem> TaskTrace { get; set; }
+        public List<HyperNodeActivityItem>? TaskTrace { get; set; }
 
         /// <summary>
         /// Contains the serialized response bytes from the command that was executed.
