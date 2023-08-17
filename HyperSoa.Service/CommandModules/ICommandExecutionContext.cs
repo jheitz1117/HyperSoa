@@ -1,5 +1,6 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Service.ActivityTracking;
+using Microsoft.Extensions.Logging;
 
 namespace HyperSoa.Service.CommandModules
 {
@@ -27,6 +28,11 @@ namespace HyperSoa.Service.CommandModules
         /// Provides a way to raise activity events from inside an <see cref="ICommandModule"/>.
         /// </summary>
         ITaskActivityTracker Activity { get; }
+
+        /// <summary>
+        /// Allow <see cref="ICommandModule"/> classes to write logs without imposing a constructor requirement.
+        /// </summary>
+        ILogger Logger { get; }
 
         /// <summary>
         /// Provides a way for the <see cref="ICommandModule"/> to terminate cooperatively when cancellation has been requested.

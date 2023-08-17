@@ -13,6 +13,8 @@ using HyperSoa.Service.Extensions;
 using HyperSoa.Service.Serialization;
 using HyperSoa.Service.TaskIdProviders;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HyperSoa.Service
 {
@@ -661,6 +663,7 @@ namespace HyperSoa.Service
                     );
                 }
 
+                var loggerFactory = ServiceProvider?.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
                 try
                 {
                     // Create the execution context to pass into our module
@@ -673,6 +676,7 @@ namespace HyperSoa.Service
                         ProcessOptionFlags = args.Message.ProcessOptionFlags,
                         Request = commandRequest,
                         Activity = args.Activity,
+                        Logger = loggerFactory.CreateLogger(commandModuleConfig.CommandModuleType),
                         Token = args.Token
                     };
 

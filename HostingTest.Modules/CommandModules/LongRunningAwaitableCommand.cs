@@ -6,6 +6,7 @@ using HyperSoa.Service;
 using HyperSoa.Service.CommandModules;
 using HyperSoa.Service.Configuration;
 using HyperSoa.Service.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace HostingTest.Modules.CommandModules
 {
@@ -76,6 +77,8 @@ namespace HostingTest.Modules.CommandModules
                             stopwatch.ElapsedMilliseconds,
                             totalRunTime.TotalMilliseconds
                         );
+
+                        context.Logger.LogTrace("[typed logger?]  prog upd rpt");
                     }
                 }
                 catch (OperationCanceledException)

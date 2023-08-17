@@ -1,5 +1,6 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Service.ActivityTracking;
+using Microsoft.Extensions.Logging;
 
 namespace HyperSoa.Service.CommandModules
 {
@@ -12,6 +13,7 @@ namespace HyperSoa.Service.CommandModules
         public MessageProcessOptionFlags ProcessOptionFlags { get; set; }
         public ICommandRequest? Request { get; set; }
         public ITaskActivityTracker Activity { get; set; }
+        public ILogger Logger { get; set; }
         public CancellationToken Token { get; set; }
     }
 }
