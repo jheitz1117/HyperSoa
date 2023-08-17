@@ -16,11 +16,15 @@ namespace HostingTest.Modules.ActivityMonitors
             Name = nameof(TaskActivityTracer);
         }
         
+        // TODO: How to switch to ILogger instead of Trace? Can I have the Activator insert an ilogger when I instantiate it?
+        // TODO: Maybe see this: https://stackoverflow.com/questions/52644507/using-activatorutilities-createinstance-to-create-instance-from-type
+
         public override void OnTrack(IHyperNodeActivityEventItem activity)
         {
-            Trace.WriteLine(
-                $"{activity.TaskId}\r\n    {activity.EventDateTime:G} {activity.Agent}\r\n    {activity.EventDescription}\r\n    {activity.EventDetail}"
-            );
+            Trace.WriteLine($"{activity.EventDateTime:G} {activity.EventDescription}");
+
+            if (!string.IsNullOrWhiteSpace(activity.EventDetail))
+                Trace.WriteLine($"    {activity.EventDetail}");
         }
 
         public override void OnActivityReportingError(Exception exception)

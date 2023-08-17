@@ -1,4 +1,5 @@
-﻿using HyperSoa.Contracts;
+﻿using System.Diagnostics;
+using HyperSoa.Contracts;
 using HyperSoa.Service;
 using HyperSoa.Service.Configuration;
 using HyperSoa.Service.Configuration.Json;
@@ -30,6 +31,9 @@ builder.Services.AddTransient<IHyperNodeHostConfigurationProvider, JsonHyperNode
 builder.Services.AddSingleton<IHyperNodeServiceHost, HyperNodeServiceHost>();
 builder.Services.AddHostedService<HostedListenerService>();
 
+// Hook up the console to all of our Trace.WriteLine()
+Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+
 try
 {
     using (var host = builder.Build())
@@ -43,34 +47,31 @@ try
         logger.LogError("Error Message");
         logger.LogCritical("Critical Message");
 
-        using (var tokenSource = new CancellationTokenSource())
+        await host.StartAsync();
+
+        var serviceHost = host.Services.GetRequiredService<IHyperNodeServiceHost>();
+
+        Console.WriteLine("Service started and is listening on the following addresses:");
+        foreach (var channel in serviceHost.GetChannels())
         {
-            await host.StartAsync(tokenSource.Token);
-
-            var serviceHost = host.Services.GetRequiredService<IHyperNodeServiceHost>();
-
-            Console.WriteLine("Service started and is listening on the following addresses:");
-            foreach (var channel in serviceHost.GetChannels())
+            if (channel.Endpoints?.Any() ?? false)
             {
-                if (channel.Endpoints?.Any() ?? false)
+                foreach (var endpoint in channel.Endpoints)
                 {
-                    foreach (var endpoint in channel.Endpoints)
-                    {
-                        Console.WriteLine("    " + endpoint);
-                    }    
-                }
+                    Console.WriteLine("    " + endpoint);
+                }    
             }
-
-            Console.WriteLine("Press any key to stop service...");
-            Console.ReadKey();
-            Console.WriteLine("Stopping service...");
-            tokenSource.Cancel();
-
-            await host.WaitForShutdownAsync(tokenSource.Token);
-        
-            Console.WriteLine("Done.");
-            Thread.Sleep(1000);
         }
+
+        Console.WriteLine("Press any key to stop service...");
+        Console.ReadKey();
+        Console.WriteLine("Stopping service...");
+
+        await host.StopAsync();
+        await host.WaitForShutdownAsync();
+        
+        Console.WriteLine("Done.");
+        Thread.Sleep(1000);
     }
 }
 catch (Exception ex)

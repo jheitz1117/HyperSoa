@@ -2,22 +2,22 @@
 
 namespace HyperSoa.Service.ActivityTracking.Monitors
 {
-    internal sealed class ResponseTaskTraceMonitor : HyperNodeServiceActivityMonitor
+    internal sealed class TaskTraceMonitor : HyperNodeServiceActivityMonitor
     {
         private static readonly object Lock = new();
-        private readonly HyperNodeMessageResponse _target;
+        private readonly List<HyperNodeActivityItem> _taskTrace = new();
 
-        public ResponseTaskTraceMonitor(HyperNodeMessageResponse target)
+        public IReadOnlyList<HyperNodeActivityItem> TaskTrace => _taskTrace;
+        public TaskTraceMonitor()
         {
-            Name = nameof(ResponseTaskTraceMonitor);
-            _target = target;
+            Name = nameof(TaskTraceMonitor);
         }
 
         public override void OnTrack(IHyperNodeActivityEventItem activity)
         {
             lock (Lock)
             {
-                _target.TaskTrace.Add(
+                _taskTrace.Add(
                     new HyperNodeActivityItem
                     {
                         Agent = activity.Agent,
@@ -36,7 +36,7 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         {
             lock (Lock)
             {
-                _target.TaskTrace.Add(
+                _taskTrace.Add(
                     new HyperNodeActivityItem
                     {
                         Agent = Name,

@@ -15,7 +15,7 @@ namespace HyperSoa.Service
         /// <summary>
         /// The name of the agent that created the <see cref="HyperNodeMessageRequest"/>.
         /// </summary>
-        string CreatedByAgentName { get; }
+        string? CreatedByAgentName { get; }
 
         /// <summary>
         /// The processing flags specified in the <see cref="IHyperNodeService"/>.

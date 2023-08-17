@@ -65,7 +65,7 @@ namespace HyperSoa.Service
         {
             var result = false;
 
-            if (_commandModuleConfigurations.TryGetValue(commandName, out var commandConfig) && commandConfig != null)
+            if (_commandModuleConfigurations.TryGetValue(commandName, out var commandConfig))
             {
                 commandConfig.Enabled = enable;
                 result = true;

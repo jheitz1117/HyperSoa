@@ -52,7 +52,7 @@ namespace HyperSoa.Contracts
         /// trace will likely be incomplete because the main thread could have completed before the task was finished.
         /// </summary>
         [ProtoMember(7)]
-        public List<HyperNodeActivityItem>? TaskTrace { get; set; }
+        public HyperNodeActivityItem[]? TaskTrace { get; set; }
 
         /// <summary>
         /// Contains the serialized response bytes from the command that was executed.

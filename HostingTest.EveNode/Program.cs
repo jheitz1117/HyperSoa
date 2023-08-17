@@ -37,34 +37,31 @@ try
         // TODO: Would like to use DI to get loggers inside hypernode service and host as well
         var logger = host.Services.GetRequiredService<ILogger<Program>>();
 
-        using (var tokenSource = new CancellationTokenSource())
+        await host.StartAsync();
+
+        var serviceHost = host.Services.GetRequiredService<IHyperNodeServiceHost>();
+
+        Console.WriteLine("Service started and is listening on the following addresses:");
+        foreach (var channel in serviceHost.GetChannels())
         {
-            await host.StartAsync(tokenSource.Token);
-
-            var serviceHost = host.Services.GetRequiredService<IHyperNodeServiceHost>();
-
-            Console.WriteLine("Service started and is listening on the following addresses:");
-            foreach (var channel in serviceHost.GetChannels())
+            if (channel.Endpoints?.Any() ?? false)
             {
-                if (channel.Endpoints?.Any() ?? false)
+                foreach (var endpoint in channel.Endpoints)
                 {
-                    foreach (var endpoint in channel.Endpoints)
-                    {
-                        Console.WriteLine("    " + endpoint);
-                    }    
-                }
+                    Console.WriteLine("    " + endpoint);
+                }    
             }
-
-            Console.WriteLine("Press any key to stop service...");
-            Console.ReadKey();
-            Console.WriteLine("Stopping service...");
-            tokenSource.Cancel();
-
-            await host.WaitForShutdownAsync(tokenSource.Token);
-        
-            Console.WriteLine("Done.");
-            Thread.Sleep(1000);
         }
+
+        Console.WriteLine("Press any key to stop service...");
+        Console.ReadKey();
+        Console.WriteLine("Stopping service...");
+
+        await host.StopAsync();
+        await host.WaitForShutdownAsync();
+        
+        Console.WriteLine("Done.");
+        Thread.Sleep(1000);
     }
 }
 catch (Exception ex)

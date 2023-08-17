@@ -35,7 +35,7 @@ namespace HyperSoa.Service
 
         private readonly TaskProgressCacheMonitor _taskProgressCacheMonitor = new();
         private readonly List<HyperNodeServiceActivityMonitor> _customActivityMonitors = new();
-        private readonly ConcurrentDictionary<string, CommandModuleConfiguration?> _commandModuleConfigurations = new();
+        private readonly ConcurrentDictionary<string, CommandModuleConfiguration> _commandModuleConfigurations = new();
         private readonly CancellationTokenSource _masterTokenSource = new();
         private readonly ConcurrentDictionary<string, HyperNodeTaskInfo> _liveTasks = new();
 
@@ -57,8 +57,8 @@ namespace HyperSoa.Service
             set => _taskProgressCacheMonitor.CacheDuration = value;
         }
 
-        private ITaskIdProvider TaskIdProvider { get; set; }
-        private IHyperNodeEventHandler EventHandler { get; set; }
+        private ITaskIdProvider TaskIdProvider { get; set; } = DefaultTaskIdProvider;
+        private IHyperNodeEventHandler EventHandler { get; set; } = DefaultEventHandler;
         internal bool EnableDiagnostics { get; set; }
         internal int MaxConcurrentTasks { get; set; }
 
@@ -72,11 +72,11 @@ namespace HyperSoa.Service
                 if (_instance == null)
                     CreateAndConfigure(DefaultConfigurationProvider);
 
-                return _instance;
+                return _instance ?? throw new HyperNodeConfigurationException("Unable to configure HyperNode service.");
             }
         }
 
-        private static HyperNodeService _instance;
+        private static HyperNodeService? _instance;
 
         #endregion Properties
 
@@ -94,8 +94,7 @@ namespace HyperSoa.Service
                 RespondingNodeName = HyperNodeName,
                 NodeAction = HyperNodeActionType.None,
                 NodeActionReason = HyperNodeActionReasonType.Unknown,
-                ProcessStatusFlags = MessageProcessStatusFlags.None,
-                TaskTrace = new List<HyperNodeActivityItem>()
+                ProcessStatusFlags = MessageProcessStatusFlags.None
             };
 
             var currentTaskInfo = new HyperNodeTaskInfo(HyperNodeName, _masterTokenSource.Token, message, response, message.TaskTraceRequested() || EnableDiagnostics);
@@ -105,7 +104,7 @@ namespace HyperSoa.Service
 
             // This tracker is used to temporarily store activity event items until we know what to do with them
             var queueTracker = new TaskActivityQueueTracker(currentTaskInfo);
-            
+
             // Check if we should reject this request
             var rejectionReason = GetRejectionReason(currentTaskInfo, queueTracker);
             if (rejectionReason.HasValue)
@@ -118,12 +117,10 @@ namespace HyperSoa.Service
                 // At this point in the game, we don't have a "real" activity tracker yet because we haven't initialized it. So instead of
                 // running the events through the activity monitors as we normally would, we'll just add the information to the task trace
                 // of the response object and send that back so the caller knows what happened.
-                while (queueTracker.Count > 0)
+                if (queueTracker.Count > 0)
                 {
-                    var activityItem = queueTracker.Dequeue();
-
-                    response.TaskTrace.Add(
-                        new HyperNodeActivityItem
+                    response.TaskTrace = queueTracker.Select(
+                        activityItem => new HyperNodeActivityItem
                         {
                             Agent = activityItem.Agent,
                             EventDateTime = activityItem.EventDateTime,
@@ -133,7 +130,7 @@ namespace HyperSoa.Service
                             ProgressTotal = activityItem.ProgressTotal,
                             Elapsed = activityItem.Elapsed
                         }
-                    );
+                    ).ToArray();
                 }
 
                 // If the message was rejected, then the HyperNodeTaskInfo was not added to the list of live events, which means it will never be disposed unless we do so here.
@@ -143,7 +140,7 @@ namespace HyperSoa.Service
             else
             {
                 // Initialize our activity tracker so we can track progress
-                InitializeActivityTracker(currentTaskInfo);
+                var taskTraceMonitor = InitializeActivityTracker(currentTaskInfo);
 
                 // Now that we've setup our "real" activity tracker, let's report all the activity we've stored up until now
                 while (queueTracker.Count > 0)
@@ -218,7 +215,16 @@ namespace HyperSoa.Service
                     {
                         // If we're running concurrently, we want to return immediately and allow the clean up to occur as a continuation after the tasks are finished.
                         // IMPORTANT: We're deliberately not using await here because we *want* to return asap because the user requested the command be run concurrently.
-                        currentTaskInfo.WhenChildTasks().ContinueWith(t => TaskCleanUp(currentTaskInfo.TaskId));
+                        _ = currentTaskInfo.WhenChildTasks().ContinueWith(
+                            _ =>
+                            {
+                                TaskCleanUp(currentTaskInfo.TaskId);
+
+                                // Set our response task trace here (if applicable) so it's available in case the response lives in the progress cache.
+                                if (currentTaskInfo.Message.TaskTraceRequested())
+                                    response.TaskTrace = taskTraceMonitor.TaskTrace.ToArray();
+                            }
+                        );
                     }
                     else
                     {
@@ -240,6 +246,10 @@ namespace HyperSoa.Service
                     TaskCleanUp(currentTaskInfo.TaskId);
                 }
 
+                // Immediate responses for async tasks don't get task traces (they'll be added later when the async task completes).
+                if (currentTaskInfo.Message.TaskTraceRequested() && !currentTaskInfo.Message.ConcurrentRunRequested())
+                    response.TaskTrace = taskTraceMonitor.TaskTrace.ToArray();
+
                 #endregion Process Message
             }
 
@@ -256,8 +266,7 @@ namespace HyperSoa.Service
             {
                 lock (Lock)
                 {
-                    if (_instance == null)
-                        _instance = Create(configProvider);
+                    _instance ??= Create(configProvider);
                 }
             }
         }
@@ -354,7 +363,7 @@ namespace HyperSoa.Service
         public void Dispose()
         {
             // Dispose of our task info objects
-            foreach (var taskInfo in _liveTasks.Values.Where(ti => ti != null))
+            foreach (var taskInfo in _liveTasks.Values)
             {
                 taskInfo.Dispose();
             }
@@ -369,10 +378,10 @@ namespace HyperSoa.Service
             (TaskIdProvider as IDisposable)?.Dispose();
 
             // Dispose of our task progress cache monitor
-            _taskProgressCacheMonitor?.Dispose();
+            _taskProgressCacheMonitor.Dispose();
 
             // Dispose of our master cancellation token source
-            _masterTokenSource?.Dispose();
+            _masterTokenSource.Dispose();
         }
 
         #endregion Public Methods
@@ -388,8 +397,10 @@ namespace HyperSoa.Service
             HyperNodeName = hyperNodeName;
         }
 
-        private void InitializeActivityTracker(HyperNodeTaskInfo currentTaskInfo)
+        private TaskTraceMonitor InitializeActivityTracker(HyperNodeTaskInfo currentTaskInfo)
         {
+            var taskTraceMonitor = new TaskTraceMonitor();
+
             currentTaskInfo.Activity = new HyperNodeTaskActivityTracker(
                 currentTaskInfo,
                 EventHandler,
@@ -405,7 +416,7 @@ namespace HyperSoa.Service
                     h => currentTaskInfo.Activity.TrackActivityHandler += h,
                     h => currentTaskInfo.Activity.TrackActivityHandler -= h
                 ).Select(
-                    a => a.EventArgs.ActivityItem as IHyperNodeActivityEventItem // Cast all our activity items as IHyperNodeActivityEventItem
+                    a => (IHyperNodeActivityEventItem)a.EventArgs.ActivityItem // Cast all our activity items as IHyperNodeActivityEventItem
                 );
 
                 var systemActivityMonitors = new List<HyperNodeServiceActivityMonitor>();
@@ -420,16 +431,15 @@ namespace HyperSoa.Service
                     systemActivityMonitors.Add(_taskProgressCacheMonitor);
 
                 /*****************************************************************************************************************
-                 * If a task trace was requested, we're only going to honor the request if the task runs synchronously. In the first
-                 * place, the response task trace will be incomplete for concurrent tasks anyway, but I eventually learned that
-                 * this response task trace monitor can enter into a race condition against the serializer when the response is
-                 * returned. Effectively, if the task trace enumeration is modified (by this monitor) while it is being serialized
-                 * (which is very possible), then the serializer throws an exception which shows up as an obscure communication
-                 * exception from the client's point of view. This was very hard to track down, requiring use of WCF's advanced
-                 * tracing tools.
+                 * If a task trace was requested, then we'll go ahead and honor it, but we will treat it differently depending
+                 * on whether the task runs synchronously or asynchronously. If the task runs synchronously, then we'll return
+                 * the task trace in the response as requested. However, if the task runs asynchronously, then the task trace will
+                 * NOT be returned in the immediate response, but will be added to the response after the task completes. If the
+                 * progress cache is enabled and was utilized as part of the request, then the response stored in the cache will
+                 * include the task trace.
                  *****************************************************************************************************************/
-                if (currentTaskInfo.Message.TaskTraceRequested() && !currentTaskInfo.Message.ConcurrentRunRequested())
-                    systemActivityMonitors.Add(new ResponseTaskTraceMonitor(currentTaskInfo.Response));
+                if (currentTaskInfo.Message.TaskTraceRequested())
+                    systemActivityMonitors.Add(taskTraceMonitor);
 
                 /*****************************************************************************************************************
                  * Subscribe our system activity monitors to the event stream first
@@ -461,16 +471,16 @@ namespace HyperSoa.Service
                  * extra time consumed by the activity monitors is absorbed into the more general task thread.
                  *****************************************************************************************************************/
                 currentTaskInfo.ActivityObservers.AddRange(
-                    _customActivityMonitors
-                        .Where(m => m.Enabled) // Only add the monitors that are enabled
-                        .Select(
-                            monitor => new HyperNodeActivityObserver(
-                                monitor,
-                                liveEvents,
-                                Scheduler.CurrentThread,
-                                currentTaskInfo
-                            )
+                    _customActivityMonitors.Where(
+                        m => m.Enabled // Only add the monitors that are enabled
+                    ).Select(
+                        monitor => new HyperNodeActivityObserver(
+                            monitor,
+                            liveEvents,
+                            Scheduler.CurrentThread,
+                            currentTaskInfo
                         )
+                    )
                 );
             }
             catch (Exception ex)
@@ -483,13 +493,15 @@ namespace HyperSoa.Service
                     )
                 );
             }
+
+            return taskTraceMonitor;
         }
 
         private HyperNodeActionReasonType? GetRejectionReason(HyperNodeTaskInfo taskInfo, ITaskActivityTracker queueTracker)
         {
             HyperNodeActionReasonType? rejectionReason = null;
             
-            HyperNodeActivityItem userRejectionActivity = null;
+            HyperNodeActivityItem? userRejectionActivity = null;
             try
             {
                 // Allow the user to reject the message if necessary
@@ -547,7 +559,7 @@ namespace HyperSoa.Service
                     // If we get this far, there's a good chance the message will not be rejected. However, if the ITaskIdProvider is ill-behaved (throws an exception), then we
                     // may still have to reject the message due to being unable to get a task ID
 
-                    string taskId = null;
+                    string? taskId = null;
                     
                     try
                     {
@@ -598,7 +610,8 @@ namespace HyperSoa.Service
         {
             ICommandResponse commandResponse;
 
-            if (_commandModuleConfigurations.ContainsKey(args.Message.CommandName) &&
+            if (!string.IsNullOrWhiteSpace(args.Message.CommandName) &&
+                _commandModuleConfigurations.ContainsKey(args.Message.CommandName) &&
                 _commandModuleConfigurations.TryGetValue(args.Message.CommandName, out var commandModuleConfig) &&
                 commandModuleConfig.Enabled)
             {
@@ -633,7 +646,7 @@ namespace HyperSoa.Service
                     // Create the execution context to pass into our module
                     var context = new CommandExecutionContext
                     {
-                        TaskId = args.Response.TaskId,
+                        TaskId = args.TaskId,
                         ExecutingNodeName = HyperNodeName,
                         CommandName = args.Message.CommandName,
                         CreatedByAgentName = args.Message.CreatedByAgentName,
@@ -644,10 +657,12 @@ namespace HyperSoa.Service
                     };
 
                     // Execute the command
-                    if (commandInstance is IAwaitableCommandModule awaitableCommand)
-                        commandResponse = await awaitableCommand.Execute(context).ConfigureAwait(false);
-                    else
-                        commandResponse = ((ICommandModule)commandInstance).Execute(context);
+                    commandResponse = commandInstance switch
+                    {
+                        IAwaitableCommandModule awaitableCommand => await awaitableCommand.Execute(context).ConfigureAwait(false),
+                        ICommandModule nonAwaitableCommand => nonAwaitableCommand.Execute(context),
+                        _ => throw new InvalidOperationException($"Command instance does not implement {nameof(ICommandModule)} or {nameof(IAwaitableCommandModule)}.")
+                    };
 
                     // Serialize the response to send back
                     args.Response.CommandResponseBytes = contractSerializer.SerializeResponse(commandResponse);
@@ -699,7 +714,7 @@ namespace HyperSoa.Service
         {
             // Remove our task info and dispose of it
             if (_liveTasks.TryRemove(taskId, out var taskInfo))
-                taskInfo?.Dispose();
+                taskInfo.Dispose();
         }
 
         private IEnumerable<Task> GetChildTasks()

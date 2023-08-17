@@ -41,12 +41,13 @@
             chkReturnTaskTrace = new CheckBox();
             btnRunCommand = new Button();
             grpHyperNodeActivity = new GroupBox();
+            spcHyperNodeActivity = new SplitContainer();
+            grpActivityItems = new GroupBox();
+            lstActivityItems = new ListBox();
             grpTaskTrace = new GroupBox();
             tvwTaskTrace = new TreeView();
             grpResponseSummary = new GroupBox();
             lstResponseSummary = new ListBox();
-            grpActivityItems = new GroupBox();
-            lstActivityItems = new ListBox();
             pnlHyperNodeActivityTop = new Panel();
             txtTaskId = new TextBox();
             btnCancelCurrentTask = new Button();
@@ -55,9 +56,13 @@
             grpRealTimeResponse.SuspendLayout();
             grpRealTimeTaskTrace.SuspendLayout();
             grpHyperNodeActivity.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)spcHyperNodeActivity).BeginInit();
+            spcHyperNodeActivity.Panel1.SuspendLayout();
+            spcHyperNodeActivity.Panel2.SuspendLayout();
+            spcHyperNodeActivity.SuspendLayout();
+            grpActivityItems.SuspendLayout();
             grpTaskTrace.SuspendLayout();
             grpResponseSummary.SuspendLayout();
-            grpActivityItems.SuspendLayout();
             pnlHyperNodeActivityTop.SuspendLayout();
             SuspendLayout();
             // 
@@ -192,62 +197,42 @@
             // 
             // grpHyperNodeActivity
             // 
-            grpHyperNodeActivity.Controls.Add(grpTaskTrace);
-            grpHyperNodeActivity.Controls.Add(grpResponseSummary);
-            grpHyperNodeActivity.Controls.Add(grpActivityItems);
+            grpHyperNodeActivity.Controls.Add(spcHyperNodeActivity);
             grpHyperNodeActivity.Controls.Add(pnlHyperNodeActivityTop);
             grpHyperNodeActivity.Dock = DockStyle.Fill;
             grpHyperNodeActivity.Location = new Point(369, 0);
             grpHyperNodeActivity.Name = "grpHyperNodeActivity";
-            grpHyperNodeActivity.Size = new Size(566, 664);
+            grpHyperNodeActivity.Size = new Size(825, 664);
             grpHyperNodeActivity.TabIndex = 1;
             grpHyperNodeActivity.TabStop = false;
             grpHyperNodeActivity.Text = "HyperNode Activity";
             // 
-            // grpTaskTrace
+            // spcHyperNodeActivity
             // 
-            grpTaskTrace.Controls.Add(tvwTaskTrace);
-            grpTaskTrace.Location = new Point(284, 386);
-            grpTaskTrace.Name = "grpTaskTrace";
-            grpTaskTrace.Size = new Size(193, 193);
-            grpTaskTrace.TabIndex = 3;
-            grpTaskTrace.TabStop = false;
-            grpTaskTrace.Text = "Task Trace";
+            spcHyperNodeActivity.Dock = DockStyle.Fill;
+            spcHyperNodeActivity.Location = new Point(3, 43);
+            spcHyperNodeActivity.Name = "spcHyperNodeActivity";
+            spcHyperNodeActivity.Orientation = Orientation.Horizontal;
             // 
-            // tvwTaskTrace
+            // spcHyperNodeActivity.Panel1
             // 
-            tvwTaskTrace.Dock = DockStyle.Fill;
-            tvwTaskTrace.Location = new Point(3, 19);
-            tvwTaskTrace.Name = "tvwTaskTrace";
-            tvwTaskTrace.Size = new Size(187, 171);
-            tvwTaskTrace.TabIndex = 0;
+            spcHyperNodeActivity.Panel1.Controls.Add(grpActivityItems);
             // 
-            // grpResponseSummary
+            // spcHyperNodeActivity.Panel2
             // 
-            grpResponseSummary.Controls.Add(lstResponseSummary);
-            grpResponseSummary.Location = new Point(22, 380);
-            grpResponseSummary.Name = "grpResponseSummary";
-            grpResponseSummary.Size = new Size(215, 210);
-            grpResponseSummary.TabIndex = 2;
-            grpResponseSummary.TabStop = false;
-            grpResponseSummary.Text = "Response Summary";
-            // 
-            // lstResponseSummary
-            // 
-            lstResponseSummary.Dock = DockStyle.Fill;
-            lstResponseSummary.FormattingEnabled = true;
-            lstResponseSummary.ItemHeight = 15;
-            lstResponseSummary.Location = new Point(3, 19);
-            lstResponseSummary.Name = "lstResponseSummary";
-            lstResponseSummary.Size = new Size(209, 188);
-            lstResponseSummary.TabIndex = 0;
+            spcHyperNodeActivity.Panel2.Controls.Add(grpTaskTrace);
+            spcHyperNodeActivity.Panel2.Controls.Add(grpResponseSummary);
+            spcHyperNodeActivity.Size = new Size(819, 618);
+            spcHyperNodeActivity.SplitterDistance = 314;
+            spcHyperNodeActivity.TabIndex = 4;
             // 
             // grpActivityItems
             // 
             grpActivityItems.Controls.Add(lstActivityItems);
-            grpActivityItems.Location = new Point(46, 93);
+            grpActivityItems.Dock = DockStyle.Fill;
+            grpActivityItems.Location = new Point(0, 0);
             grpActivityItems.Name = "grpActivityItems";
-            grpActivityItems.Size = new Size(306, 160);
+            grpActivityItems.Size = new Size(819, 314);
             grpActivityItems.TabIndex = 1;
             grpActivityItems.TabStop = false;
             grpActivityItems.Text = "Activity Items";
@@ -259,8 +244,48 @@
             lstActivityItems.ItemHeight = 15;
             lstActivityItems.Location = new Point(3, 19);
             lstActivityItems.Name = "lstActivityItems";
-            lstActivityItems.Size = new Size(300, 138);
+            lstActivityItems.Size = new Size(813, 292);
             lstActivityItems.TabIndex = 0;
+            // 
+            // grpTaskTrace
+            // 
+            grpTaskTrace.Controls.Add(tvwTaskTrace);
+            grpTaskTrace.Dock = DockStyle.Fill;
+            grpTaskTrace.Location = new Point(292, 0);
+            grpTaskTrace.Name = "grpTaskTrace";
+            grpTaskTrace.Size = new Size(527, 300);
+            grpTaskTrace.TabIndex = 3;
+            grpTaskTrace.TabStop = false;
+            grpTaskTrace.Text = "Task Trace";
+            // 
+            // tvwTaskTrace
+            // 
+            tvwTaskTrace.Dock = DockStyle.Fill;
+            tvwTaskTrace.Location = new Point(3, 19);
+            tvwTaskTrace.Name = "tvwTaskTrace";
+            tvwTaskTrace.Size = new Size(521, 278);
+            tvwTaskTrace.TabIndex = 0;
+            // 
+            // grpResponseSummary
+            // 
+            grpResponseSummary.Controls.Add(lstResponseSummary);
+            grpResponseSummary.Dock = DockStyle.Left;
+            grpResponseSummary.Location = new Point(0, 0);
+            grpResponseSummary.Name = "grpResponseSummary";
+            grpResponseSummary.Size = new Size(292, 300);
+            grpResponseSummary.TabIndex = 2;
+            grpResponseSummary.TabStop = false;
+            grpResponseSummary.Text = "Response Summary";
+            // 
+            // lstResponseSummary
+            // 
+            lstResponseSummary.Dock = DockStyle.Fill;
+            lstResponseSummary.FormattingEnabled = true;
+            lstResponseSummary.ItemHeight = 15;
+            lstResponseSummary.Location = new Point(3, 19);
+            lstResponseSummary.Name = "lstResponseSummary";
+            lstResponseSummary.Size = new Size(286, 278);
+            lstResponseSummary.TabIndex = 0;
             // 
             // pnlHyperNodeActivityTop
             // 
@@ -270,7 +295,7 @@
             pnlHyperNodeActivityTop.Dock = DockStyle.Top;
             pnlHyperNodeActivityTop.Location = new Point(3, 19);
             pnlHyperNodeActivityTop.Name = "pnlHyperNodeActivityTop";
-            pnlHyperNodeActivityTop.Size = new Size(560, 24);
+            pnlHyperNodeActivityTop.Size = new Size(819, 24);
             pnlHyperNodeActivityTop.TabIndex = 0;
             // 
             // txtTaskId
@@ -278,18 +303,19 @@
             txtTaskId.Dock = DockStyle.Fill;
             txtTaskId.Location = new Point(43, 0);
             txtTaskId.Name = "txtTaskId";
-            txtTaskId.Size = new Size(442, 23);
+            txtTaskId.Size = new Size(701, 23);
             txtTaskId.TabIndex = 2;
             // 
             // btnCancelCurrentTask
             // 
             btnCancelCurrentTask.Dock = DockStyle.Right;
-            btnCancelCurrentTask.Location = new Point(485, 0);
+            btnCancelCurrentTask.Location = new Point(744, 0);
             btnCancelCurrentTask.Name = "btnCancelCurrentTask";
             btnCancelCurrentTask.Size = new Size(75, 24);
             btnCancelCurrentTask.TabIndex = 1;
             btnCancelCurrentTask.Text = "Cancel";
             btnCancelCurrentTask.UseVisualStyleBackColor = true;
+            btnCancelCurrentTask.Click += btnCancelCurrentTask_Click;
             // 
             // lblTaskId
             // 
@@ -305,7 +331,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(935, 664);
+            ClientSize = new Size(1194, 664);
             Controls.Add(grpHyperNodeActivity);
             Controls.Add(pnlLeft);
             Name = "MainForm";
@@ -315,9 +341,13 @@
             grpRealTimeResponse.ResumeLayout(false);
             grpRealTimeTaskTrace.ResumeLayout(false);
             grpHyperNodeActivity.ResumeLayout(false);
+            spcHyperNodeActivity.Panel1.ResumeLayout(false);
+            spcHyperNodeActivity.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)spcHyperNodeActivity).EndInit();
+            spcHyperNodeActivity.ResumeLayout(false);
+            grpActivityItems.ResumeLayout(false);
             grpTaskTrace.ResumeLayout(false);
             grpResponseSummary.ResumeLayout(false);
-            grpActivityItems.ResumeLayout(false);
             pnlHyperNodeActivityTop.ResumeLayout(false);
             pnlHyperNodeActivityTop.PerformLayout();
             ResumeLayout(false);
@@ -348,5 +378,6 @@
         private Button btnRefreshCommandList;
         private GroupBox grpRealTimeResponse;
         private GroupBox grpRealTimeTaskTrace;
+        private SplitContainer spcHyperNodeActivity;
     }
 }

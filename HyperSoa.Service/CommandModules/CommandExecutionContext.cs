@@ -8,7 +8,7 @@ namespace HyperSoa.Service.CommandModules
         public string TaskId { get; set; }
         public string ExecutingNodeName { get; set; }
         public string CommandName { get; set; }
-        public string CreatedByAgentName { get; set; }
+        public string? CreatedByAgentName { get; set; }
         public MessageProcessOptionFlags ProcessOptionFlags { get; set; }
         public ICommandRequest? Request { get; set; }
         public ITaskActivityTracker Activity { get; set; }

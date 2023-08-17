@@ -21,7 +21,7 @@ namespace HyperSoa.Service.CommandModules
         /// <summary>
         /// The request object containing parameters to be passed to the <see cref="ICommandModule"/>.
         /// </summary>
-        ICommandRequest Request { get; }
+        ICommandRequest? Request { get; }
 
         /// <summary>
         /// Provides a way to raise activity events from inside an <see cref="ICommandModule"/>.

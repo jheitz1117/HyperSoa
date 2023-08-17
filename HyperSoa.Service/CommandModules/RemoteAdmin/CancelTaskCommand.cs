@@ -2,10 +2,11 @@
 using HyperSoa.Contracts.Extensions;
 using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Service.Configuration;
+using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class CancelTaskCommand : ICommandModule
+    internal class CancelTaskCommand : ICommandModule, IContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -20,6 +21,11 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             return (
                 result ? MessageProcessStatusFlags.Success : MessageProcessStatusFlags.Failure
             ).ToEmptyCommandResponse();
+        }
+
+        public IContractSerializer Create()
+        {
+            return new ProtoContractSerializer<CancelTaskRequest, EmptyCommandResponse>();
         }
     }
 }

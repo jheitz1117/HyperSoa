@@ -47,7 +47,7 @@ namespace HyperSoa.Service
             // Validate our configuration
             var builder = new StringBuilder();
             new HyperNodeConfigurationValidator(
-                (sender, args) => builder.AppendLine(args.Message)
+                (_, args) => builder.AppendLine(args.Message)
             ).ValidateConfiguration(config);
 
             // Check for validation errors before proceeding to create and configure our HyperNodeService instance
@@ -164,12 +164,16 @@ namespace HyperSoa.Service
 
         private static void ConfigureTaskProvider(HyperNodeService service, IHyperNodeConfiguration config)
         {
-            ITaskIdProvider taskIdProvider = null;
+            ITaskIdProvider? taskIdProvider = null;
 
             // Set our task id provider if applicable, but if we have any problems creating the instance or casting to ITaskIdProvider, we deliberately want to fail out and make them fix the configuration
             if (!string.IsNullOrWhiteSpace(config.TaskIdProviderType))
             {
-                taskIdProvider = (ITaskIdProvider)Activator.CreateInstance(Type.GetType(config.TaskIdProviderType, true));
+                taskIdProvider = (ITaskIdProvider?)Activator.CreateInstance(Type.GetType(config.TaskIdProviderType, true)!);
+
+                if (taskIdProvider == null)
+                    throw new HyperNodeConfigurationException($"Unable to create {nameof(ITaskIdProvider)} from type '{config.TaskIdProviderType}'.");
+
                 taskIdProvider.Initialize();
             }
 
@@ -186,7 +190,7 @@ namespace HyperSoa.Service
             foreach (var monitorConfig in config.ActivityMonitors)
             {
                 // If we have any problems creating the instance or casting to HyperNodeServiceActivityMonitor, we deliberately want to fail out and make them fix the config
-                var monitor = (HyperNodeServiceActivityMonitor)Activator.CreateInstance(Type.GetType(monitorConfig.MonitorType, true));
+                var monitor = (HyperNodeServiceActivityMonitor?)Activator.CreateInstance(Type.GetType(monitorConfig.MonitorType!, true)!);
                 if (monitor != null)
                 {
                     monitor.Name = monitorConfig.MonitorName;
