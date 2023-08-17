@@ -11,7 +11,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not GetCachedTaskProgressInfoRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(GetCachedTaskProgressInfoRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(GetCachedTaskProgressInfoRequest), context.Request?.GetType());
 
             var response = new GetCachedTaskProgressInfoResponse
             {

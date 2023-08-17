@@ -100,7 +100,8 @@ namespace TestClient
                 PopulateTaskTrace(tvwRealTimeTaskTrace, response);
 
                 if (response.NodeAction != HyperNodeActionType.Rejected &&
-                    msg.ProcessOptionFlags.HasFlag(MessageProcessOptionFlags.CacheTaskProgress))
+                    msg.ProcessOptionFlags.HasFlag(MessageProcessOptionFlags.CacheTaskProgress) &&
+                    !string.IsNullOrWhiteSpace(response.TaskId))
                 {
                     await TrackCommandProgress(response.TaskId);
                 }

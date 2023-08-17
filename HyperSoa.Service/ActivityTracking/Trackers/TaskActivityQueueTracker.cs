@@ -11,32 +11,32 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
             _taskContext = taskContext;
         }
 
-        public void Track(string eventDescription)
+        public void Track(string? eventDescription)
         {
             Track(eventDescription, null);
         }
 
-        public void Track(string eventDescription, string eventDetail)
+        public void Track(string? eventDescription, string? eventDetail)
         {
             Track(eventDescription, eventDetail, null);
         }
 
-        public void Track(string eventDescription, string eventDetail, object eventData)
+        public void Track(string? eventDescription, string? eventDetail, object? eventData)
         {
             Track(eventDescription, eventDetail, eventData, null, null);
         }
 
-        public void Track(string eventDescription, double? progressPart, double? progressTotal)
+        public void Track(string? eventDescription, double? progressPart, double? progressTotal)
         {
             Track(eventDescription, null, progressPart, progressTotal);
         }
 
-        public void Track(string eventDescription, string eventDetail, double? progressPart, double? progressTotal)
+        public void Track(string? eventDescription, string? eventDetail, double? progressPart, double? progressTotal)
         {
             Track(eventDescription, eventDetail, null, progressPart, progressTotal);
         }
 
-        public void Track(string eventDescription, string eventDetail, object eventData, double? progressPart, double? progressTotal)
+        public void Track(string? eventDescription, string? eventDetail, object? eventData, double? progressPart, double? progressTotal)
         {
             Enqueue(
                 new HyperNodeActivityEventItem
@@ -55,7 +55,7 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
             );
         }
 
-        public void TrackFormat(string eventDescriptionFormat, params object[] args)
+        public void TrackFormat(string eventDescriptionFormat, params object?[] args)
         {
             Track(string.Format(eventDescriptionFormat, args));
         }

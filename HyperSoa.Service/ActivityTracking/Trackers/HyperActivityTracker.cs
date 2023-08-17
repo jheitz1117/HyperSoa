@@ -5,19 +5,19 @@
     /// </summary>
     /// <param name="sender">The object that fired the event.</param>
     /// <param name="e">The <see cref="TrackActivityEventArgs"/> object containing the event data.</param>
-    public delegate void TrackActivityEventHandler(object sender, TrackActivityEventArgs e);
+    internal delegate void TrackActivityEventHandler(object sender, TrackActivityEventArgs e);
 
     /// <summary>
     /// Base class for tracking arbitrary activity events.
     /// </summary>
-    public abstract class HyperActivityTracker
+    internal abstract class HyperActivityTracker
     {
         private readonly object _lock = new();
 
         /// <summary>
         /// Allows consumers to respond to activity events.
         /// </summary>
-        public event TrackActivityEventHandler TrackActivityHandler = (sender, args) => { };
+        public event TrackActivityEventHandler TrackActivityHandler = (_, _) => { };
 
         /// <summary>
         /// When overridden in a derived class, fires an event containing the specified <see cref="TrackActivityEventArgs"/> object.
@@ -31,7 +31,7 @@
                 handler = TrackActivityHandler;
             }
 
-            handler?.Invoke(this, e);
+            handler.Invoke(this, e);
         }
     }
 }

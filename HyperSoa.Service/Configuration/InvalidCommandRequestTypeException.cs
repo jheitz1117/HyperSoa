@@ -21,8 +21,8 @@ namespace HyperSoa.Service.Configuration
         /// </summary>
         /// <param name="expectedType">The <see cref="Type"/> expected by the <see cref="ICommandModule"/>.</param>
         /// <param name="actualType">The <see cref="Type"/> actually received by the <see cref="ICommandModule"/>.</param>
-        public InvalidCommandRequestTypeException(Type expectedType, Type actualType)
-            : this($"Request type '{actualType.FullName}' could not be converted to type '{expectedType.FullName}'.") { }
+        public InvalidCommandRequestTypeException(Type expectedType, Type? actualType)
+            : this($"{(actualType == null ? "Null object" : $"Request type '{actualType.FullName}'")} could not be converted to type '{expectedType.FullName}'.") { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidCommandRequestTypeException"/> class with a specified error message.

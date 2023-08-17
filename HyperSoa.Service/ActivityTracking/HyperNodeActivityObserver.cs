@@ -12,7 +12,7 @@ namespace HyperSoa.Service.ActivityTracking
     {
         private readonly HyperNodeServiceActivityMonitor _underlyingMonitor;
         private readonly ITaskActivityTracker _activity;
-        private readonly IDisposable _subscription;
+        private readonly IDisposable? _subscription;
         private readonly IScheduler _scheduler;
         private bool _isDisposed;
 

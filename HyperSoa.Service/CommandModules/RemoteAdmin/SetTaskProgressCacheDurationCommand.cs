@@ -10,7 +10,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not SetTaskProgressCacheDurationRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(SetTaskProgressCacheDurationRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(SetTaskProgressCacheDurationRequest), context.Request?.GetType());
 
             var response = new SetTaskProgressCacheDurationResponse
             {

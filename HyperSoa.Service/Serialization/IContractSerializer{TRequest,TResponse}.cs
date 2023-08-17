@@ -3,7 +3,8 @@
 namespace HyperSoa.Service.Serialization
 {
     /// <summary>
-    /// Provides methods to serialize and deserialize <see cref="ICommandRequest"/> objects.
+    /// Provides methods to deserialize <see cref="ICommandRequest"/> objects and
+    /// serialize <see cref="ICommandResponse"/> objects.
     /// </summary>
     internal interface IContractSerializer<out TRequest, in TResponse> : IContractSerializer
         where TRequest : ICommandRequest

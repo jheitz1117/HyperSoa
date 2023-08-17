@@ -11,7 +11,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EnableCommandModuleRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(EnableCommandModuleRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(EnableCommandModuleRequest), context.Request?.GetType());
 
             var processStatusFlags = MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
             if (request.CommandName == context.CommandName && !request.Enable)
@@ -22,7 +22,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             }
             else
             {
-                if (HyperNodeService.Instance.IsKnownCommand(request.CommandName ?? ""))
+                if (HyperNodeService.Instance.IsKnownCommand(request.CommandName))
                 {
                     var result = HyperNodeService.Instance.EnableCommandModule(request.CommandName, request.Enable);
                     context.Activity.Track(

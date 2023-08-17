@@ -7,7 +7,6 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         private static readonly object Lock = new();
         private readonly List<HyperNodeActivityItem> _taskTrace = new();
 
-        public IReadOnlyList<HyperNodeActivityItem> TaskTrace => _taskTrace;
         public TaskTraceMonitor()
         {
             Name = nameof(TaskTraceMonitor);
@@ -45,6 +44,14 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
                         EventDetail = exception.ToString()
                     }
                 );
+            }
+        }
+
+        public HyperNodeActivityItem[] GetTaskTrace()
+        {
+            lock (Lock)
+            {
+                return _taskTrace.ToArray();
             }
         }
     }

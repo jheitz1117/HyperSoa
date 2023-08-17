@@ -243,7 +243,7 @@ namespace HyperSoa.Service.Configuration
             }
         }
 
-        private void ValidateTypeString(string targetTypeString, out Type targetType)
+        private void ValidateTypeString(string targetTypeString, out Type? targetType)
         {
             try
             {

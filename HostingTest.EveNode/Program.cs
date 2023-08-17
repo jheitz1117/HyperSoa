@@ -7,7 +7,6 @@ using HyperSoa.ServiceHosting.Configuration;
 using HyperSoa.ServiceHosting.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -17,7 +16,8 @@ builder.Services.AddSingleton<IHyperNodeService>(
     serviceProvider =>
     {
         HyperNodeService.CreateAndConfigure(
-            serviceProvider.GetRequiredService<IHyperNodeConfigurationProvider>()
+            serviceProvider.GetRequiredService<IHyperNodeConfigurationProvider>(),
+            serviceProvider
         );
 
         return HyperNodeService.Instance;
@@ -34,9 +34,6 @@ try
 {
     using (var host = builder.Build())
     {
-        // TODO: Would like to use DI to get loggers inside hypernode service and host as well
-        var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
         await host.StartAsync();
 
         var serviceHost = host.Services.GetRequiredService<IHyperNodeServiceHost>();
@@ -61,7 +58,7 @@ try
         await host.WaitForShutdownAsync();
         
         Console.WriteLine("Done.");
-        Thread.Sleep(1000);
+        await Task.Delay(1000);
     }
 }
 catch (Exception ex)

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using HyperSoa.Contracts;
+﻿using HyperSoa.Contracts;
 using HyperSoa.Service;
 using HyperSoa.Service.Configuration;
 using HyperSoa.Service.Configuration.Json;
@@ -8,7 +7,6 @@ using HyperSoa.ServiceHosting.Configuration;
 using HyperSoa.ServiceHosting.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -18,7 +16,8 @@ builder.Services.AddSingleton<IHyperNodeService>(
     serviceProvider =>
     {
         HyperNodeService.CreateAndConfigure(
-            serviceProvider.GetRequiredService<IHyperNodeConfigurationProvider>()
+            serviceProvider.GetRequiredService<IHyperNodeConfigurationProvider>(),
+            serviceProvider
         );
 
         return HyperNodeService.Instance;
@@ -31,22 +30,10 @@ builder.Services.AddTransient<IHyperNodeHostConfigurationProvider, JsonHyperNode
 builder.Services.AddSingleton<IHyperNodeServiceHost, HyperNodeServiceHost>();
 builder.Services.AddHostedService<HostedListenerService>();
 
-// Hook up the console to all of our Trace.WriteLine()
-Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
-
 try
 {
     using (var host = builder.Build())
     {
-        var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogTrace("Trace Message");
-        logger.LogDebug("Debug Message");
-        logger.LogInformation("Info Message");
-        logger.LogWarning("Warning Message");
-        logger.LogError("Error Message");
-        logger.LogCritical("Critical Message");
-
         await host.StartAsync();
 
         var serviceHost = host.Services.GetRequiredService<IHyperNodeServiceHost>();
@@ -71,7 +58,7 @@ try
         await host.WaitForShutdownAsync();
         
         Console.WriteLine("Done.");
-        Thread.Sleep(1000);
+        await Task.Delay(1000);
     }
 }
 catch (Exception ex)
@@ -79,5 +66,3 @@ catch (Exception ex)
     Console.WriteLine(ex);
     Console.ReadKey();
 }
-
-

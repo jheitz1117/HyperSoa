@@ -3,7 +3,8 @@
 namespace HyperSoa.Service.Serialization
 {
     /// <summary>
-    /// Provides methods to serialize and deserialize <see cref="ICommandRequest"/> objects.
+    /// Provides methods to deserialize <see cref="ICommandRequest"/> objects and
+    /// serialize <see cref="ICommandResponse"/> objects.
     /// </summary>
     public interface IContractSerializer
     {
@@ -20,5 +21,11 @@ namespace HyperSoa.Service.Serialization
         /// <param name="response">The <see cref="ICommandResponse"/> object to serialize.</param>
         /// <returns></returns>
         byte[]? SerializeResponse(ICommandResponse? response);
+
+        /// <summary>
+        /// Gets the expected <see cref="Type"/> of the <see cref="ICommandRequest"/> object.
+        /// </summary>
+        /// <returns></returns>
+        Type GetRequestType();
     }
 }

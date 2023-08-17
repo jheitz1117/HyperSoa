@@ -12,6 +12,7 @@ using HyperSoa.Service.EventTracking;
 using HyperSoa.Service.Extensions;
 using HyperSoa.Service.Serialization;
 using HyperSoa.Service.TaskIdProviders;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HyperSoa.Service
 {
@@ -57,6 +58,7 @@ namespace HyperSoa.Service
             set => _taskProgressCacheMonitor.CacheDuration = value;
         }
 
+        private IServiceProvider? ServiceProvider { get; init; }
         private ITaskIdProvider TaskIdProvider { get; set; } = DefaultTaskIdProvider;
         private IHyperNodeEventHandler EventHandler { get; set; } = DefaultEventHandler;
         internal bool EnableDiagnostics { get; set; }
@@ -222,7 +224,7 @@ namespace HyperSoa.Service
 
                                 // Set our response task trace here (if applicable) so it's available in case the response lives in the progress cache.
                                 if (currentTaskInfo.Message.TaskTraceRequested())
-                                    response.TaskTrace = taskTraceMonitor.TaskTrace.ToArray();
+                                    response.TaskTrace = taskTraceMonitor.GetTaskTrace();
                             }
                         );
                     }
@@ -248,7 +250,7 @@ namespace HyperSoa.Service
 
                 // Immediate responses for async tasks don't get task traces (they'll be added later when the async task completes).
                 if (currentTaskInfo.Message.TaskTraceRequested() && !currentTaskInfo.Message.ConcurrentRunRequested())
-                    response.TaskTrace = taskTraceMonitor.TaskTrace.ToArray();
+                    response.TaskTrace = taskTraceMonitor.GetTaskTrace();
 
                 #endregion Process Message
             }
@@ -266,7 +268,23 @@ namespace HyperSoa.Service
             {
                 lock (Lock)
                 {
-                    _instance ??= Create(configProvider);
+                    _instance ??= Create(configProvider, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
+        /// </summary>
+        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
+        /// <param name="serviceProvider">The DI <see cref="IServiceProvider"/> to use to create instances of our dynamic types.</param>
+        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider, IServiceProvider serviceProvider)
+        {
+            if (_instance == null)
+            {
+                lock (Lock)
+                {
+                    _instance ??= Create(configProvider, serviceProvider);
                 }
             }
         }
@@ -615,8 +633,10 @@ namespace HyperSoa.Service
                 _commandModuleConfigurations.TryGetValue(args.Message.CommandName, out var commandModuleConfig) &&
                 commandModuleConfig.Enabled)
             {
-                // Create our command module instance
-                var commandInstance = Activator.CreateInstance(commandModuleConfig.CommandModuleType);
+                // Create our command module instance (with DI if available)
+                var commandInstance = ServiceProvider != null
+                    ? ActivatorUtilities.CreateInstance(ServiceProvider, commandModuleConfig.CommandModuleType)
+                    : Activator.CreateInstance(commandModuleConfig.CommandModuleType);
 
                 IContractSerializer? contractSerializer = null;
 
@@ -636,7 +656,7 @@ namespace HyperSoa.Service
                 catch (Exception ex)
                 {
                     throw new InvalidCommandRequestTypeException(
-                        $"Command '{args.Message.CommandName}' expected a request type of '{contractSerializer.GetType().FullName}', but the command request string could not be deserialized into that type. See inner exception for details.",
+                        $"Command '{args.Message.CommandName}' expected a request type of '{contractSerializer.GetRequestType().FullName}', but the command request string could not be deserialized into that type. See inner exception for details.",
                         ex
                     );
                 }

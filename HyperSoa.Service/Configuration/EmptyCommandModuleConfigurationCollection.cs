@@ -16,6 +16,6 @@ namespace HyperSoa.Service.Configuration
             return GetEnumerator();
         }
 
-        public string ContractSerializerType => null;
+        public string? ContractSerializerType => null;
     }
 }

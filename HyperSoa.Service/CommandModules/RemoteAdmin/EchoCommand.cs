@@ -1,15 +1,16 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Service.Configuration;
+using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class EchoCommand : ICommandModule
+    internal class EchoCommand : ICommandModule, IContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EchoRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(EchoRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(EchoRequest), context.Request?.GetType());
 
             var echoString = $"HyperNode '{context.ExecutingNodeName}' says, \"{request.Prompt}\".";
             
@@ -20,6 +21,11 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
                 ProcessStatusFlags = MessageProcessStatusFlags.Success,
                 Reply = echoString
             };
+        }
+
+        public IContractSerializer Create()
+        {
+            return new ProtoContractSerializer<EchoRequest, EchoResponse>();
         }
     }
 }

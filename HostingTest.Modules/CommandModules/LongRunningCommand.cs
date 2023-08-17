@@ -6,6 +6,7 @@ using HyperSoa.Service;
 using HyperSoa.Service.CommandModules;
 using HyperSoa.Service.Configuration;
 using HyperSoa.Service.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace HostingTest.Modules.CommandModules
 {
@@ -14,9 +15,15 @@ namespace HostingTest.Modules.CommandModules
     /// </summary>
     public class LongRunningCommand : ICommandModule
     {
+        private readonly ILogger<LongRunningCommand> _logger;
         private static readonly TimeSpan DefaultTotalRunTime = TimeSpan.FromSeconds(30);
         private static readonly TimeSpan DefaultMinimumSleepInterval = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan DefaultMaximumSleepInterval = TimeSpan.FromSeconds(5);
+
+        public LongRunningCommand(ILogger<LongRunningCommand> logger)
+        {
+            _logger = logger;
+        }
 
         /// <summary>
         /// Executes a long-running command using the specified <see cref="ICommandExecutionContext"/>.
@@ -25,9 +32,11 @@ namespace HostingTest.Modules.CommandModules
         /// <returns></returns>
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
+            _logger.LogDebug($"In {nameof(LongRunningCommand)}");
+
             // This technique allows us to optionally take a command request. If they just want to run the default settings, they can just pass an empty string and we'll supply the default values.
             if (!(context.Request is ByteArrayRequest byteArrayRequest))
-                throw new InvalidCommandRequestTypeException(typeof(ByteArrayRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(ByteArrayRequest), context.Request?.GetType());
             
             // Test if we have a command request string. If we have a non-blank request string, then try to deserialize it
             var request = new LongRunningCommandRequest();
@@ -82,6 +91,8 @@ namespace HostingTest.Modules.CommandModules
                             stopwatch.ElapsedMilliseconds,
                             totalRunTime.TotalMilliseconds
                         );
+
+                        _logger.LogDebug("[command logger] Progress update {prc}", progressReportCount);
                     }
                 }
                 catch (OperationCanceledException)

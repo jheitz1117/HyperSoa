@@ -7,6 +7,7 @@ using HyperSoa.Service.Configuration;
 using HyperSoa.Service.EventTracking;
 using HyperSoa.Service.Serialization;
 using HyperSoa.Service.TaskIdProviders;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HyperSoa.Service
 {
@@ -25,7 +26,7 @@ namespace HyperSoa.Service
 
         #region Configuration
 
-        private static HyperNodeService Create(IHyperNodeConfigurationProvider configProvider)
+        private static HyperNodeService Create(IHyperNodeConfigurationProvider configProvider, IServiceProvider? serviceProvider)
         {
             if (configProvider == null)
                 throw new ArgumentNullException(nameof(configProvider));
@@ -56,6 +57,7 @@ namespace HyperSoa.Service
 
             var service = new HyperNodeService(config.HyperNodeName)
             {
+                ServiceProvider = serviceProvider,
                 EnableTaskProgressCache = config.EnableTaskProgressCache ?? DefaultTaskProgressCacheEnabled,
                 EnableDiagnostics = config.EnableDiagnostics ?? DefaultDiagnosticsEnabled,
                 TaskProgressCacheDuration = TimeSpan.FromMinutes(config.TaskProgressCacheDurationMinutes ?? DefaultProgressCacheDurationMinutes),
@@ -63,10 +65,10 @@ namespace HyperSoa.Service
             };
 
             ConfigureRemoteAdminCommands(service, config);
-            ConfigureTaskProvider(service, config);
-            ConfigureActivityMonitors(service, config);
-            ConfigureCommandModules(service, config);
-            ConfigureHyperNodeEventHandler(service, config);
+            ConfigureTaskProvider(service, config, serviceProvider);
+            ConfigureActivityMonitors(service, config, serviceProvider);
+            ConfigureCommandModules(service, config, serviceProvider);
+            ConfigureHyperNodeEventHandler(service, config, serviceProvider);
 
             return service;
         }
@@ -162,14 +164,19 @@ namespace HyperSoa.Service
             }
         }
 
-        private static void ConfigureTaskProvider(HyperNodeService service, IHyperNodeConfiguration config)
+        private static void ConfigureTaskProvider(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             ITaskIdProvider? taskIdProvider = null;
 
-            // Set our task id provider if applicable, but if we have any problems creating the instance or casting to ITaskIdProvider, we deliberately want to fail out and make them fix the configuration
             if (!string.IsNullOrWhiteSpace(config.TaskIdProviderType))
             {
-                taskIdProvider = (ITaskIdProvider?)Activator.CreateInstance(Type.GetType(config.TaskIdProviderType, true)!);
+                // Set our task id provider if applicable, but if we have any problems creating the instance or casting to ITaskIdProvider, we deliberately want to fail out and make them fix the configuration
+                var taskIdProviderType = Type.GetType(config.TaskIdProviderType, true) ?? throw new HyperNodeConfigurationException($"Unable to determine {nameof(ITaskIdProvider)} type from '{config.TaskIdProviderType}'.");
+
+                if (serviceProvider != null)
+                    taskIdProvider = (ITaskIdProvider)ActivatorUtilities.CreateInstance(serviceProvider, taskIdProviderType);
+                else
+                    taskIdProvider = (ITaskIdProvider?)Activator.CreateInstance(taskIdProviderType);
 
                 if (taskIdProvider == null)
                     throw new HyperNodeConfigurationException($"Unable to create {nameof(ITaskIdProvider)} from type '{config.TaskIdProviderType}'.");
@@ -180,7 +187,7 @@ namespace HyperSoa.Service
             service.TaskIdProvider = taskIdProvider ?? DefaultTaskIdProvider;
         }
 
-        private static void ConfigureActivityMonitors(HyperNodeService service, IHyperNodeConfiguration config)
+        private static void ConfigureActivityMonitors(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             // Consider a null collection equivalent to an empty one
             if (config.ActivityMonitors == null)
@@ -189,11 +196,20 @@ namespace HyperSoa.Service
             // Instantiate our activity monitors
             foreach (var monitorConfig in config.ActivityMonitors)
             {
+                HyperNodeServiceActivityMonitor? monitor;
+
                 // If we have any problems creating the instance or casting to HyperNodeServiceActivityMonitor, we deliberately want to fail out and make them fix the config
-                var monitor = (HyperNodeServiceActivityMonitor?)Activator.CreateInstance(Type.GetType(monitorConfig.MonitorType!, true)!);
+                var monitorType = Type.GetType(monitorConfig.MonitorType!, true) ?? throw new HyperNodeConfigurationException($"Unable to determine activity monitor type from '{monitorConfig.MonitorType}'.");
+                if (serviceProvider != null)
+                    monitor = (HyperNodeServiceActivityMonitor)ActivatorUtilities.CreateInstance(serviceProvider, monitorType);
+                else
+                    monitor = (HyperNodeServiceActivityMonitor?)Activator.CreateInstance(monitorType);
+
                 if (monitor != null)
                 {
-                    monitor.Name = monitorConfig.MonitorName;
+                    monitor.Name = string.IsNullOrWhiteSpace(monitorConfig.MonitorName)
+                        ? Guid.NewGuid().ToString()
+                        : monitorConfig.MonitorName;
                     monitor.Enabled = monitorConfig.Enabled;
 
                     monitor.Initialize();
@@ -210,13 +226,13 @@ namespace HyperSoa.Service
             }
         }
 
-        private static void ConfigureCommandModules(HyperNodeService service, IHyperNodeConfiguration config)
+        private static void ConfigureCommandModules(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             // Consider a null collection equivalent to an empty one
             if (config.CommandModules == null)
                 return;
 
-            Type collectionContractSerializerType = null;
+            Type? collectionContractSerializerType = null;
 
             // First, see if we have a serializer type defined at the collection level
             if (!string.IsNullOrWhiteSpace(config.CommandModules.ContractSerializerType))
@@ -224,11 +240,15 @@ namespace HyperSoa.Service
 
             foreach (var commandModuleConfig in config.CommandModules)
             {
-                var commandModuleType = Type.GetType(commandModuleConfig.CommandModuleType, true);
+                var commandModuleType = Type.GetType(
+                    commandModuleConfig.CommandModuleType,
+                    true
+                ) ?? throw new HyperNodeConfigurationException($"Unable to determine command type from '{commandModuleConfig.CommandModuleType}'.");
+
                 if (commandModuleType.GetInterfaces().Contains(typeof(ICommandModule)) ||
                     commandModuleType.GetInterfaces().Contains(typeof(IAwaitableCommandModule)))
                 {
-                    Type commandContractSerializerType = null;
+                    Type? commandContractSerializerType = null;
 
                     // Now check to see if we have a serializer type defined at the command level
                     if (!string.IsNullOrWhiteSpace(commandModuleConfig.ContractSerializerType))
@@ -237,11 +257,16 @@ namespace HyperSoa.Service
                     // Our final configuration allows command-level serializer types to take precedence, if available. Otherwise, the collection-level types are used.
                     var configContractSerializerType = commandContractSerializerType ?? collectionContractSerializerType;
 
-                    IContractSerializer configContractSerializer = null;
+                    IContractSerializer? configContractSerializer = null;
 
                     // Attempt construction of config-level serializer types
                     if (configContractSerializerType != null)
-                        configContractSerializer = (IContractSerializer)Activator.CreateInstance(configContractSerializerType);
+                    {
+                        if (serviceProvider != null)
+                            configContractSerializer = (IContractSerializer)ActivatorUtilities.CreateInstance(serviceProvider, configContractSerializerType);
+                        else
+                            configContractSerializer = (IContractSerializer?)Activator.CreateInstance(configContractSerializerType);
+                    }
 
                     // Finally, construct our command module configuration
                     var commandConfig = new CommandModuleConfiguration
@@ -257,14 +282,23 @@ namespace HyperSoa.Service
             }
         }
 
-        private static void ConfigureHyperNodeEventHandler(HyperNodeService service, IHyperNodeConfiguration config)
+        private static void ConfigureHyperNodeEventHandler(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
-            IHyperNodeEventHandler eventHandler = null;
+            IHyperNodeEventHandler? eventHandler = null;
 
-            // Set our event handler if applicable, but if we have any problems creating the instance or casting to HyperNodeEventHandlerBase, we deliberately want to fail out and make them fix the configuration
             if (!string.IsNullOrWhiteSpace(config.HyperNodeEventHandlerType))
             {
-                eventHandler = (IHyperNodeEventHandler)Activator.CreateInstance(Type.GetType(config.HyperNodeEventHandlerType, true));
+                // Set our event handler if applicable, but if we have any problems creating the instance or casting to HyperNodeEventHandlerBase, we deliberately want to fail out and make them fix the configuration
+                var eventHandlerType = Type.GetType(config.HyperNodeEventHandlerType, true) ?? throw new HyperNodeConfigurationException($"Unable to determine {nameof(IHyperNodeEventHandler)} type from '{config.HyperNodeEventHandlerType}'.");
+                
+                if (serviceProvider != null)
+                    eventHandler = (IHyperNodeEventHandler)ActivatorUtilities.CreateInstance(serviceProvider, eventHandlerType);
+                else
+                    eventHandler = (IHyperNodeEventHandler?)Activator.CreateInstance(eventHandlerType);
+
+                if (eventHandler == null)
+                    throw new HyperNodeConfigurationException($"Unable to create {nameof(IHyperNodeEventHandler)} from type '{config.TaskIdProviderType}'.");
+
                 eventHandler.Initialize();
             }
 

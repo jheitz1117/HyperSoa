@@ -11,7 +11,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EnableDiagnosticsRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(EnableDiagnosticsRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(EnableDiagnosticsRequest), context.Request?.GetType());
 
             HyperNodeService.Instance.EnableDiagnostics = request.Enable;
             context.Activity.Track($"Diagnostics are now {(request.Enable ? "enabled" : "disabled")}.");

@@ -28,6 +28,11 @@ namespace HyperSoa.Service.Serialization
             return Serialize(response);
         }
 
+        public Type GetRequestType()
+        {
+            return typeof(TRequest);
+        }
+
         #endregion Public Methods
 
         #region Private Methods

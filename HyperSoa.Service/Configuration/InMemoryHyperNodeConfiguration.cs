@@ -12,10 +12,10 @@
         public int? TaskProgressCacheDurationMinutes => null;
         public int? MaxConcurrentTasks => null;
         public string? TaskIdProviderType => null;
-        public string HyperNodeEventHandlerType => null;
+        public string? HyperNodeEventHandlerType => null;
 
 
-        public IActivityMonitorConfigurationCollection? ActivityMonitors => _activityMonitors;
+        public IActivityMonitorConfigurationCollection ActivityMonitors => _activityMonitors;
         public IRemoteAdminConfigurationCollection RemoteAdminCommands => _remoteAdminCommands;
         public ICommandModuleConfigurationCollection CommandModules => _commandModules;
     }

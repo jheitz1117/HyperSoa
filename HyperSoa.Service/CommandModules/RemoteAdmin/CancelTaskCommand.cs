@@ -11,7 +11,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not CancelTaskRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(CancelTaskRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(CancelTaskRequest), context.Request?.GetType());
 
             var result = HyperNodeService.Instance.CancelTask(request.TaskId);
             context.Activity.Track(

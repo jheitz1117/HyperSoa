@@ -29,9 +29,7 @@ namespace HyperSoa.Service.Configuration
 
         public IRemoteAdminCommandConfiguration GetByCommandName(string commandName)
         {
-            _remoteAdminCommands.TryGetValue(commandName, out var result);
-            
-            return result;
+            return _remoteAdminCommands[commandName];
         }
 
         public bool ContainsCommandName(string commandName)

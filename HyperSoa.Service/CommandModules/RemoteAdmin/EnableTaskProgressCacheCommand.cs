@@ -11,7 +11,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EnableTaskProgressCacheRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(EnableTaskProgressCacheRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(EnableTaskProgressCacheRequest), context.Request?.GetType());
 
             HyperNodeService.Instance.EnableTaskProgressCache = request.Enable;
             context.Activity.Track($"The task progress cache is now {(request.Enable ? "enabled" : "disabled")}.");

@@ -26,5 +26,10 @@ namespace HyperSoa.Service.Serialization
         {
             return SerializeResponse(response as ByteArrayResponse);
         }
+
+        public Type GetRequestType()
+        {
+            return typeof(ByteArrayRequest);
+        }
     }
 }

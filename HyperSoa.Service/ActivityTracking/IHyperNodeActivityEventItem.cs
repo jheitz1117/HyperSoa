@@ -27,18 +27,18 @@ namespace HyperSoa.Service.ActivityTracking
         /// <summary>
         /// An object representing data associated with this <see cref="IHyperNodeActivityEventItem"/>. This value may be null.
         /// </summary>
-        object EventData { get; set; }
+        object? EventData { get; }
 
         /// <summary>
         /// A numeric value representing the progress of a <see cref="ICommandModule"/>. This value may be used in conjunction
         /// with the <see cref="ProgressTotal"/> property to obtain a percentile.
         /// </summary>
-        double? ProgressPart { get; set; }
+        double? ProgressPart { get; }
 
         /// <summary>
         /// A numeric value representing the progress total of a <see cref="ICommandModule"/>. This value may be used in conjunction
         /// with the <see cref="ProgressPart"/> property to obtain a percentile.
         /// </summary>
-        double? ProgressTotal { get; set; }
+        double? ProgressTotal { get; }
     }
 }

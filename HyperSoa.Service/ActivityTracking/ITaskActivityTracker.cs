@@ -11,14 +11,14 @@ namespace HyperSoa.Service.ActivityTracking
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified description.
         /// </summary>
         /// <param name="eventDescription">A description of the event.</param>
-        void Track(string eventDescription);
+        void Track(string? eventDescription);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified description and detail.
         /// </summary>
         /// <param name="eventDescription">A description of the event.</param>
         /// <param name="eventDetail">A description providing more verbose details of the event.</param>
-        void Track(string eventDescription, string eventDetail);
+        void Track(string? eventDescription, string? eventDetail);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified description and detail.
@@ -27,7 +27,7 @@ namespace HyperSoa.Service.ActivityTracking
         /// <param name="eventDescription">A description of the event.</param>
         /// <param name="eventDetail">A description providing more verbose details of the event.</param>
         /// <param name="eventData">An object to be associated with the <see cref="IHyperNodeActivityEventItem"/>.</param>
-        void Track(string eventDescription, string eventDetail, object eventData);
+        void Track(string? eventDescription, string? eventDetail, object? eventData);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified description and progress report.
@@ -35,7 +35,7 @@ namespace HyperSoa.Service.ActivityTracking
         /// <param name="eventDescription">A description of the event.</param>
         /// <param name="progressPart">A numeric value representing the progress of the <see cref="ICommandModule"/>.</param>
         /// <param name="progressTotal">A numeric value representing the progress total of a <see cref="ICommandModule"/>.</param>
-        void Track(string eventDescription, double? progressPart, double? progressTotal);
+        void Track(string? eventDescription, double? progressPart, double? progressTotal);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified description, detail, and progress report.
@@ -44,7 +44,7 @@ namespace HyperSoa.Service.ActivityTracking
         /// <param name="eventDetail">A description providing more verbose details of the event.</param>
         /// <param name="progressPart">A numeric value representing the progress of the <see cref="ICommandModule"/>.</param>
         /// <param name="progressTotal">A numeric value representing the progress total of a <see cref="ICommandModule"/>.</param>
-        void Track(string eventDescription, string eventDetail, double? progressPart, double? progressTotal);
+        void Track(string? eventDescription, string? eventDetail, double? progressPart, double? progressTotal);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified description, detail, event data, and progress report.
@@ -54,14 +54,14 @@ namespace HyperSoa.Service.ActivityTracking
         /// <param name="eventData">An object to be associated with the <see cref="IHyperNodeActivityEventItem"/>.</param>
         /// <param name="progressPart">A numeric value representing the progress of the <see cref="ICommandModule"/>.</param>
         /// <param name="progressTotal">A numeric value representing the progress total of a <see cref="ICommandModule"/>.</param>
-        void Track(string eventDescription, string eventDetail, object eventData, double? progressPart, double? progressTotal);
+        void Track(string? eventDescription, string? eventDetail, object? eventData, double? progressPart, double? progressTotal);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> with the specified format string and parameters.
         /// </summary>
         /// <param name="eventDescriptionFormat">A format string description of the event.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        void TrackFormat(string eventDescriptionFormat, params object[] args);
+        void TrackFormat(string eventDescriptionFormat, params object?[] args);
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> containing information about the specified <see cref="Exception"/>.

@@ -44,14 +44,14 @@ namespace HyperSoa.Service
                 taskId => new LiveTaskStatus
                 {
                     TaskId = taskId,
-                    CommandName = _liveTasks[taskId].Message.CommandName,
+                    CommandName = _liveTasks[taskId].CommandName,
                     IsCancellationRequested = _liveTasks[taskId].Token.IsCancellationRequested,
                     Elapsed = _liveTasks[taskId].Elapsed
                 }
             );
         }
 
-        internal bool IsKnownCommand(string commandName)
+        internal bool IsKnownCommand(string? commandName)
         {
             return _commandModuleConfigurations.ContainsKey(commandName ?? "");
         }
@@ -106,7 +106,7 @@ namespace HyperSoa.Service
         {
             var result = false;
 
-            if (_liveTasks.TryGetValue(taskId, out var taskInfo) && taskInfo != null)
+            if (_liveTasks.TryGetValue(taskId, out var taskInfo))
             {
                 taskInfo.Cancel();
                 result = true;

@@ -8,21 +8,21 @@
         /// <summary>
         /// The date and time the event happened.
         /// </summary>
-        DateTime EventDateTime { get; set; }
+        DateTime EventDateTime { get; }
 
         /// <summary>
         /// The name of the agent reporting the activity event.
         /// </summary>
-        string Agent { get; set; }
+        string Agent { get; }
 
         /// <summary>
         /// A description of the activity event.
         /// </summary>
-        string EventDescription { get; set; }
+        string? EventDescription { get; }
 
         /// <summary>
         /// A longer, more detailed description of the activity event.
         /// </summary>
-        string EventDetail { get; set; }
+        string? EventDetail { get; }
     }
 }

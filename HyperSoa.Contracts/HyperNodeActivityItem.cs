@@ -31,13 +31,13 @@ namespace HyperSoa.Contracts
         /// A description of the activity event.
         /// </summary>
         [ProtoMember(4)]
-        public string EventDescription { get; set; }
+        public string? EventDescription { get; set; }
 
         /// <summary>
         /// A longer, more detailed description of the activity event.
         /// </summary>
         [ProtoMember(5)]
-        public string EventDetail { get; set; }
+        public string? EventDetail { get; set; }
 
         /// <summary>
         /// A numeric value representing the progress of a command module. This value may be used in conjunction

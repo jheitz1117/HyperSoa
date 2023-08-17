@@ -11,7 +11,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EnableActivityMonitorRequest request)
-                throw new InvalidCommandRequestTypeException(typeof(EnableActivityMonitorRequest), context.Request.GetType());
+                throw new InvalidCommandRequestTypeException(typeof(EnableActivityMonitorRequest), context.Request?.GetType());
 
             var processStatusFlags = MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
             if (HyperNodeService.Instance.IsKnownActivityMonitor(request.ActivityMonitorName))
