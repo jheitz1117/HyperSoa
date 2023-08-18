@@ -11,19 +11,21 @@ namespace HyperSoa.Service
 {
     internal sealed class HyperNodeTaskInfo : ITaskEventContext, IDisposable
     {
-        private readonly Stopwatch _stopwatch;
+        private readonly Stopwatch? _stopwatch;
         private readonly CancellationTokenSource _taskTokenSource;
         private readonly List<Task> _childTasks = new();
+
+        private IDisposable? _logScope;
 
         #region Properties
 
         public string HyperNodeName { get; }
 
-        public string CommandName => Message.CommandName;
+        public string? CommandName => Message.CommandName;
 
         public IReadOnlyHyperNodeMessageInfo MessageInfo => new ReadOnlyHyperNodeMessageInfo(Message);
 
-        public string TaskId
+        public string? TaskId
         {
             get => Response.TaskId;
             set => Response.TaskId = value;
@@ -31,11 +33,11 @@ namespace HyperSoa.Service
 
         public CancellationToken Token => _taskTokenSource.Token;
 
-        public HyperNodeTaskActivityTracker Activity { get; set; }
+        public HyperNodeTaskActivityTracker? Activity { get; set; }
 
         public IConnectableObservable<Unit> TerminatingSequence { get; } = Observable.Return(Unit.Default).Publish();
 
-        public List<HyperNodeActivityObserver> ActivityObservers { get; } = new List<HyperNodeActivityObserver>();
+        public List<HyperNodeActivityObserver> ActivityObservers { get; } = new();
 
         public HyperNodeMessageRequest Message { get; }
 
@@ -47,7 +49,7 @@ namespace HyperSoa.Service
 
         #region Public Methods
 
-        public HyperNodeTaskInfo(string hyperNodeName, CancellationToken masterToken, HyperNodeMessageRequest message, HyperNodeMessageResponse response, bool enableDiagnostics)
+        public HyperNodeTaskInfo(string hyperNodeName, HyperNodeMessageRequest message, HyperNodeMessageResponse response, bool enableDiagnostics, CancellationToken masterToken)
         {
             HyperNodeName = hyperNodeName;
             _taskTokenSource = CancellationTokenSource.CreateLinkedTokenSource(masterToken);
@@ -64,6 +66,11 @@ namespace HyperSoa.Service
                 _stopwatch.Start();
         }
 
+        public void BeginTaskIdLogScope(IDisposable? logScope)
+        {
+            _logScope = logScope;
+        }
+
         /// <summary>
         /// Adds an object to the end of the <see cref="List{T}"/>.
         /// </summary>
@@ -71,15 +78,6 @@ namespace HyperSoa.Service
         public void AddChildTask(Task childTask)
         {
             _childTasks.Add(childTask);
-        }
-
-        /// <summary>
-        /// Adds the elements of the specified collection to the end of the <see cref="List{T}"/>.
-        /// </summary>
-        /// <param name="collection">The collection whose elements should be added to the end of the <see cref="List{T}"/>. The collection itself cannot be null, but it can contain elements that are null.</param>
-        public void AddChildTasks(IEnumerable<Task> collection)
-        {
-            _childTasks.AddRange(collection);
         }
 
         /// <summary>
@@ -140,8 +138,10 @@ namespace HyperSoa.Service
                  * subscribers at this time; I will allow the automatic disposal scheduling to take care of it. That is, when a sequence is completed, it calls Dispose(), and I'm
                  * guaranteeing that the event sequence will always complete.
                  */
+                _taskTokenSource.Dispose();
 
-                _taskTokenSource?.Dispose();
+                // Finally, dispose of our log scope
+                _logScope?.Dispose();
             }
         }
 

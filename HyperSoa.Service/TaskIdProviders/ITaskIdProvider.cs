@@ -20,6 +20,6 @@ namespace HyperSoa.Service.TaskIdProviders
         /// </summary>
         /// <param name="message">The <see cref="IReadOnlyHyperNodeMessageInfo"/> to use.</param>
         /// <returns></returns>
-        string CreateTaskId(IReadOnlyHyperNodeMessageInfo message);
+        string? CreateTaskId(IReadOnlyHyperNodeMessageInfo message);
     }
 }

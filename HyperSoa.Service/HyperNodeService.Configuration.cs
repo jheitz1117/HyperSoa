@@ -8,6 +8,8 @@ using HyperSoa.Service.EventTracking;
 using HyperSoa.Service.Serialization;
 using HyperSoa.Service.TaskIdProviders;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HyperSoa.Service
 {
@@ -25,6 +27,37 @@ namespace HyperSoa.Service
         #endregion Defaults
 
         #region Configuration
+
+        /// <summary>
+        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
+        /// </summary>
+        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
+        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider)
+        {
+            if (_instance == null)
+            {
+                lock (Lock)
+                {
+                    _instance ??= Create(configProvider, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
+        /// </summary>
+        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
+        /// <param name="serviceProvider">The DI <see cref="IServiceProvider"/> to use to create instances of our dynamic types.</param>
+        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider, IServiceProvider serviceProvider)
+        {
+            if (_instance == null)
+            {
+                lock (Lock)
+                {
+                    _instance ??= Create(configProvider, serviceProvider);
+                }
+            }
+        }
 
         private static HyperNodeService Create(IHyperNodeConfigurationProvider configProvider, IServiceProvider? serviceProvider)
         {
@@ -58,6 +91,7 @@ namespace HyperSoa.Service
             var service = new HyperNodeService(config.HyperNodeName)
             {
                 ServiceProvider = serviceProvider,
+                Logger = serviceProvider?.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance,
                 EnableTaskProgressCache = config.EnableTaskProgressCache ?? DefaultTaskProgressCacheEnabled,
                 EnableDiagnostics = config.EnableDiagnostics ?? DefaultDiagnosticsEnabled,
                 TaskProgressCacheDuration = TimeSpan.FromMinutes(config.TaskProgressCacheDurationMinutes ?? DefaultProgressCacheDurationMinutes),
@@ -306,5 +340,41 @@ namespace HyperSoa.Service
         }
         
         #endregion Configuration
+
+        #region Programmatic Configuration
+
+        /// <summary>
+        /// Adds the specified <see cref="Type"/> as an enabled command module with the specified command name. Command modules
+        /// added using this method do not have <see cref="IContractSerializer"/> or <see cref="IContractSerializer"/>
+        /// implementations defined.
+        /// </summary>
+        /// <param name="commandName">The name of the command.</param>
+        /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
+        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType)
+        {
+            AddCommandModuleConfiguration(commandName, commandModuleType, true, null);
+        }
+
+        /// <summary>
+        /// Adds the specified <see cref="Type"/> as a command module with the specified command name and configuration options.
+        /// </summary>
+        /// <param name="commandName">The name of the command.</param>
+        /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
+        /// <param name="enabled">Indicates whether the command will be enabled immediately.</param>
+        /// <param name="contractSerializer">The <see cref="IContractSerializer"/> implementation to use to serialize and deserialize request and response objects. This parameter can be null.</param>
+        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType, bool enabled, IContractSerializer? contractSerializer)
+        {
+            AddCommandModuleConfiguration(
+                new CommandModuleConfiguration
+                {
+                    CommandName = commandName,
+                    CommandModuleType = commandModuleType,
+                    Enabled = enabled,
+                    ContractSerializer = contractSerializer
+                }
+            );
+        }
+
+        #endregion Programmatic Configuration
     }
 }

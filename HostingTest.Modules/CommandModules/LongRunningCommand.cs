@@ -35,7 +35,7 @@ namespace HostingTest.Modules.CommandModules
             _logger.LogDebug($"In {nameof(LongRunningCommand)}");
 
             // This technique allows us to optionally take a command request. If they just want to run the default settings, they can just pass an empty string and we'll supply the default values.
-            if (!(context.Request is ByteArrayRequest byteArrayRequest))
+            if (context.Request is not ByteArrayRequest byteArrayRequest)
                 throw new InvalidCommandRequestTypeException(typeof(ByteArrayRequest), context.Request?.GetType());
             
             // Test if we have a command request string. If we have a non-blank request string, then try to deserialize it
@@ -91,8 +91,6 @@ namespace HostingTest.Modules.CommandModules
                             stopwatch.ElapsedMilliseconds,
                             totalRunTime.TotalMilliseconds
                         );
-
-                        _logger.LogDebug("[command logger] Progress update {prc}", progressReportCount);
                     }
                 }
                 catch (OperationCanceledException)
@@ -112,7 +110,7 @@ namespace HostingTest.Modules.CommandModules
                 // Otherwise, we completed successfully, so show 100%
                 context.Activity.Track(
                     $"Progress update {++progressReportCount}.",
-                totalRunTime.TotalMilliseconds,
+                    totalRunTime.TotalMilliseconds,
                     totalRunTime.TotalMilliseconds
                 );    
             }

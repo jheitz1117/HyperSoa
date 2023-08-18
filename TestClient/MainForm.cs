@@ -11,7 +11,12 @@ namespace TestClient
     public partial class MainForm : Form
     {
         private const string ClientAgentName = "HyperNodeTestClient";
+        
         private const string AliceHttpEndpoint = "http://localhost:8005/HyperNode/AliceLocal00";
+        private const string EveHttpEndpoint1 = "http://localhost:8005/HyperNode/EveLocal00";
+        private const string EveHttpEndpoint2 = "http://localhost:8020/HyperNode/EveLocal01";
+
+        private const string TargetEndpoint = AliceHttpEndpoint;
 
         public MainForm()
         {
@@ -33,7 +38,7 @@ namespace TestClient
                     CommandName = RemoteAdminCommandName.GetNodeStatus
                 };
 
-                var client = new HyperNodeClient(AliceHttpEndpoint);
+                var client = new HyperNodeClient(TargetEndpoint);
                 var response = await client.ProcessMessageAsync(msg);
 
                 if (response.CommandResponseBytes?.Length > 0)
@@ -93,7 +98,7 @@ namespace TestClient
                                              : MessageProcessOptionFlags.None)
                 };
 
-                var client = new HyperNodeClient(AliceHttpEndpoint);
+                var client = new HyperNodeClient(TargetEndpoint);
                 var response = await client.ProcessMessageAsync(msg);
 
                 PopulateResponseSummary(lstRealTimeResponse, response);
@@ -136,7 +141,7 @@ namespace TestClient
                 };
 
                 var cancelSuccess = (
-                    await new HyperNodeClient(AliceHttpEndpoint).ProcessMessageAsync(msg)
+                    await new HyperNodeClient(TargetEndpoint).ProcessMessageAsync(msg)
                 )?.ProcessStatusFlags.HasFlag(
                     MessageProcessStatusFlags.Success
                 ) ?? false;
@@ -261,7 +266,7 @@ namespace TestClient
 
                     var taskProgressInfo = new HyperNodeTaskProgressInfo();
 
-                    var alice = new HyperNodeClient(AliceHttpEndpoint);
+                    var alice = new HyperNodeClient(TargetEndpoint);
                     var serializer = new ProtoContractSerializer<GetCachedTaskProgressInfoRequest, GetCachedTaskProgressInfoResponse>();
                     var request = new HyperNodeMessageRequest
                     {

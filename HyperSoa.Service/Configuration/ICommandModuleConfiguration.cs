@@ -12,13 +12,13 @@ namespace HyperSoa.Service.Configuration
         /// <summary>
         /// The name of the user-defined <see cref="ICommandModule"/> object. This property is required.
         /// </summary>
-        string CommandName { get; }
+        string? CommandName { get; }
 
         /// <summary>
         /// The assembly qualified name of a type that implements <see cref="ICommandModule"/>.
         /// This property is required.
         /// </summary>
-        string CommandModuleType { get; }
+        string? CommandModuleType { get; }
 
         /// <summary>
         /// Indicates whether the user-defined <see cref="ICommandModule"/> object will be enabled when the <see cref="IHyperNodeService"/> starts.

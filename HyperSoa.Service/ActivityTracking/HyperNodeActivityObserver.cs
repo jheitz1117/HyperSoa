@@ -11,7 +11,7 @@ namespace HyperSoa.Service.ActivityTracking
     internal sealed class HyperNodeActivityObserver : IObserver<IHyperNodeActivityEventItem>, IDisposable
     {
         private readonly HyperNodeServiceActivityMonitor _underlyingMonitor;
-        private readonly ITaskActivityTracker _activity;
+        private readonly ITaskActivityTracker? _activity;
         private readonly IDisposable? _subscription;
         private readonly IScheduler _scheduler;
         private bool _isDisposed;
@@ -35,7 +35,7 @@ namespace HyperSoa.Service.ActivityTracking
                         catch (Exception ex)
                         {
                             // This is legal at this point because we already subscribed our cache and task trace monitors earlier
-                            _activity.TrackException(
+                            _activity?.TrackException(
                                 new ActivityMonitorException(
                                     $"Unable to subscribe activity monitor '{underlyingMonitor.Name}' because its {nameof(HyperNodeServiceActivityMonitor.ShouldTrack)}() method threw an exception.",
                                     ex
@@ -66,7 +66,7 @@ namespace HyperSoa.Service.ActivityTracking
                     _scheduler.Schedule(() => disposableScheduler.Dispose());
 
                 // Tattle to everyone else and alert the other observers of what the original problem was
-                _activity.TrackException(
+                _activity?.TrackException(
                     new ActivityMonitorException(
                         $"Activity monitor with {nameof(_underlyingMonitor.Name)} '{_underlyingMonitor.Name}' of type '{_underlyingMonitor.GetType().FullName}' threw an exception while attempting to track an activity event. The monitor has been unsubscribed and will not receive any additional notifications. See the {nameof(HyperNodeActivityItem.EventDetail)} property for details.",
                         ex

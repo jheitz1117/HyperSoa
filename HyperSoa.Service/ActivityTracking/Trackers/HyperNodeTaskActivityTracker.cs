@@ -1,15 +1,31 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Service.EventTracking;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HyperSoa.Service.ActivityTracking.Trackers
 {
-    internal sealed class HyperNodeTaskActivityTracker : HyperActivityTracker, ITaskActivityTracker
+    /// <summary>
+    /// Delegate to handle events fired by <see cref="HyperNodeTaskActivityTracker"/>.
+    /// </summary>
+    /// <param name="sender">The object that fired the event.</param>
+    /// <param name="e">The <see cref="TrackActivityEventArgs"/> object containing the event data.</param>
+    internal delegate void TrackActivityEventHandler(object sender, TrackActivityEventArgs e);
+
+    internal sealed class HyperNodeTaskActivityTracker : ITaskActivityTracker
     {
+        private readonly object _lock = new();
         private readonly ITaskEventContext _taskContext;
         private readonly IHyperNodeEventHandler _eventHandler;
         private readonly Action _cancelTaskAction;
+        private readonly ILogger<HyperNodeService> _serviceLogger;
 
-        public HyperNodeTaskActivityTracker(ITaskEventContext taskContext, IHyperNodeEventHandler eventHandler, Action cancelTaskAction)
+        /// <summary>
+        /// Allows consumers to respond to activity events.
+        /// </summary>
+        public event TrackActivityEventHandler TrackActivityHandler = (_, _) => { };
+
+        public HyperNodeTaskActivityTracker(ITaskEventContext taskContext, IHyperNodeEventHandler eventHandler, Action cancelTaskAction, ILogger<HyperNodeService> serviceLogger)
         {
             _taskContext = taskContext;
             _eventHandler = eventHandler;
@@ -18,6 +34,7 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
                 Track("Task cancellation requested from user-defined code.");
                 cancelTaskAction();
             };
+            _serviceLogger = serviceLogger;
         }
 
         public void TrackTaskStarted()
@@ -142,5 +159,25 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
         }
 
         #endregion ITaskActivityTracker Implementation
+
+        #region Private Methods
+
+        /// <summary>
+        /// Fires an event containing the specified <see cref="TrackActivityEventArgs"/> object.
+        /// </summary>
+        /// <param name="e">The <see cref="TrackActivityEventArgs"/> data for the event.</param>
+        private void OnTrackActivity(TrackActivityEventArgs e)
+        {
+            TrackActivityEventHandler handler;
+            lock (_lock)
+            {
+                handler = TrackActivityHandler;
+            }
+
+            _serviceLogger.LogTrace("{m}", e.ActivityItem.EventDescription);
+            handler.Invoke(this, e);
+        }
+
+        #endregion Private Methods
     }
 }

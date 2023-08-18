@@ -16,7 +16,7 @@ namespace HyperSoa.Service.EventTracking
         /// <summary>
         /// The name of the command being executed.
         /// </summary>
-        string CommandName { get; }
+        string? CommandName { get; }
 
         /// <summary>
         /// The message being processed by the current task.
@@ -26,7 +26,7 @@ namespace HyperSoa.Service.EventTracking
         /// <summary>
         /// The Task ID for the current task.
         /// </summary>
-        string TaskId { get; }
+        string? TaskId { get; }
 
         /// <summary>
         /// The amount of time which has elapsed since the task was started. If the <see cref="IHyperNodeService"/> has diagnostics turned off,

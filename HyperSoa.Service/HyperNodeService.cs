@@ -61,6 +61,7 @@ namespace HyperSoa.Service
         }
 
         private IServiceProvider? ServiceProvider { get; init; }
+        private ILogger<HyperNodeService> Logger { get; init; } = NullLogger<HyperNodeService>.Instance;
         private ITaskIdProvider TaskIdProvider { get; set; } = DefaultTaskIdProvider;
         private IHyperNodeEventHandler EventHandler { get; set; } = DefaultEventHandler;
         internal bool EnableDiagnostics { get; set; }
@@ -93,6 +94,13 @@ namespace HyperSoa.Service
         /// <returns></returns>
         public async Task<HyperNodeMessageResponse> ProcessMessageAsync(HyperNodeMessageRequest message)
         {
+            Logger.LogTrace($"In {nameof(ProcessMessageAsync)}.");
+            Logger.LogTrace($"{nameof(HyperNodeMessageRequest)} Values:");
+            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CommandName)}", message.CommandName == null ? "<null>" : $"\"{message.CommandName}\"");
+            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.ProcessOptionFlags)}", message.ProcessOptionFlags);
+            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CreatedByAgentName)}", message.CreatedByAgentName == null ? "<null>" : $"\"{message.CreatedByAgentName}\"");
+            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CommandRequestBytes)}", message.CommandRequestBytes?.Length.ToString("Array (Count: #)") ?? "<null>");
+
             var response = new HyperNodeMessageResponse
             {
                 RespondingNodeName = HyperNodeName,
@@ -101,18 +109,29 @@ namespace HyperSoa.Service
                 ProcessStatusFlags = MessageProcessStatusFlags.None
             };
 
-            var currentTaskInfo = new HyperNodeTaskInfo(HyperNodeName, _masterTokenSource.Token, message, response, message.TaskTraceRequested() || EnableDiagnostics);
+            var currentTaskInfo = new HyperNodeTaskInfo(
+                HyperNodeName,
+                message,
+                response,
+                message.TaskTraceRequested() || EnableDiagnostics,
+                _masterTokenSource.Token
+            );
 
             // Start our task-level stopwatch to track total time. If diagnostics are disabled, calling this method has no effect.
             currentTaskInfo.StartStopwatch();
 
             // This tracker is used to temporarily store activity event items until we know what to do with them
             var queueTracker = new TaskActivityQueueTracker(currentTaskInfo);
+            
+            // We'll set the task trace a few different ways, but the logic determining whether it's returned in the response appears at the end of this method
+            HyperNodeActivityItem[]? taskTrace = null;
 
             // Check if we should reject this request
+            Logger.LogTrace("Analyzing request for acceptance or rejection.");
             var rejectionReason = GetRejectionReason(currentTaskInfo, queueTracker);
             if (rejectionReason.HasValue)
             {
+                Logger.LogTrace("Rejecting request. Rejection reason: {r}", rejectionReason);
                 response.NodeAction = HyperNodeActionType.Rejected;
                 response.NodeActionReason = rejectionReason.Value;
                 response.ProcessStatusFlags = MessageProcessStatusFlags.Cancelled;
@@ -123,16 +142,24 @@ namespace HyperSoa.Service
                 // of the response object and send that back so the caller knows what happened.
                 if (queueTracker.Count > 0)
                 {
-                    response.TaskTrace = queueTracker.Select(
-                        activityItem => new HyperNodeActivityItem
+                    Logger.LogTrace("Constructing task trace for rejected request from queued activity items.");
+
+                    taskTrace = queueTracker.Select(
+                        activityItem =>
                         {
-                            Agent = activityItem.Agent,
-                            EventDateTime = activityItem.EventDateTime,
-                            EventDetail = activityItem.EventDetail,
-                            EventDescription = activityItem.EventDescription,
-                            ProgressPart = activityItem.ProgressPart,
-                            ProgressTotal = activityItem.ProgressTotal,
-                            Elapsed = activityItem.Elapsed
+                            // These activity items would never be logged if they weren't logged here
+                            Logger.LogTrace("{m}", activityItem.EventDescription);
+
+                            return new HyperNodeActivityItem
+                            {
+                                Agent = activityItem.Agent,
+                                EventDateTime = activityItem.EventDateTime,
+                                EventDetail = activityItem.EventDetail,
+                                EventDescription = activityItem.EventDescription,
+                                ProgressPart = activityItem.ProgressPart,
+                                ProgressTotal = activityItem.ProgressTotal,
+                                Elapsed = activityItem.Elapsed
+                            };
                         }
                     ).ToArray();
                 }
@@ -143,8 +170,16 @@ namespace HyperSoa.Service
             }
             else
             {
+                var taskTraceMonitor = new TaskTraceMonitor();
+
+                // This node accepts responsibility for processing this message
+                response.NodeAction = HyperNodeActionType.Accepted;
+                response.NodeActionReason = HyperNodeActionReasonType.ValidMessage;
+                Logger.LogTrace("Request accepted.");
+
                 // Initialize our activity tracker so we can track progress
-                var taskTraceMonitor = InitializeActivityTracker(currentTaskInfo);
+                Logger.LogTrace("Initializing activity tracker.");
+                InitializeActivityTracker(currentTaskInfo, taskTraceMonitor);
 
                 // Now that we've setup our "real" activity tracker, let's report all the activity we've stored up until now
                 while (queueTracker.Count > 0)
@@ -155,23 +190,27 @@ namespace HyperSoa.Service
                         activityItem.TaskId = currentTaskInfo.TaskId;
 
                     // Now track it verbatim (all info is preserved, i.e. the original date/time of the event and other properties)
-                    currentTaskInfo.Activity.TrackActivityVerbatim(activityItem);
+                    currentTaskInfo.Activity?.TrackActivityVerbatim(activityItem);
                 }
 
                 #region Process Message
 
                 try
                 {
+                    if (currentTaskInfo.TaskId != null)
+                    {
+                        currentTaskInfo.BeginTaskIdLogScope(
+                            Logger.BeginScope(currentTaskInfo.TaskId)
+                        );
+                    }
+
                     // Track that we've started a task to process the message.
-                    currentTaskInfo.Activity.TrackTaskStarted();
+                    currentTaskInfo.Activity?.TrackTaskStarted();
 
                     // Check if user cancelled the message in the OnTaskStarted event
                     currentTaskInfo.Token.ThrowIfCancellationRequested();
-
-                    // This node accepts responsibility for processing this message
-                    response.NodeAction = HyperNodeActionType.Accepted;
-                    response.NodeActionReason = HyperNodeActionReasonType.ValidMessage;
-                    currentTaskInfo.Activity.Track("Attempting to process message...");
+                    
+                    currentTaskInfo.Activity?.Track("Attempting to process message...");
 
                     // Define the method in a safe way (i.e. with a try/catch around it)
                     var processMessageInternalSafe = new Func<HyperNodeTaskInfo, Task>(
@@ -191,11 +230,11 @@ namespace HyperSoa.Service
                                 if (ex is InvalidCommandRequestTypeException)
                                     args.Response.ProcessStatusFlags |= MessageProcessStatusFlags.InvalidCommandRequest;
 
-                                args.Activity.TrackException(ex);
+                                args.Activity?.TrackException(ex);
                             }
                             finally
                             {
-                                args.Activity.TrackMessageProcessed();
+                                args.Activity?.TrackMessageProcessed();
                             }
                         }
                     );
@@ -244,83 +283,24 @@ namespace HyperSoa.Service
                     else
                         response.ProcessStatusFlags = MessageProcessStatusFlags.Failure;
 
-                    currentTaskInfo.Activity.TrackException(ex);
+                    currentTaskInfo.Activity?.TrackException(ex);
 
                     // Make sure we clean up our task if any exceptions were thrown
                     TaskCleanUp(currentTaskInfo.TaskId);
                 }
 
-                // Immediate responses for async tasks don't get task traces (they'll be added later when the async task completes).
-                if (currentTaskInfo.Message.TaskTraceRequested() && !currentTaskInfo.Message.ConcurrentRunRequested())
-                    response.TaskTrace = taskTraceMonitor.GetTaskTrace();
+                // Wait until the very end to set this array to make sure we snag every activity item
+                taskTrace = taskTraceMonitor.GetTaskTrace();
 
                 #endregion Process Message
             }
 
+            // Immediate responses for async tasks don't get task traces (they'll be added later when the async task completes).
+            if (currentTaskInfo.Message.TaskTraceRequested() && !currentTaskInfo.Message.ConcurrentRunRequested())
+                response.TaskTrace = taskTrace;
+
+            Logger.LogTrace($"Returning from {nameof(ProcessMessageAsync)}.");
             return response;
-        }
-
-        /// <summary>
-        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
-        /// </summary>
-        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
-        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider)
-        {
-            if (_instance == null)
-            {
-                lock (Lock)
-                {
-                    _instance ??= Create(configProvider, null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
-        /// </summary>
-        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
-        /// <param name="serviceProvider">The DI <see cref="IServiceProvider"/> to use to create instances of our dynamic types.</param>
-        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider, IServiceProvider serviceProvider)
-        {
-            if (_instance == null)
-            {
-                lock (Lock)
-                {
-                    _instance ??= Create(configProvider, serviceProvider);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adds the specified <see cref="Type"/> as an enabled command module with the specified command name. Command modules
-        /// added using this method do not have <see cref="IContractSerializer"/> or <see cref="IContractSerializer"/>
-        /// implementations defined.
-        /// </summary>
-        /// <param name="commandName">The name of the command.</param>
-        /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
-        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType)
-        {
-            AddCommandModuleConfiguration(commandName, commandModuleType, true, null);
-        }
-
-        /// <summary>
-        /// Adds the specified <see cref="Type"/> as a command module with the specified command name and configuration options.
-        /// </summary>
-        /// <param name="commandName">The name of the command.</param>
-        /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
-        /// <param name="enabled">Indicates whether the command will be enabled immediately.</param>
-        /// <param name="contractSerializer">The <see cref="IContractSerializer"/> implementation to use to serialize and deserialize request and response objects. This parameter can be null.</param>
-        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType, bool enabled, IContractSerializer? contractSerializer)
-        {
-            AddCommandModuleConfiguration(
-                new CommandModuleConfiguration
-                {
-                    CommandName = commandName,
-                    CommandModuleType = commandModuleType,
-                    Enabled = enabled,
-                    ContractSerializer = contractSerializer
-                }
-            );
         }
 
         /// <summary>
@@ -417,16 +397,15 @@ namespace HyperSoa.Service
             HyperNodeName = hyperNodeName;
         }
 
-        private TaskTraceMonitor InitializeActivityTracker(HyperNodeTaskInfo currentTaskInfo)
+        private void InitializeActivityTracker(HyperNodeTaskInfo currentTaskInfo, TaskTraceMonitor taskTraceMonitor)
         {
-            var taskTraceMonitor = new TaskTraceMonitor();
-
             currentTaskInfo.Activity = new HyperNodeTaskActivityTracker(
                 currentTaskInfo,
                 EventHandler,
 
                 // Possible user actions
-                currentTaskInfo.Cancel
+                currentTaskInfo.Cancel,
+                Logger
             );
 
             try
@@ -448,7 +427,10 @@ namespace HyperSoa.Service
                  * activity.
                  *****************************************************************************************************************/
                 if (EnableTaskProgressCache && currentTaskInfo.Message.ProgressCacheRequested())
+                {
+                    Logger.LogTrace("Adding task progress cache monitor.");
                     systemActivityMonitors.Add(_taskProgressCacheMonitor);
+                }
 
                 /*****************************************************************************************************************
                  * If a task trace was requested, then we'll go ahead and honor it, but we will treat it differently depending
@@ -459,11 +441,15 @@ namespace HyperSoa.Service
                  * include the task trace.
                  *****************************************************************************************************************/
                 if (currentTaskInfo.Message.TaskTraceRequested())
+                {
+                    Logger.LogTrace("Adding task trace monitor.");
                     systemActivityMonitors.Add(taskTraceMonitor);
+                }
 
                 /*****************************************************************************************************************
                  * Subscribe our system activity monitors to the event stream first
                  *****************************************************************************************************************/
+                Logger.LogTrace("Subscribing built-in activity monitors to activity tracker (Count: {c}).", systemActivityMonitors.Count);
                 currentTaskInfo.ActivityObservers.AddRange(
                     systemActivityMonitors.Select(
                         monitor => new HyperNodeActivityObserver(
@@ -490,6 +476,7 @@ namespace HyperSoa.Service
                  * that we have to introduce some concurrency, then the caller can just indicate in the request object to run the task concurrently, so that the
                  * extra time consumed by the activity monitors is absorbed into the more general task thread.
                  *****************************************************************************************************************/
+                Logger.LogTrace("Subscribing custom activity monitors to activity tracker (Count: {c}).", _customActivityMonitors.Count);
                 currentTaskInfo.ActivityObservers.AddRange(
                     _customActivityMonitors.Where(
                         m => m.Enabled // Only add the monitors that are enabled
@@ -513,8 +500,6 @@ namespace HyperSoa.Service
                     )
                 );
             }
-
-            return taskTraceMonitor;
         }
 
         private HyperNodeActionReasonType? GetRejectionReason(HyperNodeTaskInfo taskInfo, ITaskActivityTracker queueTracker)
@@ -585,6 +570,8 @@ namespace HyperSoa.Service
                     {
                         // Try to use our custom task ID provider
                         taskId = TaskIdProvider.CreateTaskId(taskInfo.MessageInfo);
+
+                        Logger.LogTrace("Generated TaskID: {tid}", taskId == null ? "<null>" : $"'{taskId}'");
                     }
                     catch (Exception ex)
                     {
@@ -664,6 +651,10 @@ namespace HyperSoa.Service
                 }
 
                 var loggerFactory = ServiceProvider?.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
+                var commandLogger = loggerFactory.CreateLogger(commandModuleConfig.CommandModuleType);
+
+                TrackActivityEventHandler commandActivityHandler = (_, e) => commandLogger.LogTrace("{m}", e.ActivityItem.EventDescription);
+
                 try
                 {
                     // Create the execution context to pass into our module
@@ -676,9 +667,13 @@ namespace HyperSoa.Service
                         ProcessOptionFlags = args.Message.ProcessOptionFlags,
                         Request = commandRequest,
                         Activity = args.Activity,
-                        Logger = loggerFactory.CreateLogger(commandModuleConfig.CommandModuleType),
+                        Logger = commandLogger,
                         Token = args.Token
                     };
+
+                    // Subscribe our command activity handler to the activity feed
+                    if (args.Activity != null)
+                        args.Activity.TrackActivityHandler += commandActivityHandler;
 
                     // Execute the command
                     commandResponse = commandInstance switch
@@ -693,6 +688,10 @@ namespace HyperSoa.Service
                 }
                 finally
                 {
+                    // Unsubscribe our command activity handler from any further updates
+                    if (args.Activity != null)
+                        args.Activity.TrackActivityHandler -= commandActivityHandler;
+
                     // Check if our module is disposable and take care of it appropriately
                     (commandInstance as IDisposable)?.Dispose();
                 }
@@ -704,7 +703,7 @@ namespace HyperSoa.Service
                     MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommand
                 ).ToEmptyCommandResponse();
 
-                args.Activity.Track($"Fatal error: Invalid {nameof(args.Message.CommandName)} '{args.Message.CommandName}'.");
+                args.Activity?.Track($"Invalid {nameof(args.Message.CommandName)} '{args.Message.CommandName}'.");
             }
 
             // Make sure we report cancellation if it was requested
@@ -734,10 +733,10 @@ namespace HyperSoa.Service
         /// Removes the task with the specified <paramref name="taskId"/> from the internal dictionary of tasks and calls Dispose() on it.
         /// </summary>
         /// <param name="taskId">The ID of the task to clean up.</param>
-        private void TaskCleanUp(string taskId)
+        private void TaskCleanUp(string? taskId)
         {
             // Remove our task info and dispose of it
-            if (_liveTasks.TryRemove(taskId, out var taskInfo))
+            if (taskId != null && _liveTasks.TryRemove(taskId, out var taskInfo))
                 taskInfo.Dispose();
         }
 
