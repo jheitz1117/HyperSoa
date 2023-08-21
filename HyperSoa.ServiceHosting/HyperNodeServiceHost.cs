@@ -1,5 +1,6 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.ServiceHosting.Configuration;
+using HyperSoa.ServiceHosting.Interop;
 using Microsoft.Extensions.Logging;
 
 namespace HyperSoa.ServiceHosting
@@ -12,18 +13,33 @@ namespace HyperSoa.ServiceHosting
         {
             var channels = new List<IHyperNodeChannel>();
 
-            var httpBindings = configProvider.GetHttpEndpoints().ToArray();
-            var tcpBindings = configProvider.GetTcpEndpoints().ToArray();
+            var hostConfig = configProvider.GetConfiguration();
+
+            var httpBindings = hostConfig?.GetHttpEndpoints().ToArray() ?? Array.Empty<IHyperNodeHttpEndpoint>();
+            var tcpBindings = hostConfig?.GetTcpEndpoints().ToArray() ?? Array.Empty<IHyperNodeTcpEndpoint>();
 
             if (httpBindings.Any())
             {
-                channels.Add(
-                    new HyperNodeHttpChannel(
+                IHyperNodeChannel httpChannel;
+
+                if (hostConfig?.UseInteropHttpChannel ?? false)
+                {
+                    httpChannel = new HyperNodeInteropHttpChannel(
+                        httpBindings,
+                        serviceInstance,
+                        loggerFactory.CreateLogger<HyperNodeInteropHttpChannel>()
+                    );
+                }
+                else
+                {
+                    httpChannel = new HyperNodeHttpChannel(
                         httpBindings,
                         serviceInstance,
                         loggerFactory.CreateLogger<HyperNodeHttpChannel>()
-                    )
-                );
+                    );
+                }
+                
+                channels.Add(httpChannel);
             }
 
             if (tcpBindings.Any())

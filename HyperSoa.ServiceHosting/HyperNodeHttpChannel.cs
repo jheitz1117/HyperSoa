@@ -8,16 +8,16 @@ namespace HyperSoa.ServiceHosting
     internal class HyperNodeHttpChannel : IHyperNodeChannel
     {
         private readonly IHyperNodeHttpEndpoint[] _httpEndpoints;
-        private readonly IHyperNodeService _serviceInstance;
-        private readonly ILogger<HyperNodeHttpChannel>? _logger;
+        private readonly ILogger<HyperNodeHttpChannel> _logger;
         private readonly HttpListener _listener;
 
+        protected IHyperNodeService ServiceInstance { get; }
         public IEnumerable<string> Endpoints => _listener.Prefixes;
 
-        public HyperNodeHttpChannel(IHyperNodeHttpEndpoint[] httpBindings, IHyperNodeService serviceInstance, ILogger<HyperNodeHttpChannel>? logger)
+        public HyperNodeHttpChannel(IHyperNodeHttpEndpoint[] httpBindings, IHyperNodeService serviceInstance, ILogger<HyperNodeHttpChannel> logger)
         {
             _httpEndpoints = httpBindings ?? throw new ArgumentNullException(nameof(httpBindings));
-            _serviceInstance = serviceInstance ?? throw new ArgumentNullException(nameof(serviceInstance));
+            ServiceInstance = serviceInstance ?? throw new ArgumentNullException(nameof(serviceInstance));
             _logger = logger;
 
             _listener = new HttpListener();
@@ -60,9 +60,9 @@ namespace HyperSoa.ServiceHosting
 
         #endregion Public Methods
 
-        #region Private Methods
+        #region Protected Methods
 
-        private async Task ProcessRequestAsync(HttpListenerContext httpContext)
+        protected virtual async Task ProcessRequestAsync(HttpListenerContext httpContext)
         {
             byte[] responseBytes;
 
@@ -72,7 +72,7 @@ namespace HyperSoa.ServiceHosting
                     httpContext.Request.InputStream
                 ) ?? throw new Exception("Invalid request message");
 
-                var hyperResp = await _serviceInstance.ProcessMessageAsync(
+                var hyperResp = await ServiceInstance.ProcessMessageAsync(
                     request
                 ).ConfigureAwait(false);
 
@@ -86,7 +86,7 @@ namespace HyperSoa.ServiceHosting
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "An exception was thrown while attempting to process a HyperNode message over HTTP.");
+                _logger.LogError(ex, "An exception was thrown while attempting to process a HyperNode message over HTTP.");
 
                 var errorResponse = new HyperNodeMessageResponse
                 {
@@ -115,6 +115,6 @@ namespace HyperSoa.ServiceHosting
             httpContext.Response.Close();
         }
 
-        #endregion Private Methods
+        #endregion Protected Methods
     }
 }
