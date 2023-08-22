@@ -27,7 +27,7 @@ namespace HyperSoa.Service
     {
         #region Defaults
 
-        private static readonly IContractSerializer DefaultContractSerializer = new NoOpContractSerializer();
+        private static readonly IServiceContractSerializer DefaultContractSerializer = new NoOpContractSerializer();
         private static readonly IHyperNodeConfigurationProvider DefaultConfigurationProvider = new InMemoryHyperNodeConfigurationProvider();
 
         #endregion Defaults
@@ -627,10 +627,10 @@ namespace HyperSoa.Service
                     ? ActivatorUtilities.CreateInstance(ServiceProvider, commandModuleConfig.CommandModuleType)
                     : Activator.CreateInstance(commandModuleConfig.CommandModuleType);
 
-                IContractSerializer? contractSerializer = null;
+                IServiceContractSerializer? contractSerializer = null;
 
                 // Use the factories to create serializers, if applicable
-                if (commandInstance is IContractSerializerFactory contractSerializerFactory)
+                if (commandInstance is IServiceContractSerializerFactory contractSerializerFactory)
                     contractSerializer = contractSerializerFactory.Create();
 
                 // Allow the command module factory-created serializers to take precedence over the configured serializers

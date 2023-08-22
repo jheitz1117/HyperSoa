@@ -6,7 +6,7 @@ using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class EnableDiagnosticsCommand : ICommandModule, IContractSerializerFactory
+    internal class EnableDiagnosticsCommand : ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -19,7 +19,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             return MessageProcessStatusFlags.Success.ToEmptyCommandResponse();
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
             return new ProtoContractSerializer<EnableDiagnosticsRequest, EmptyCommandResponse>();
         }

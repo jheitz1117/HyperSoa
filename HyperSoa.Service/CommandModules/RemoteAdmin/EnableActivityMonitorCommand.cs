@@ -6,7 +6,7 @@ using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class EnableActivityMonitorCommand : ICommandModule, IContractSerializerFactory
+    internal class EnableActivityMonitorCommand : ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -31,7 +31,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             return processStatusFlags.ToEmptyCommandResponse();
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
             return new ProtoContractSerializer<EnableActivityMonitorRequest, EmptyCommandResponse>();
         }

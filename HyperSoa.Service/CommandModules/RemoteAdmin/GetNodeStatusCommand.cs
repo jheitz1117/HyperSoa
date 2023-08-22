@@ -4,7 +4,7 @@ using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class GetNodeStatusCommand : ICommandModule, IContractSerializerFactory
+    internal class GetNodeStatusCommand : ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -23,7 +23,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             };
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
             return new ProtoContractSerializer<ICommandRequest, GetNodeStatusResponse>();
         }

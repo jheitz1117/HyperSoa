@@ -6,7 +6,7 @@ using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class GetCachedTaskProgressInfoCommand : ICommandModule, IContractSerializerFactory
+    internal class GetCachedTaskProgressInfoCommand : ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -49,7 +49,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             return response;
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
             return new ProtoContractSerializer<GetCachedTaskProgressInfoRequest, GetCachedTaskProgressInfoResponse>();
         }

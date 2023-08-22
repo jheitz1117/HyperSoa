@@ -5,16 +5,18 @@ using HyperSoa.Client.Serialization;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Contracts.RemoteAdmin.Models;
+using TestClient.Serialization;
 
 namespace TestClient
 {
     public partial class MainForm : Form
     {
         private const string ClientAgentName = "HyperNodeTestClient";
-        
-        private const string AliceHttpEndpoint = "http://localhost:8005/HyperNode/AliceLocal00";
-        private const string EveHttpEndpoint1 = "http://localhost:8005/HyperNode/EveLocal00";
-        private const string EveHttpEndpoint2 = "http://localhost:8020/HyperNode/EveLocal01";
+
+        private const bool EnableFiddler = false;
+        private const string AliceHttpEndpoint = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8005/HyperNode/AliceLocal00";
+        private const string EveHttpEndpoint1 = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8005/HyperNode/EveLocal00";
+        private const string EveHttpEndpoint2 = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8020/HyperNode/EveLocal01";
 
         private const string TargetEndpoint = AliceHttpEndpoint;
 
@@ -72,13 +74,14 @@ namespace TestClient
                 ClearResponseData();
 
                 // Create our message request
-                var serializer = new ProtoContractSerializer<LongRunningCommandRequest, EmptyCommandResponse>();
+                var serializer = new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>();
                 var commandRequestBytes = serializer.SerializeRequest(
-                    new LongRunningCommandRequest
+                    new ComplexCommandRequest
                     {
-                        TotalRunTime = TimeSpan.FromHours(1),
-                        MinimumSleepInterval = TimeSpan.FromSeconds(1),
-                        MaximumSleepInterval = TimeSpan.FromSeconds(5)
+                        MyDateTime = new DateTime(2002, 4, 12),
+                        MyInt32 = 1000,
+                        MyString = "My String!",
+                        MyTimeSpan = TimeSpan.FromMinutes(17)
                     }
                 );
 

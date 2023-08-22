@@ -5,7 +5,7 @@ using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class EchoCommand : ICommandModule, IContractSerializerFactory
+    internal class EchoCommand : ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -23,7 +23,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             };
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
             return new ProtoContractSerializer<EchoRequest, EchoResponse>();
         }

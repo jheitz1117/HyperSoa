@@ -2,13 +2,13 @@
 
 namespace HyperSoa.Service.Serialization
 {
-    public sealed class ProtoContractSerializer<TRequest, TResponse> : IContractSerializer<TRequest, TResponse>
+    public sealed class ProtoContractSerializer<TRequest, TResponse> : IServiceContractSerializer<TRequest, TResponse>
         where TRequest : ICommandRequest
         where TResponse : ICommandResponse
     {
         #region Public Methods
 
-        ICommandRequest? IContractSerializer.DeserializeRequest(byte[]? requestBytes)
+        ICommandRequest? IServiceContractSerializer.DeserializeRequest(byte[]? requestBytes)
         {
             return DeserializeRequest(requestBytes);
         }

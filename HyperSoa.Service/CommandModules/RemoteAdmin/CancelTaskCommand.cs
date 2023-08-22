@@ -6,7 +6,7 @@ using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
-    internal class CancelTaskCommand : ICommandModule, IContractSerializerFactory
+    internal class CancelTaskCommand : ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -23,7 +23,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             ).ToEmptyCommandResponse();
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
             return new ProtoContractSerializer<CancelTaskRequest, EmptyCommandResponse>();
         }

@@ -26,7 +26,7 @@ namespace HyperSoa.Service.Configuration
         bool Enabled { get; }
 
         /// <summary>
-        /// The assembly qualified name of a type that implements <see cref="IContractSerializer{TRequest,TResponse}"/>. If this property is
+        /// The assembly qualified name of a type that implements <see cref="IServiceContractSerializer{TRequest,TResponse}"/>. If this property is
         /// not supplied, the collection-level default is used instead. If no collection-level default was specified, then the
         /// <see cref="IHyperNodeService"/> chooses a default implementation to use.
         /// </summary>

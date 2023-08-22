@@ -291,15 +291,15 @@ namespace HyperSoa.Service
                     // Our final configuration allows command-level serializer types to take precedence, if available. Otherwise, the collection-level types are used.
                     var configContractSerializerType = commandContractSerializerType ?? collectionContractSerializerType;
 
-                    IContractSerializer? configContractSerializer = null;
+                    IServiceContractSerializer? configContractSerializer = null;
 
                     // Attempt construction of config-level serializer types
                     if (configContractSerializerType != null)
                     {
                         if (serviceProvider != null)
-                            configContractSerializer = (IContractSerializer)ActivatorUtilities.CreateInstance(serviceProvider, configContractSerializerType);
+                            configContractSerializer = (IServiceContractSerializer)ActivatorUtilities.CreateInstance(serviceProvider, configContractSerializerType);
                         else
-                            configContractSerializer = (IContractSerializer?)Activator.CreateInstance(configContractSerializerType);
+                            configContractSerializer = (IServiceContractSerializer?)Activator.CreateInstance(configContractSerializerType);
                     }
 
                     // Finally, construct our command module configuration
@@ -345,7 +345,7 @@ namespace HyperSoa.Service
 
         /// <summary>
         /// Adds the specified <see cref="Type"/> as an enabled command module with the specified command name. Command modules
-        /// added using this method do not have <see cref="IContractSerializer"/> or <see cref="IContractSerializer"/>
+        /// added using this method do not have <see cref="IServiceContractSerializer"/> or <see cref="IServiceContractSerializer"/>
         /// implementations defined.
         /// </summary>
         /// <param name="commandName">The name of the command.</param>
@@ -361,8 +361,8 @@ namespace HyperSoa.Service
         /// <param name="commandName">The name of the command.</param>
         /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
         /// <param name="enabled">Indicates whether the command will be enabled immediately.</param>
-        /// <param name="contractSerializer">The <see cref="IContractSerializer"/> implementation to use to serialize and deserialize request and response objects. This parameter can be null.</param>
-        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType, bool enabled, IContractSerializer? contractSerializer)
+        /// <param name="contractSerializer">The <see cref="IServiceContractSerializer"/> implementation to use to serialize and deserialize request and response objects. This parameter can be null.</param>
+        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType, bool enabled, IServiceContractSerializer? contractSerializer)
         {
             AddCommandModuleConfiguration(
                 new CommandModuleConfiguration

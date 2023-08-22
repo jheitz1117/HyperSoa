@@ -6,7 +6,7 @@ namespace HyperSoa.Client.Serialization
     /// Provides methods to serialize <see cref="ICommandRequest"/> objects and
     /// deserialize <see cref="ICommandResponse"/> objects.
     /// </summary>
-    public interface IContractSerializer
+    public interface IClientContractSerializer
     {
         /// <summary>
         /// Serializes the specified <see cref="ICommandRequest"/> object into a byte array.

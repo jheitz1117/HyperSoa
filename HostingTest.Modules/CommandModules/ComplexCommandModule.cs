@@ -2,10 +2,11 @@
 using HyperSoa.Service.CommandModules;
 using HyperSoa.Service.Serialization;
 using HostingTest.Contracts;
+using HostingTest.Modules.Serialization;
 
 namespace HostingTest.Modules.CommandModules
 {
-    internal class ComplexCommandModule: ICommandModule, IContractSerializerFactory
+    internal class ComplexCommandModule: ICommandModule, IServiceContractSerializerFactory
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
@@ -33,9 +34,9 @@ namespace HostingTest.Modules.CommandModules
             };
         }
 
-        public IContractSerializer Create()
+        public IServiceContractSerializer Create()
         {
-            return new ProtoContractSerializer<ComplexCommandRequest, ComplexCommandResponse>();
+            return new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>();
         }
     }
 }

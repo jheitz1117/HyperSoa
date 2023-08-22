@@ -2,7 +2,7 @@
 
 namespace HyperSoa.Client.Serialization
 {
-    public sealed class ProtoContractSerializer<TRequest, TResponse> : IContractSerializer<TRequest, TResponse>
+    public sealed class ProtoContractSerializer<TRequest, TResponse> : IClientContractSerializer<TRequest, TResponse>
         where TRequest : ICommandRequest
         where TResponse : ICommandResponse
     {
@@ -18,7 +18,7 @@ namespace HyperSoa.Client.Serialization
             return Serialize(request);
         }
 
-        ICommandResponse? IContractSerializer.DeserializeResponse(byte[]? responseBytes)
+        ICommandResponse? IClientContractSerializer.DeserializeResponse(byte[]? responseBytes)
         {
             return DeserializeResponse(responseBytes);
         }

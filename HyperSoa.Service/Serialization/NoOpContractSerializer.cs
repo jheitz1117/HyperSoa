@@ -2,9 +2,9 @@
 
 namespace HyperSoa.Service.Serialization
 {
-    internal sealed class NoOpContractSerializer : IContractSerializer<ByteArrayRequest, ByteArrayResponse>
+    internal sealed class NoOpContractSerializer : IServiceContractSerializer<ByteArrayRequest, ByteArrayResponse>
     {
-        ICommandRequest IContractSerializer.DeserializeRequest(byte[]? requestBytes)
+        ICommandRequest IServiceContractSerializer.DeserializeRequest(byte[]? requestBytes)
         {
             return DeserializeRequest(requestBytes);
         }

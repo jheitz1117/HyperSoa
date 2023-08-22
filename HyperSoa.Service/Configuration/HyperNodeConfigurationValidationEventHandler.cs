@@ -75,7 +75,7 @@ namespace HyperSoa.Service.Configuration
             {
                 // ContractSerializerType property is not required at the collection level, but if it is specified, it must implement the correct interface
                 if (!string.IsNullOrWhiteSpace(config.CommandModules.ContractSerializerType))
-                    ValidateTypeImplementsInterface(config.CommandModules.ContractSerializerType, typeof(IContractSerializer));
+                    ValidateTypeImplementsInterface(config.CommandModules.ContractSerializerType, typeof(IServiceContractSerializer));
 
                 foreach (var commandModule in config.CommandModules)
                 {
@@ -180,7 +180,7 @@ namespace HyperSoa.Service.Configuration
 
             // ContractSerializerType property is not required, but if it is specified, it must implement the correct interface
             if (!string.IsNullOrWhiteSpace(config.ContractSerializerType))
-                ValidateTypeImplementsInterface(config.ContractSerializerType, typeof(IContractSerializer));
+                ValidateTypeImplementsInterface(config.ContractSerializerType, typeof(IServiceContractSerializer));
         }
 
         private void ValidateTypeImplementsInterface(string targetTypeString, Type requiredInterface)
