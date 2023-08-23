@@ -6,19 +6,29 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
     internal class GetNodeStatusCommand : ICommandModule, IServiceContractSerializerFactory
     {
+        private readonly HyperNodeService _adminService;
+
+        public GetNodeStatusCommand(IHyperNodeService serviceInstance)
+        {
+            if (serviceInstance is not HyperNodeService adminService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _adminService = adminService;
+        }
+
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             context.Activity.Track("Retrieving HyperNode status info.");
 
             return new GetNodeStatusResponse
             {
-                DiagnosticsEnabled = HyperNodeService.Instance.EnableDiagnostics,
-                TaskProgressCacheDuration = HyperNodeService.Instance.TaskProgressCacheDuration,
-                TaskProgressCacheEnabled = HyperNodeService.Instance.EnableTaskProgressCache,
-                MaxConcurrentTasks = HyperNodeService.Instance.MaxConcurrentTasks,
-                Commands = HyperNodeService.Instance.GetCommandStatuses().ToList(),
-                ActivityMonitors = HyperNodeService.Instance.GetActivityMonitorStatuses().ToList(),
-                LiveTasks = HyperNodeService.Instance.GetLiveTaskStatuses().ToList(),
+                DiagnosticsEnabled = _adminService.EnableDiagnostics,
+                TaskProgressCacheDuration = _adminService.TaskProgressCacheDuration,
+                TaskProgressCacheEnabled = _adminService.EnableTaskProgressCache,
+                MaxConcurrentTasks = _adminService.MaxConcurrentTasks,
+                Commands = _adminService.GetCommandStatuses().ToArray(),
+                ActivityMonitors = _adminService.GetActivityMonitorStatuses().ToArray(),
+                LiveTasks = _adminService.GetLiveTaskStatuses().ToArray(),
                 ProcessStatusFlags = MessageProcessStatusFlags.Success
             };
         }

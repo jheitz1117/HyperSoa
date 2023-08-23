@@ -12,7 +12,7 @@ namespace HyperSoa.Contracts.RemoteAdmin.Models
         /// The name of the custom activity monitor.
         /// </summary>
         [ProtoMember(1)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         
         /// <summary>
         /// Indicates whether the custom activity monitor is enabled or disabled.

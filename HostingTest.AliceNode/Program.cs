@@ -12,17 +12,7 @@ var builder = Host.CreateApplicationBuilder(args);
 
 // Add HyperNodeService dependencies
 builder.Services.AddTransient<IHyperNodeConfigurationProvider, JsonHyperNodeConfigurationProvider>();
-builder.Services.AddSingleton<IHyperNodeService>(
-    serviceProvider =>
-    {
-        HyperNodeService.CreateAndConfigure(
-            serviceProvider.GetRequiredService<IHyperNodeConfigurationProvider>(),
-            serviceProvider
-        );
-
-        return HyperNodeService.Instance;
-    }
-);
+builder.Services.AddSingleton<IHyperNodeService, HyperNodeService>();
 builder.Services.AddHostedService<HostedHyperNodeService>();
 
 // Add HyperNodeHost dependencies

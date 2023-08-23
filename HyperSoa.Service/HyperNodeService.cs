@@ -20,8 +20,7 @@ namespace HyperSoa.Service
 {
     /// <summary>
     /// Processes <see cref="HyperNodeMessageRequest"/> objects and returns <see cref="HyperNodeMessageResponse"/> objects.
-    /// This class is a singleton and must be referenced using the static <see cref="HyperNodeService.Instance"/> property.
-    /// This class cannot be inherited.
+    /// This class should be registered as a singleton in a DI container. This class cannot be inherited.
     /// </summary>
     public sealed partial class HyperNodeService : IHyperNodeService, IDisposable
     {
@@ -33,8 +32,6 @@ namespace HyperSoa.Service
         #endregion Defaults
 
         #region Private Members
-
-        private static readonly object Lock = new();
 
         private readonly TaskProgressCacheMonitor _taskProgressCacheMonitor = new();
         private readonly List<HyperNodeServiceActivityMonitor> _customActivityMonitors = new();
@@ -60,28 +57,12 @@ namespace HyperSoa.Service
             set => _taskProgressCacheMonitor.CacheDuration = value;
         }
 
-        private IServiceProvider? ServiceProvider { get; init; }
-        private ILogger<HyperNodeService> Logger { get; init; } = NullLogger<HyperNodeService>.Instance;
+        private IServiceProvider ServiceProvider { get; }
+        private ILogger<HyperNodeService> Logger { get; } = NullLogger<HyperNodeService>.Instance;
         private ITaskIdProvider TaskIdProvider { get; set; } = DefaultTaskIdProvider;
         private IHyperNodeEventHandler EventHandler { get; set; } = DefaultEventHandler;
         internal bool EnableDiagnostics { get; set; }
         internal int MaxConcurrentTasks { get; set; }
-
-        /// <summary>
-        /// Represents the singleton instance of the <see cref="HyperNodeService"/>.
-        /// </summary>
-        public static HyperNodeService Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    CreateAndConfigure(DefaultConfigurationProvider);
-
-                return _instance ?? throw new HyperNodeConfigurationException("Unable to configure HyperNode service.");
-            }
-        }
-
-        private static HyperNodeService? _instance;
 
         #endregion Properties
 
@@ -387,15 +368,6 @@ namespace HyperSoa.Service
         #endregion Public Methods
 
         #region Private Methods
-
-        /// <summary>
-        /// Initializes an instance of the <see cref="HyperNodeService"/> class with the specified name.
-        /// </summary>
-        /// <param name="hyperNodeName">The name of the <see cref="HyperNodeService"/>.</param>
-        private HyperNodeService(string hyperNodeName)
-        {
-            HyperNodeName = hyperNodeName;
-        }
 
         private void InitializeActivityTracker(HyperNodeTaskInfo currentTaskInfo, TaskTraceMonitor taskTraceMonitor)
         {

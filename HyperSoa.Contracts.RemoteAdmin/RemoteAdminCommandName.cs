@@ -30,42 +30,42 @@
         /// <summary>
         /// Enables or disables the command module with the name specified in the request object.
         /// <see cref="ICommandRequest"/> type: An <see cref="EnableCommandModuleRequest"/> containing the command name and whether to enable or disable it.
-        /// <see cref="ICommandResponse"/> type: A <see cref="CommandResponse"/> indicating success or failure.
+        /// <see cref="ICommandResponse"/> type: A <see cref="EmptyCommandResponse"/> indicating success or failure.
         /// </summary>
         public const string EnableCommand                 = "EnableCommand";
 
         /// <summary>
         /// Enables or disables the custom activity monitor with the name specified in the request object.
         /// <see cref="ICommandRequest"/> type: An <see cref="EnableActivityMonitorRequest"/> containing the monitor name and whether to enable or disable it.
-        /// <see cref="ICommandResponse"/> type: A <see cref="CommandResponse"/> indicating success or failure.
+        /// <see cref="ICommandResponse"/> type: A <see cref="EmptyCommandResponse"/> indicating success or failure.
         /// </summary>
         public const string EnableActivityMonitor         = "EnableActivityMonitor";
 
         /// <summary>
         /// Renames the custom activity monitor with the name specified in the request object.
         /// <see cref="ICommandRequest"/> type: A <see cref="RenameActivityMonitorRequest"/> containing the old name and the new name of the custom activity monitor.
-        /// <see cref="ICommandResponse"/> type: A <see cref="CommandResponse"/> indicating success or failure.
+        /// <see cref="ICommandResponse"/> type: A <see cref="EmptyCommandResponse"/> indicating success or failure.
         /// </summary>
         public const string RenameActivityMonitor         = "RenameActivityMonitor";
 
         /// <summary>
         /// Enables or disables the task progress cache.
         /// <see cref="ICommandRequest"/> type: An <see cref="EnableTaskProgressCacheRequest"/> indicating whether or enable or disable the task progress cache.
-        /// <see cref="ICommandResponse"/> type: A <see cref="CommandResponse"/> indicating success or failure.
+        /// <see cref="ICommandResponse"/> type: A <see cref="EmptyCommandResponse"/> indicating success or failure.
         /// </summary>
         public const string EnableTaskProgressCache       = "EnableTaskProgressCache";
 
         /// <summary>
         /// Enables or disables diagnostics.
         /// <see cref="ICommandRequest"/> type: An <see cref="EnableDiagnosticsRequest"/> indicating whether or enable or disable diagnostics.
-        /// <see cref="ICommandResponse"/> type: A <see cref="CommandResponse"/> indicating success or failure.
+        /// <see cref="ICommandResponse"/> type: A <see cref="EmptyCommandResponse"/> indicating success or failure.
         /// </summary>
         public const string EnableDiagnostics             = "EnableDiagnostics";
 
         /// <summary>
         /// Cancels the task with the ID specified in the command request string.
         /// <see cref="ICommandRequest"/> type: A <see cref="CancelTaskRequest"/> containing the ID of the task to cancel.
-        /// <see cref="ICommandResponse"/> type: A <see cref="CommandResponse"/> indicating success or failure.
+        /// <see cref="ICommandResponse"/> type: A <see cref="EmptyCommandResponse"/> indicating success or failure.
         /// </summary>
         public const string CancelTask                    = "CancelTask";
 

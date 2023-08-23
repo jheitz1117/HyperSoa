@@ -8,15 +8,25 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
     internal class RenameActivityMonitorCommand : ICommandModule, IServiceContractSerializerFactory
     {
+        private readonly HyperNodeService _adminService;
+
+        public RenameActivityMonitorCommand(IHyperNodeService serviceInstance)
+        {
+            if (serviceInstance is not HyperNodeService adminService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _adminService = adminService;
+        }
+
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not RenameActivityMonitorRequest request)
                 throw new InvalidCommandRequestTypeException(typeof(RenameActivityMonitorRequest), context.Request?.GetType());
 
             var processStatusFlags = MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
-            if (HyperNodeService.Instance.IsKnownActivityMonitor(request.OldName))
+            if (_adminService.IsKnownActivityMonitor(request.OldName))
             {
-                var result = HyperNodeService.Instance.RenameActivityMonitor(request.OldName, request.NewName);
+                var result = _adminService.RenameActivityMonitor(request.OldName, request.NewName);
                 context.Activity.Track($"The activity monitor '{request.OldName}' {(result ? "has been" : "could not be")} renamed to '{request.NewName}'.");
 
                 processStatusFlags = result ? MessageProcessStatusFlags.Success : MessageProcessStatusFlags.Failure;

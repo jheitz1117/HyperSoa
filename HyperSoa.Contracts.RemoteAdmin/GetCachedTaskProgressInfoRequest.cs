@@ -6,6 +6,6 @@ namespace HyperSoa.Contracts.RemoteAdmin
     public sealed class GetCachedTaskProgressInfoRequest : ICommandRequest
     {
         [ProtoMember(1)]
-        public string TaskId { get; set; }
+        public string? TaskId { get; set; }
     }
 }

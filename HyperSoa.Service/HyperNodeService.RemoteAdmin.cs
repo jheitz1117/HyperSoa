@@ -26,16 +26,13 @@ namespace HyperSoa.Service
 
         internal IEnumerable<ActivityMonitorStatus> GetActivityMonitorStatuses()
         {
-            lock (Lock)
-            {
-                return _customActivityMonitors.Select(
-                    m => new ActivityMonitorStatus
-                    {
-                        Name = m.Name,
-                        Enabled = m.Enabled
-                    }
-                );
-            }
+            return _customActivityMonitors.Select(
+                m => new ActivityMonitorStatus
+                {
+                    Name = m.Name,
+                    Enabled = m.Enabled
+                }
+            );
         }
 
         internal IEnumerable<LiveTaskStatus> GetLiveTaskStatuses()

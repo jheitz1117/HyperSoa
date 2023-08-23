@@ -1,34 +1,32 @@
-﻿using HyperSoa.Service;
-using HyperSoa.Service.Configuration;
+﻿using HyperSoa.Contracts;
+using HyperSoa.Service;
 using Microsoft.Extensions.Hosting;
 
 namespace HyperSoa.ServiceHosting
 {
     public class HostedHyperNodeService : IHostedService
     {
-        private readonly IHyperNodeConfigurationProvider _configProvider;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly HyperNodeService _cancellableService;
 
-        public HostedHyperNodeService(IHyperNodeConfigurationProvider configProvider, IServiceProvider serviceProvider)
+        public HostedHyperNodeService(IHyperNodeService serviceInstance)
         {
-            _configProvider = configProvider;
-            _serviceProvider = serviceProvider;
+            if (serviceInstance is not HyperNodeService cancellableService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _cancellableService = cancellableService;
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
-            // Create and configure here just in case we haven't done it yet
-            HyperNodeService.CreateAndConfigure(_configProvider, _serviceProvider);
-
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            HyperNodeService.Instance.Cancel();
-            HyperNodeService.Instance.WaitAllChildTasks(cancellationToken);
+            _cancellableService.Cancel();
+            _cancellableService.WaitAllChildTasks(cancellationToken);
             
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
     }
 }

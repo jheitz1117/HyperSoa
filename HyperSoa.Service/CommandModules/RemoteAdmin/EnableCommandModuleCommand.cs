@@ -8,6 +8,16 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
     internal class EnableCommandModuleCommand : ICommandModule, IServiceContractSerializerFactory
     {
+        private readonly HyperNodeService _adminService;
+
+        public EnableCommandModuleCommand(IHyperNodeService serviceInstance)
+        {
+            if (serviceInstance is not HyperNodeService adminService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _adminService = adminService;
+        }
+
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EnableCommandModuleRequest request)
@@ -22,9 +32,9 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             }
             else
             {
-                if (HyperNodeService.Instance.IsKnownCommand(request.CommandName))
+                if (_adminService.IsKnownCommand(request.CommandName))
                 {
-                    var result = HyperNodeService.Instance.EnableCommandModule(request.CommandName, request.Enable);
+                    var result = _adminService.EnableCommandModule(request.CommandName, request.Enable);
                     context.Activity.Track(
                         $"The command '{request.CommandName}' {(result ? "is now" : "could not be")} {(request.Enable ? "enabled" : "disabled")}."
                     );

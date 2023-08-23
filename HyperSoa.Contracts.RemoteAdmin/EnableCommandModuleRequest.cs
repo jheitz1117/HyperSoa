@@ -12,7 +12,7 @@ namespace HyperSoa.Contracts.RemoteAdmin
         /// The name of the command to enable or disable.
         /// </summary>
         [ProtoMember(1)]
-        public string CommandName { get; set; }
+        public string? CommandName { get; set; }
 
         /// <summary>
         /// Indicates whether to enable or disable the command with the specified command name.

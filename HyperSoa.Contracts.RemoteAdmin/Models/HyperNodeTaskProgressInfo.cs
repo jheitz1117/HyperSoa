@@ -12,13 +12,13 @@ namespace HyperSoa.Contracts.RemoteAdmin.Models
         /// A list of <see cref="HyperNodeActivityItem"/> objects tracing the progress of the task.
         /// </summary>
         [ProtoMember(1)]
-        public List<HyperNodeActivityItem> Activity { get; set; } = new List<HyperNodeActivityItem>();
+        public HyperNodeActivityItem[]? Activity { get; set; }
 
         /// <summary>
         /// If the task has completed, contains the <see cref="HyperNodeMessageResponse"/> of the task.
         /// </summary>
         [ProtoMember(2)]
-        public HyperNodeMessageResponse Response { get; set; }
+        public HyperNodeMessageResponse? Response { get; set; }
 
         /// <summary>
         /// Indicates whether the task has completed.

@@ -7,6 +7,16 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
     internal class SetTaskProgressCacheDurationCommand : ICommandModule, IServiceContractSerializerFactory
     {
+        private readonly HyperNodeService _adminService;
+
+        public SetTaskProgressCacheDurationCommand(IHyperNodeService serviceInstance)
+        {
+            if (serviceInstance is not HyperNodeService adminService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _adminService = adminService;
+        }
+
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not SetTaskProgressCacheDurationRequest request)
@@ -14,7 +24,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 
             var response = new SetTaskProgressCacheDurationResponse
             {
-                TaskProgressCacheEnabled = HyperNodeService.Instance.EnableTaskProgressCache
+                TaskProgressCacheEnabled = _adminService.EnableTaskProgressCache
             };
 
             if (!response.TaskProgressCacheEnabled)
@@ -23,7 +33,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
                 response.ProcessStatusFlags |= MessageProcessStatusFlags.HadWarnings;
             }
 
-            HyperNodeService.Instance.TaskProgressCacheDuration = request.CacheDuration;
+            _adminService.TaskProgressCacheDuration = request.CacheDuration;
             context.Activity.Track($"The task progress cache duration is now {request.CacheDuration}.");
             
             response.ProcessStatusFlags |= MessageProcessStatusFlags.Success;

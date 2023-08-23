@@ -27,13 +27,13 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         public override void OnTrack(IHyperNodeActivityEventItem activity)
         {
             // First add a new cache item or get the existing cache item with the specified key
-            var taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new HyperNodeTaskProgressInfo());
+            var taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new CachedTaskProgressInfo());
 
             // If we try to cache activity for a task that has already completed, evict the previous entry and initialize a new instance with that key.
             if (taskProgressInfo.IsComplete)
             {
                 Cache.Remove(activity.TaskId);
-                taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new HyperNodeTaskProgressInfo());
+                taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new CachedTaskProgressInfo());
             }
 
             // Now add our specific item to our list of activity items. Need lock because list is not thread-safe
@@ -68,7 +68,7 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         public override void OnActivityReportingError(Exception exception)
         {
             // First add a new cache item or get the existing cache item with the specified key
-            var taskProgressInfo = AddOrGetExisting("Error", () => new HyperNodeTaskProgressInfo());
+            var taskProgressInfo = AddOrGetExisting(nameof(TaskProgressCacheMonitor), () => new CachedTaskProgressInfo());
 
             // Now add our specific item to our list of activity items. Need lock because list is not thread-safe
             lock (Lock)
@@ -76,7 +76,7 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
                 taskProgressInfo.Activity.Add(
                     new HyperNodeActivityItem
                     {
-                        Agent = "Error",
+                        Agent = nameof(TaskProgressCacheMonitor),
                         EventDateTime = DateTime.Now,
                         EventDescription = exception.Message,
                         EventDetail = exception.ToString()
@@ -92,11 +92,31 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         /// <returns></returns>
         public HyperNodeTaskProgressInfo? GetTaskProgressInfo(string taskId)
         {
-            return (
-                Cache[taskId] as Lazy<HyperNodeTaskProgressInfo?> ?? new Lazy<HyperNodeTaskProgressInfo?>(
+            HyperNodeTaskProgressInfo? snapshot = null;
+
+            var cachedProgress = (
+                Cache[taskId] as Lazy<CachedTaskProgressInfo?> ?? new Lazy<CachedTaskProgressInfo?>(
                     () => null // If we don't have any task progress for the specified task ID, just return null
                 )
             ).Value;
+
+            if (cachedProgress != null)
+            {
+                // Need this lock to synchronize access to the activity list, which could be modified during enumeration
+                lock (Lock)
+                {
+                    snapshot = new HyperNodeTaskProgressInfo
+                    {
+                        ProgressTotal = cachedProgress.ProgressTotal,
+                        ProgressPart = cachedProgress.ProgressPart,
+                        Activity = cachedProgress.Activity.ToArray(),
+                        IsComplete = cachedProgress.IsComplete,
+                        Response = cachedProgress.Response,
+                    };
+                }
+            }
+
+            return snapshot;
         }
 
         public void Dispose()

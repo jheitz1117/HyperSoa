@@ -6,6 +6,6 @@ namespace HyperSoa.Contracts.RemoteAdmin
     public sealed class EchoRequest : ICommandRequest
     {
         [ProtoMember(1)]
-        public string Prompt { get; set; }
+        public string? Prompt { get; set; }
     }
 }
