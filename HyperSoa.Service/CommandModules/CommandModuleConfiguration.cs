@@ -4,9 +4,9 @@ namespace HyperSoa.Service.CommandModules
 {
     internal class CommandModuleConfiguration
     {
-        public string CommandName { get; set; }
+        public string? CommandName { get; set; }
         public bool Enabled { get; set; }
-        public Type CommandModuleType { get; set; }
+        public Type? CommandModuleType { get; set; }
         public IServiceContractSerializer? ContractSerializer { get; set; }
     }
 }

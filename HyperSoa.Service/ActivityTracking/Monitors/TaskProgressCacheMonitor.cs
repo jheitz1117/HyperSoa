@@ -26,6 +26,10 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
 
         public override void OnTrack(IHyperNodeActivityEventItem activity)
         {
+            // Ignore all activity that doesn't have a task ID
+            if (string.IsNullOrWhiteSpace(activity.TaskId))
+                return;
+
             // First add a new cache item or get the existing cache item with the specified key
             var taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new CachedTaskProgressInfo());
 

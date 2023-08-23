@@ -1,7 +1,6 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Service.EventTracking;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace HyperSoa.Service.ActivityTracking.Trackers
 {

@@ -1,4 +1,6 @@
-﻿namespace HyperSoa.Service.EventTracking
+﻿using HyperSoa.Contracts;
+
+namespace HyperSoa.Service.EventTracking
 {
     /// <summary>
     /// Event arguments passed to an implementation of <see cref="IHyperNodeEventHandler"/> when the <see cref="IHyperNodeService"/> finishes executing the current task.

@@ -12,12 +12,12 @@ namespace HyperSoa.Service.CommandModules
         /// <summary>
         /// The ID of the current task.
         /// </summary>
-        string TaskId { get; }
+        string? TaskId { get; }
 
         /// <summary>
         /// The name of the <see cref="IHyperNodeService"/> running the current task.
         /// </summary>
-        string ExecutingNodeName { get; }
+        string? ExecutingNodeName { get; }
 
         /// <summary>
         /// The request object containing parameters to be passed to the <see cref="ICommandModule"/>.

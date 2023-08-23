@@ -1,4 +1,6 @@
-﻿namespace HyperSoa.Service.TaskIdProviders
+﻿using HyperSoa.Contracts;
+
+namespace HyperSoa.Service.TaskIdProviders
 {
     /// <summary>
     /// Abstract implementation of <see cref="ITaskIdProvider"/>.

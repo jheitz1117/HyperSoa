@@ -10,7 +10,7 @@ namespace HostingTest.Contracts
     {
         [ProtoMember(1)]
         [DataMember]
-        public string MyString { get; set; }
+        public string? MyString { get; set; }
         
         [ProtoMember(2)]
         [DataMember]

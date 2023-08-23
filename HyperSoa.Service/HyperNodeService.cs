@@ -57,7 +57,7 @@ namespace HyperSoa.Service
             set => _taskProgressCacheMonitor.CacheDuration = value;
         }
 
-        private IServiceProvider ServiceProvider { get; }
+        private IServiceProvider? ServiceProvider { get; }
         private ILogger<HyperNodeService> Logger { get; } = NullLogger<HyperNodeService>.Instance;
         private ITaskIdProvider TaskIdProvider { get; set; } = DefaultTaskIdProvider;
         private IHyperNodeEventHandler EventHandler { get; set; } = DefaultEventHandler;
@@ -77,10 +77,10 @@ namespace HyperSoa.Service
         {
             Logger.LogTrace($"In {nameof(ProcessMessageAsync)}.");
             Logger.LogTrace($"{nameof(HyperNodeMessageRequest)} Values:");
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CommandName)}", message.CommandName == null ? "<null>" : $"\"{message.CommandName}\"");
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.ProcessOptionFlags)}", message.ProcessOptionFlags);
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CreatedByAgentName)}", message.CreatedByAgentName == null ? "<null>" : $"\"{message.CreatedByAgentName}\"");
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CommandRequestBytes)}", message.CommandRequestBytes?.Length.ToString("Array (Count: #)") ?? "<null>");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandName), message.CommandName == null ? "<null>" : $"\"{message.CommandName}\"");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.ProcessOptionFlags), message.ProcessOptionFlags);
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CreatedByAgentName), message.CreatedByAgentName == null ? "<null>" : $"\"{message.CreatedByAgentName}\"");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandRequestBytes), message.CommandRequestBytes?.Length.ToString("Array (Count: #)") ?? "<null>");
 
             var response = new HyperNodeMessageResponse
             {
@@ -592,7 +592,7 @@ namespace HyperSoa.Service
             if (!string.IsNullOrWhiteSpace(args.Message.CommandName) &&
                 _commandModuleConfigurations.ContainsKey(args.Message.CommandName) &&
                 _commandModuleConfigurations.TryGetValue(args.Message.CommandName, out var commandModuleConfig) &&
-                commandModuleConfig.Enabled)
+                commandModuleConfig is { Enabled: true, CommandModuleType: not null })
             {
                 // Create our command module instance (with DI if available)
                 var commandInstance = ServiceProvider != null
@@ -638,7 +638,7 @@ namespace HyperSoa.Service
                         CreatedByAgentName = args.Message.CreatedByAgentName,
                         ProcessOptionFlags = args.Message.ProcessOptionFlags,
                         Request = commandRequest,
-                        Activity = args.Activity,
+                        Activity = args.Activity ?? (ITaskActivityTracker)NullActivityTracker.Instance,
                         Logger = commandLogger,
                         Token = args.Token
                     };

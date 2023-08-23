@@ -11,12 +11,12 @@ namespace HyperSoa.Service.ActivityTracking
         /// <summary>
         /// The ID of the current task.
         /// </summary>
-        string TaskId { get; }
+        string? TaskId { get; }
 
         /// <summary>
         /// The name of the command currently executing.
         /// </summary>
-        string CommandName { get; }
+        string? CommandName { get; }
 
         /// <summary>
         /// The amount of time that has elapsed since the first <see cref="IHyperNodeActivityEventItem"/> was raised for this task.

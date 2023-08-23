@@ -47,7 +47,7 @@ namespace TestClient
                 {
                     cboCommandNames.DataSource = serializer.DeserializeResponse(
                         response.CommandResponseBytes
-                    )?.Commands.Select(
+                    )?.Commands?.Select(
                         c => c.CommandName
                     ).OrderBy(
                         cn => cn
@@ -137,9 +137,9 @@ namespace TestClient
 
                 var cancelSuccess = (
                     await new HyperNodeClient(TargetEndpoint).ProcessMessageAsync(msg)
-                )?.ProcessStatusFlags.HasFlag(
+                ).ProcessStatusFlags.HasFlag(
                     MessageProcessStatusFlags.Success
-                ) ?? false;
+                );
 
                 if (cancelSuccess)
                     MessageBox.Show("Task cancelled successfully!", "Task Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -233,9 +233,9 @@ namespace TestClient
             return $"{item.EventDateTime:G} {item.Agent}{(progressPercentage.HasValue || item.Elapsed.HasValue ? $" ({item.Elapsed}{(item.Elapsed.HasValue && progressPercentage.HasValue ? " " : "")}{progressPercentage:P})" : "")} - {item.EventDescription}";
         }
 
-        private static string[] GetActivityStrings(IEnumerable<HyperNodeActivityItem> activity)
+        private static string[]? GetActivityStrings(IEnumerable<HyperNodeActivityItem>? activity)
         {
-            return activity.OrderBy(
+            return activity?.OrderBy(
                 i => i.EventDateTime
             ).Select(
                 FormatActivityItem

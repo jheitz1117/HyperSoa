@@ -53,16 +53,16 @@ namespace HyperSoa.Service
             return _commandModuleConfigurations.ContainsKey(commandName ?? "");
         }
 
-        internal bool IsKnownActivityMonitor(string activityMonitorName)
+        internal bool IsKnownActivityMonitor(string? activityMonitorName)
         {
             return _customActivityMonitors.Any(a => a.Name == activityMonitorName);
         }
 
-        internal bool EnableCommandModule(string commandName, bool enable)
+        internal bool EnableCommandModule(string? commandName, bool enable)
         {
             var result = false;
 
-            if (_commandModuleConfigurations.TryGetValue(commandName, out var commandConfig))
+            if (!string.IsNullOrWhiteSpace(commandName) && _commandModuleConfigurations.TryGetValue(commandName, out var commandConfig))
             {
                 commandConfig.Enabled = enable;
                 result = true;
@@ -71,7 +71,7 @@ namespace HyperSoa.Service
             return result;
         }
 
-        internal bool EnableActivityMonitor(string activityMonitorName, bool enable)
+        internal bool EnableActivityMonitor(string? activityMonitorName, bool enable)
         {
             var result = false;
 
@@ -99,11 +99,11 @@ namespace HyperSoa.Service
             return result;
         }
 
-        internal bool CancelTask(string taskId)
+        internal bool CancelTask(string? taskId)
         {
             var result = false;
 
-            if (_liveTasks.TryGetValue(taskId, out var taskInfo))
+            if (!string.IsNullOrWhiteSpace(taskId) && _liveTasks.TryGetValue(taskId, out var taskInfo))
             {
                 taskInfo.Cancel();
                 result = true;

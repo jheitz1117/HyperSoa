@@ -19,6 +19,7 @@ namespace HyperSoa.Service
 
         private static readonly IHyperNodeEventHandler DefaultEventHandler = new HyperNodeEventHandlerBase();
         private static readonly ITaskIdProvider DefaultTaskIdProvider = new GuidTaskIdProvider();
+        internal const string DefaultNodeName = "DefaultInstance";
         internal const bool DefaultTaskProgressCacheEnabled = false;
         internal const bool DefaultDiagnosticsEnabled = false;
         internal const int DefaultProgressCacheDurationMinutes = 60;
@@ -29,11 +30,18 @@ namespace HyperSoa.Service
         #region Configuration
 
         /// <summary>
-        /// Initializes an instance of the <see cref="HyperNodeService"/> class with the specified name.
+        /// Initializes an instance of the <see cref="HyperNodeService"/> class with a default <see cref="IHyperNodeConfigurationProvider"/>
+        /// and no <see cref="IServiceProvider"/>.
+        /// </summary>
+        public HyperNodeService() : this(DefaultConfigurationProvider) { }
+
+        /// <summary>
+        /// Initializes an instance of the <see cref="HyperNodeService"/> class with the specified <see cref="IHyperNodeConfigurationProvider"/>
+        /// and an optional <see cref="IServiceProvider"/>.
         /// </summary>
         /// <param name="configProvider">DI dependency for the config</param>
-        /// <param name="serviceProvider">DI dependency for the <see cref="IServiceProvider"/></param>
-        public HyperNodeService(IHyperNodeConfigurationProvider configProvider, IServiceProvider serviceProvider)
+        /// <param name="serviceProvider">Optional DI dependency for the <see cref="IServiceProvider"/></param>
+        public HyperNodeService(IHyperNodeConfigurationProvider configProvider, IServiceProvider? serviceProvider = null)
         {
             if (configProvider == null)
                 throw new ArgumentNullException(nameof(configProvider));
@@ -64,7 +72,7 @@ namespace HyperSoa.Service
             if (builder.Length > 0)
             { throw new HyperNodeConfigurationException(builder.ToString()); }
 
-            HyperNodeName = config.HyperNodeName;
+            HyperNodeName = config.HyperNodeName ?? DefaultNodeName;
 
             ServiceProvider = serviceProvider;
             Logger = serviceProvider.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance;
@@ -159,7 +167,7 @@ namespace HyperSoa.Service
             foreach (var remoteAdminCommandConfig in remoteAdminCommandConfigs)
             {
                 // Allow each remote admin command to be enabled or disabled individually. This takes precedence over any defaults defined previously
-                if (config.RemoteAdminCommands != null && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandConfig.CommandName))
+                if (config.RemoteAdminCommands != null && !string.IsNullOrWhiteSpace(remoteAdminCommandConfig.CommandName) && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandConfig.CommandName))
                 {
                     var userConfig = config.RemoteAdminCommands.GetByCommandName(remoteAdminCommandConfig.CommandName);
                     if (userConfig != null)
@@ -248,7 +256,7 @@ namespace HyperSoa.Service
             foreach (var commandModuleConfig in config.CommandModules)
             {
                 var commandModuleType = Type.GetType(
-                    commandModuleConfig.CommandModuleType,
+                    commandModuleConfig.CommandModuleType!,
                     true
                 ) ?? throw new HyperNodeConfigurationException($"Unable to determine command type from '{commandModuleConfig.CommandModuleType}'.");
 

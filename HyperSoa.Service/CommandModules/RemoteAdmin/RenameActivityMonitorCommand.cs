@@ -23,17 +23,32 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             if (context.Request is not RenameActivityMonitorRequest request)
                 throw new InvalidCommandRequestTypeException(typeof(RenameActivityMonitorRequest), context.Request?.GetType());
 
-            var processStatusFlags = MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
-            if (_adminService.IsKnownActivityMonitor(request.OldName))
-            {
-                var result = _adminService.RenameActivityMonitor(request.OldName, request.NewName);
-                context.Activity.Track($"The activity monitor '{request.OldName}' {(result ? "has been" : "could not be")} renamed to '{request.NewName}'.");
+            var processStatusFlags = MessageProcessStatusFlags.None;
 
-                processStatusFlags = result ? MessageProcessStatusFlags.Success : MessageProcessStatusFlags.Failure;
+            if (string.IsNullOrWhiteSpace(request.OldName))
+            {
+                context.Activity.Track($"Invalid {nameof(request.OldName)} value. The value must not be blank.");
+                processStatusFlags |= MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
+            }
+            else if (!_adminService.IsKnownActivityMonitor(request.OldName))
+            {
+                context.Activity.Track($"No activity monitor exists with the name '{request.OldName}'.");
+                processStatusFlags |= MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
             }
             else
             {
-                context.Activity.Track($"No activity monitor exists with the name '{request.OldName}'.");
+                if (!string.IsNullOrWhiteSpace(request.NewName))
+                {
+                    var result = _adminService.RenameActivityMonitor(request.OldName, request.NewName);
+                    context.Activity.Track($"The activity monitor '{request.OldName}' {(result ? "has been" : "could not be")} renamed to '{request.NewName}'.");
+
+                    processStatusFlags = result ? MessageProcessStatusFlags.Success : MessageProcessStatusFlags.Failure;
+                }
+                else
+                {
+                    context.Activity.Track($"Invalid {nameof(request.NewName)} value. The value must not be blank.");
+                    processStatusFlags |= MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
+                }
             }
 
             return processStatusFlags.ToEmptyCommandResponse();
