@@ -2,6 +2,7 @@
 using HyperSoa.ServiceHosting.Configuration;
 using HyperSoa.ServiceHosting.Interop;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace HyperSoa.ServiceHosting
 {
@@ -9,23 +10,20 @@ namespace HyperSoa.ServiceHosting
     {
         private readonly IHyperNodeChannel[] _channels;
 
-        public HyperNodeServiceHost(IHyperNodeHostConfigurationProvider configProvider, IHyperNodeService serviceInstance, ILoggerFactory loggerFactory)
+        public HyperNodeServiceHost(IOptions<HyperNodeHostOptions> options, IHyperNodeService serviceInstance, ILoggerFactory loggerFactory)
         {
             var channels = new List<IHyperNodeChannel>();
 
-            var hostConfig = configProvider.GetConfiguration();
+            var hostConfig = options.Value;
 
-            var httpBindings = hostConfig?.GetHttpEndpoints().ToArray() ?? Array.Empty<IHyperNodeHttpEndpoint>();
-            var tcpBindings = hostConfig?.GetTcpEndpoints().ToArray() ?? Array.Empty<IHyperNodeTcpEndpoint>();
-
-            if (httpBindings.Any())
+            if (hostConfig.HttpEndpoints.Any())
             {
                 IHyperNodeChannel httpChannel;
 
-                if (hostConfig?.UseInteropHttpChannel ?? false)
+                if (hostConfig.UseInteropHttpChannel)
                 {
                     httpChannel = new HyperNodeInteropHttpChannel(
-                        httpBindings,
+                        hostConfig.HttpEndpoints,
                         serviceInstance,
                         loggerFactory.CreateLogger<HyperNodeInteropHttpChannel>()
                     );
@@ -33,7 +31,7 @@ namespace HyperSoa.ServiceHosting
                 else
                 {
                     httpChannel = new HyperNodeHttpChannel(
-                        httpBindings,
+                        hostConfig.HttpEndpoints,
                         serviceInstance,
                         loggerFactory.CreateLogger<HyperNodeHttpChannel>()
                     );
@@ -41,9 +39,6 @@ namespace HyperSoa.ServiceHosting
                 
                 channels.Add(httpChannel);
             }
-
-            if (tcpBindings.Any())
-                throw new NotSupportedException("TCP endpoints are not currently supported.");
 
             _channels = channels.ToArray();
         }

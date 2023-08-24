@@ -6,7 +6,7 @@
         private readonly EmptyCommandModuleConfigurationCollection _commandModules = new();
         private readonly FullRemoteAdminConfigurationCollection _remoteAdminCommands = new();
 
-        public string HyperNodeName => "InMemoryNode";
+        public string InstanceName => "InMemoryNode";
         public bool? EnableTaskProgressCache => true;
         public bool? EnableDiagnostics => true;
         public int? TaskProgressCacheDurationMinutes => null;

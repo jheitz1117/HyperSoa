@@ -15,7 +15,6 @@
     <ProjectReference Include="..\HostingTest.Modules\HostingTest.Modules.csproj" />
     <ProjectReference Include="..\HyperSoa.Service.Configuration.Json\HyperSoa.Service.Configuration.Json.csproj" />
     <ProjectReference Include="..\HyperSoa.Service.Configuration.Xml\HyperSoa.Service.Configuration.Xml.csproj" />
-    <ProjectReference Include="..\HyperSoa.ServiceHosting.Configuration.Json\HyperSoa.ServiceHosting.Configuration.Json.csproj" />
     <ProjectReference Include="..\HyperSoa.ServiceHosting\HyperSoa.ServiceHosting.csproj" />
     <ProjectReference Include="..\HyperSoa.Service\HyperSoa.Service.csproj" />
   </ItemGroup>

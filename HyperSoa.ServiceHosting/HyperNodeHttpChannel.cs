@@ -7,16 +7,16 @@ namespace HyperSoa.ServiceHosting
 {
     internal class HyperNodeHttpChannel : IHyperNodeChannel
     {
-        private readonly IHyperNodeHttpEndpoint[] _httpEndpoints;
+        private readonly HyperNodeHttpEndpoint[] _httpEndpoints;
         private readonly ILogger<HyperNodeHttpChannel> _logger;
         private readonly HttpListener _listener;
 
         protected IHyperNodeService ServiceInstance { get; }
         public IEnumerable<string> Endpoints => _listener.Prefixes;
 
-        public HyperNodeHttpChannel(IHyperNodeHttpEndpoint[] httpBindings, IHyperNodeService serviceInstance, ILogger<HyperNodeHttpChannel> logger)
+        public HyperNodeHttpChannel(HyperNodeHttpEndpoint[] httpEndpoints, IHyperNodeService serviceInstance, ILogger<HyperNodeHttpChannel> logger)
         {
-            _httpEndpoints = httpBindings ?? throw new ArgumentNullException(nameof(httpBindings));
+            _httpEndpoints = httpEndpoints ?? throw new ArgumentNullException(nameof(httpEndpoints));
             ServiceInstance = serviceInstance ?? throw new ArgumentNullException(nameof(serviceInstance));
             _logger = logger;
 

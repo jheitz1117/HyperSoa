@@ -43,7 +43,7 @@ namespace HyperSoa.Service
 
         #region Properties
 
-        private string HyperNodeName { get; }
+        private string InstanceName { get; }
 
         internal bool EnableTaskProgressCache
         {
@@ -84,14 +84,14 @@ namespace HyperSoa.Service
 
             var response = new HyperNodeMessageResponse
             {
-                RespondingNodeName = HyperNodeName,
+                RespondingNodeName = InstanceName,
                 NodeAction = HyperNodeActionType.None,
                 NodeActionReason = HyperNodeActionReasonType.Unknown,
                 ProcessStatusFlags = MessageProcessStatusFlags.None
             };
 
             var currentTaskInfo = new HyperNodeTaskInfo(
-                HyperNodeName,
+                InstanceName,
                 message,
                 response,
                 message.TaskTraceRequested() || EnableDiagnostics,
@@ -491,7 +491,7 @@ namespace HyperSoa.Service
                             rejectionReason = HyperNodeActionReasonType.Custom;
                             userRejectionActivity = new HyperNodeActivityItem
                             {
-                                Agent = HyperNodeName,
+                                Agent = InstanceName,
                                 EventDescription = "The message was rejected by user-defined code. See the EventDetail property for the rejection reason.",
                                 EventDetail = r
                             };
@@ -505,7 +505,7 @@ namespace HyperSoa.Service
                 rejectionReason = HyperNodeActionReasonType.Custom;
                 userRejectionActivity = new HyperNodeActivityItem
                 {
-                    Agent = HyperNodeName,
+                    Agent = InstanceName,
                     EventDescription = "An exception was thrown by user-defined code while processing the OnMessageReceived event. See the EventDetail property for the exception details.",
                     EventDetail = ex.ToString()
                 };
@@ -514,7 +514,7 @@ namespace HyperSoa.Service
             // If the user didn't reject the message, give the system a chance to reject it
             var systemRejectionActivity = new HyperNodeActivityItem
             {
-                Agent = HyperNodeName
+                Agent = InstanceName
             };
 
             if (!rejectionReason.HasValue)
@@ -633,7 +633,7 @@ namespace HyperSoa.Service
                     var context = new CommandExecutionContext
                     {
                         TaskId = args.TaskId,
-                        ExecutingNodeName = HyperNodeName,
+                        ExecutingNodeName = InstanceName,
                         CommandName = args.Message.CommandName,
                         CreatedByAgentName = args.Message.CreatedByAgentName,
                         ProcessOptionFlags = args.Message.ProcessOptionFlags,
