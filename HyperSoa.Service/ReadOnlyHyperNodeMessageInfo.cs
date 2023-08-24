@@ -7,8 +7,8 @@ namespace HyperSoa.Service
     /// </summary>
     internal class ReadOnlyHyperNodeMessageInfo : IReadOnlyHyperNodeMessageInfo
     {
-        public string CommandName { get; }
-        public string CreatedByAgentName { get; }
+        public string? CommandName { get; }
+        public string? CreatedByAgentName { get; }
         public MessageProcessOptionFlags ProcessOptionFlags { get; }
 
         public ReadOnlyHyperNodeMessageInfo(HyperNodeMessageRequest message)

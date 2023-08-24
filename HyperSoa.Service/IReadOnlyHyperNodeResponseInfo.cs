@@ -11,12 +11,12 @@ namespace HyperSoa.Service
         /// The ID of the task started as a result of the <see cref="HyperNodeMessageRequest"/>. This value
         /// may be null or white space if no task could be started.
         /// </summary>
-        string TaskId { get; }
+        string? TaskId { get; }
 
         /// <summary>
         /// The name of the <see cref="IHyperNodeService"/> that sent this <see cref="HyperNodeMessageResponse"/>.
         /// </summary>
-        string RespondingNodeName { get; }
+        string? RespondingNodeName { get; }
 
         /// <summary>
         /// If the task completed, contains the total run time of the task.

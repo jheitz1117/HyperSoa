@@ -12,7 +12,7 @@ namespace HyperSoa.Contracts.RemoteAdmin.Models
         /// The command name of the module.
         /// </summary>
         [ProtoMember(1)]
-        public string CommandName { get; set; }
+        public string? CommandName { get; set; }
         
         /// <summary>
         /// Indicates whether the command module is enabled or disabled.

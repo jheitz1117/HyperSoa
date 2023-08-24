@@ -12,6 +12,6 @@ namespace HyperSoa.Contracts.RemoteAdmin
         public MessageProcessStatusFlags ProcessStatusFlags { get; set; }
 
         [ProtoMember(2)]
-        public string Reply { get; set; }
+        public string? Reply { get; set; }
     }
 }

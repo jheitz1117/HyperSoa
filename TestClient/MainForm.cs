@@ -47,7 +47,7 @@ namespace TestClient
                 {
                     cboCommandNames.DataSource = serializer.DeserializeResponse(
                         response.CommandResponseBytes
-                    )?.Commands.Select(
+                    )?.Commands?.Select(
                         c => c.CommandName
                     ).OrderBy(
                         cn => cn
@@ -73,43 +73,35 @@ namespace TestClient
                 // Clear out our data source first
                 ClearResponseData();
 
-                // Create our message request
-                var serializer = new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>();
-                var commandRequestBytes = serializer.SerializeRequest(
-                    new ComplexCommandRequest
-                    {
-                        MyDateTime = new DateTime(2002, 4, 12),
-                        MyInt32 = 1000,
-                        MyString = "My String!",
-                        MyTimeSpan = TimeSpan.FromMinutes(17)
-                    }
-                );
+                var optionFlags = MessageProcessOptionFlags.None;
+                if (chkReturnTaskTrace.Checked)
+                    optionFlags |= MessageProcessOptionFlags.ReturnTaskTrace;
+                if (chkRunConcurrently.Checked)
+                    optionFlags |= MessageProcessOptionFlags.RunConcurrently;
+                if (chkCacheProgressInfo.Checked)
+                    optionFlags |= MessageProcessOptionFlags.CacheTaskProgress;
 
-                var msg = new HyperNodeMessageRequest
+                HyperNodeMessageResponse? response;
+
+                switch (cboCommandNames.Text)
                 {
-                    CreatedByAgentName = ClientAgentName,
-                    CommandName = cboCommandNames.Text,
-                    CommandRequestBytes = commandRequestBytes,
-                    ProcessOptionFlags = (chkReturnTaskTrace.Checked
-                                             ? MessageProcessOptionFlags.ReturnTaskTrace
-                                             : MessageProcessOptionFlags.None) |
-                                         (chkRunConcurrently.Checked
-                                             ? MessageProcessOptionFlags.RunConcurrently
-                                             : MessageProcessOptionFlags.None) |
-                                         (chkCacheProgressInfo.Checked
-                                             ? MessageProcessOptionFlags.CacheTaskProgress
-                                             : MessageProcessOptionFlags.None)
-                };
-
-                var client = new HyperNodeClient(TargetEndpoint);
-                var response = await client.ProcessMessageAsync(msg);
+                    case "ComplexCommand":
+                        response = await RunComplexCommand(optionFlags);
+                        break;
+                    case "TestLongRunningCommand":
+                        response = await RunLongRunningCommand(optionFlags);
+                        break;
+                    default:
+                        response = null;
+                        break;
+                }
 
                 PopulateResponseSummary(lstRealTimeResponse, response);
                 PopulateTaskTrace(tvwRealTimeTaskTrace, response);
 
-                if (response.NodeAction != HyperNodeActionType.Rejected &&
-                    msg.ProcessOptionFlags.HasFlag(MessageProcessOptionFlags.CacheTaskProgress) &&
-                    !string.IsNullOrWhiteSpace(response.TaskId))
+                if (response?.NodeAction != HyperNodeActionType.Rejected &&
+                    optionFlags.HasFlag(MessageProcessOptionFlags.CacheTaskProgress) &&
+                    !string.IsNullOrWhiteSpace(response?.TaskId))
                 {
                     await TrackCommandProgress(response.TaskId);
                 }
@@ -145,9 +137,9 @@ namespace TestClient
 
                 var cancelSuccess = (
                     await new HyperNodeClient(TargetEndpoint).ProcessMessageAsync(msg)
-                )?.ProcessStatusFlags.HasFlag(
+                ).ProcessStatusFlags.HasFlag(
                     MessageProcessStatusFlags.Success
-                ) ?? false;
+                );
 
                 if (cancelSuccess)
                     MessageBox.Show("Task cancelled successfully!", "Task Cancelled", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -241,9 +233,9 @@ namespace TestClient
             return $"{item.EventDateTime:G} {item.Agent}{(progressPercentage.HasValue || item.Elapsed.HasValue ? $" ({item.Elapsed}{(item.Elapsed.HasValue && progressPercentage.HasValue ? " " : "")}{progressPercentage:P})" : "")} - {item.EventDescription}";
         }
 
-        private static string[] GetActivityStrings(IEnumerable<HyperNodeActivityItem> activity)
+        private static string[]? GetActivityStrings(IEnumerable<HyperNodeActivityItem>? activity)
         {
-            return activity.OrderBy(
+            return activity?.OrderBy(
                 i => i.EventDateTime
             ).Select(
                 FormatActivityItem
@@ -297,13 +289,14 @@ namespace TestClient
                         taskProgressInfo = commandResponse?.TaskProgressInfo ?? new HyperNodeTaskProgressInfo();
                         if (!(commandResponse?.TaskProgressCacheEnabled ?? false))
                         {
-                            taskProgressInfo.Activity.Add(
+                            taskProgressInfo.Activity = new[]
+                            {
                                 new HyperNodeActivityItem
                                 {
                                     Agent = ClientAgentName,
-                                    EventDescription = "Warning: Task progress cache is not enabled for HyperNode \'Alice\'."
+                                    EventDescription = $"Warning: Task progress cache is not enabled for HyperNode at \'{TargetEndpoint}\'."
                                 }
-                            );
+                            };
 
                             // Make sure we exit the loop, since we're not going to get anything useful in this case.
                             taskProgressInfo.IsComplete = true;
@@ -323,6 +316,57 @@ namespace TestClient
             lstActivityItems.DataSource = GetActivityStrings(finalTaskProgressInfo.Activity);
             PopulateResponseSummary(lstResponseSummary, finalTaskProgressInfo.Response);
             PopulateTaskTrace(tvwTaskTrace, finalTaskProgressInfo.Response);
+        }
+
+        private async Task<HyperNodeMessageResponse> RunComplexCommand(MessageProcessOptionFlags optionFlags)
+        {
+            // Create our message request
+            var serializer = new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>();
+            var commandRequestBytes = serializer.SerializeRequest(
+                new ComplexCommandRequest
+                {
+                    MyDateTime = new DateTime(2002, 4, 12),
+                    MyInt32 = 1000,
+                    MyString = "My String!",
+                    MyTimeSpan = TimeSpan.FromMinutes(17)
+                }
+            );
+
+            var msg = new HyperNodeMessageRequest
+            {
+                CreatedByAgentName = ClientAgentName,
+                CommandName = cboCommandNames.Text,
+                CommandRequestBytes = commandRequestBytes,
+                ProcessOptionFlags = optionFlags
+            };
+
+            var client = new HyperNodeClient(TargetEndpoint);
+            return await client.ProcessMessageAsync(msg);
+        }
+
+        private async Task<HyperNodeMessageResponse> RunLongRunningCommand(MessageProcessOptionFlags optionFlags)
+        {
+            // Create our message request
+            var serializer = new ProtoContractSerializer<LongRunningCommandRequest, EmptyCommandResponse>();
+            var commandRequestBytes = serializer.SerializeRequest(
+                new LongRunningCommandRequest
+                {
+                    TotalRunTime = TimeSpan.FromHours(1),
+                    MinimumSleepInterval = TimeSpan.FromSeconds(1),
+                    MaximumSleepInterval = TimeSpan.FromSeconds(5)
+                }
+            );
+
+            var msg = new HyperNodeMessageRequest
+            {
+                CreatedByAgentName = ClientAgentName,
+                CommandName = cboCommandNames.Text,
+                CommandRequestBytes = commandRequestBytes,
+                ProcessOptionFlags = optionFlags
+            };
+
+            var client = new HyperNodeClient(TargetEndpoint);
+            return await client.ProcessMessageAsync(msg);
         }
 
         #endregion Private Methods

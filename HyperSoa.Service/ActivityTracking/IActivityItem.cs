@@ -13,7 +13,7 @@
         /// <summary>
         /// The name of the agent reporting the activity event.
         /// </summary>
-        string Agent { get; }
+        string? Agent { get; }
 
         /// <summary>
         /// A description of the activity event.

@@ -4,7 +4,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
 {
     internal sealed class SystemCommandElementCollection : ConfigurationElementCollection, IRemoteAdminConfigurationCollection
     {
-        public SystemCommandElement this[int index]
+        public SystemCommandElement? this[int index]
         {
             get => BaseGet(index) as SystemCommandElement;
             set
@@ -15,7 +15,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
             }
         }
 
-        public new SystemCommandElement this[string name]
+        public new SystemCommandElement? this[string name]
         {
             get => BaseGet(name) as SystemCommandElement;
             set
@@ -48,7 +48,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
             set => base["enabled"] = value;
         }
 
-        public IRemoteAdminCommandConfiguration GetByCommandName(string commandName)
+        public IRemoteAdminCommandConfiguration? GetByCommandName(string commandName)
         {
             return this[commandName];
         }

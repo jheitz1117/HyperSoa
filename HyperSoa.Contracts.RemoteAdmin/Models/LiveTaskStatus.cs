@@ -12,13 +12,13 @@ namespace HyperSoa.Contracts.RemoteAdmin.Models
         /// The ID of the task.
         /// </summary>
         [ProtoMember(1)]
-        public string TaskId { get; set; }
+        public string? TaskId { get; set; }
 
         /// <summary>
         /// The name of the command which started the task.
         /// </summary>
         [ProtoMember(2)]
-        public string CommandName { get; set; }
+        public string? CommandName { get; set; }
 
         /// <summary>
         /// Indicates whether cancellation has been requested for the task.

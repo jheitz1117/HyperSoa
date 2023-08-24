@@ -11,7 +11,7 @@ namespace HyperSoa.Service.Configuration
         /// <summary>
         /// The name of the system-level <see cref="ICommandModule"/> object. This property is required.
         /// </summary>
-        string CommandName { get; }
+        string? CommandName { get; }
 
         /// <summary>
         /// Indicates whether the system-level <see cref="ICommandModule"/> object will be enabled when the <see cref="IHyperNodeService"/> starts.

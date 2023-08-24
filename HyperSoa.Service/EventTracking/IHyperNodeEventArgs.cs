@@ -1,4 +1,5 @@
-﻿using HyperSoa.Service.ActivityTracking;
+﻿using HyperSoa.Contracts;
+using HyperSoa.Service.ActivityTracking;
 
 namespace HyperSoa.Service.EventTracking
 {

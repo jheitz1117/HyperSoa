@@ -4,7 +4,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
 {
     internal sealed class CommandModuleElementCollection : ConfigurationElementCollection, ICommandModuleConfigurationCollection
     {
-        public CommandModuleElement this[int index]
+        public CommandModuleElement? this[int index]
         {
             get => BaseGet(index) as CommandModuleElement;
             set
@@ -15,7 +15,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
             }
         }
 
-        public new CommandModuleElement this[string name]
+        public new CommandModuleElement? this[string name]
         {
             get => BaseGet(name) as CommandModuleElement;
             set

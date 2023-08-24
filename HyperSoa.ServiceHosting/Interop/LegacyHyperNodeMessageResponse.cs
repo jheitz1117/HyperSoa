@@ -10,7 +10,7 @@ namespace HyperSoa.ServiceHosting.Interop
         public HyperNodeActionType NodeAction { get; set; }
         public HyperNodeActionReasonType NodeActionReason { get; set; }
         public MessageProcessStatusFlags ProcessStatusFlags { get; set; }
-        public List<HyperNodeActivityItem> TaskTrace { get; set; }
+        public List<HyperNodeActivityItem>? TaskTrace { get; set; }
         public string? CommandResponseString { get; set; }
     }
 }

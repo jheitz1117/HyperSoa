@@ -74,7 +74,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
         /// </summary>
         [ConfigurationProperty("activityMonitors")]
         [ConfigurationCollection(typeof(ActivityMonitorElementCollection))]
-        public ActivityMonitorElementCollection ActivityMonitors => this["activityMonitors"] as ActivityMonitorElementCollection;
+        public ActivityMonitorElementCollection? ActivityMonitors => this["activityMonitors"] as ActivityMonitorElementCollection;
 
         /// <summary>
         /// This property (and all such collection properties) must be defined with a return type that matches the <see cref="ConfigurationCollectionAttribute"/> to satisfy the .NET framework.
@@ -82,7 +82,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
         /// </summary>
         [ConfigurationProperty("systemCommands")]
         [ConfigurationCollection(typeof(SystemCommandElementCollection), AddItemName = "systemCommand")]
-        public SystemCommandElementCollection SystemCommands => this["systemCommands"] as SystemCommandElementCollection;
+        public SystemCommandElementCollection? SystemCommands => this["systemCommands"] as SystemCommandElementCollection;
 
         /// <summary>
         /// This property (and all such collection properties) must be defined with a return type that matches the <see cref="ConfigurationCollectionAttribute"/> to satisfy the .NET framework.
@@ -90,21 +90,21 @@ namespace HyperSoa.Service.Configuration.Xml.Models
         /// </summary>
         [ConfigurationProperty("commandModules")]
         [ConfigurationCollection(typeof(CommandModuleElementCollection))]
-        public CommandModuleElementCollection CommandModules => this["commandModules"] as CommandModuleElementCollection;
+        public CommandModuleElementCollection? CommandModules => this["commandModules"] as CommandModuleElementCollection;
 
         /// <summary>
         /// This property must be implemented explicitly because its sibling property of the same name must have a specific return type to satisfy the .NET framework.
         /// </summary>
-        IActivityMonitorConfigurationCollection IHyperNodeConfiguration.ActivityMonitors => ActivityMonitors;
+        IActivityMonitorConfigurationCollection? IHyperNodeConfiguration.ActivityMonitors => ActivityMonitors;
 
         /// <summary>
         /// This property must be implemented explicitly because its sibling property of the same name must have a specific return type to satisfy the .NET framework.
         /// </summary>
-        IRemoteAdminConfigurationCollection IHyperNodeConfiguration.RemoteAdminCommands => SystemCommands;
+        IRemoteAdminConfigurationCollection? IHyperNodeConfiguration.RemoteAdminCommands => SystemCommands;
 
         /// <summary>
         /// This property must be implemented explicitly because its sibling property of the same name must have a specific return type to satisfy the .NET framework.
         /// </summary>
-        ICommandModuleConfigurationCollection IHyperNodeConfiguration.CommandModules => CommandModules;
+        ICommandModuleConfigurationCollection? IHyperNodeConfiguration.CommandModules => CommandModules;
     }
 }

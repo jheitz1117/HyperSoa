@@ -1,34 +1,12 @@
-﻿using HyperSoa.Contracts;
-using HyperSoa.Service;
-using HyperSoa.Service.Configuration;
-using HyperSoa.Service.Configuration.Json;
+﻿using HyperSoa.Service.Configuration.Json;
 using HyperSoa.ServiceHosting;
-using HyperSoa.ServiceHosting.Configuration;
 using HyperSoa.ServiceHosting.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// Add HyperNodeService dependencies
-builder.Services.AddTransient<IHyperNodeConfigurationProvider, JsonHyperNodeConfigurationProvider>();
-builder.Services.AddSingleton<IHyperNodeService>(
-    serviceProvider =>
-    {
-        HyperNodeService.CreateAndConfigure(
-            serviceProvider.GetRequiredService<IHyperNodeConfigurationProvider>(),
-            serviceProvider
-        );
-
-        return HyperNodeService.Instance;
-    }
-);
-builder.Services.AddHostedService<HostedHyperNodeService>();
-
-// Add HyperNodeHost dependencies
-builder.Services.AddTransient<IHyperNodeHostConfigurationProvider, JsonHyperNodeHostConfigurationProvider>();
-builder.Services.AddSingleton<IHyperNodeServiceHost, HyperNodeServiceHost>();
-builder.Services.AddHostedService<HostedListenerService>();
+builder.Services.AddHyperNodeServiceHosting<JsonHyperNodeConfigurationProvider, JsonHyperNodeHostConfigurationProvider>();
 
 try
 {

@@ -8,6 +8,16 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
     internal class GetCachedTaskProgressInfoCommand : ICommandModule, IServiceContractSerializerFactory
     {
+        private readonly HyperNodeService _adminService;
+
+        public GetCachedTaskProgressInfoCommand(IHyperNodeService serviceInstance)
+        {
+            if (serviceInstance is not HyperNodeService adminService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _adminService = adminService;
+        }
+
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not GetCachedTaskProgressInfoRequest request)
@@ -15,7 +25,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 
             var response = new GetCachedTaskProgressInfoResponse
             {
-                TaskProgressCacheEnabled = HyperNodeService.Instance.EnableTaskProgressCache
+                TaskProgressCacheEnabled = _adminService.EnableTaskProgressCache
             };
 
             if (!response.TaskProgressCacheEnabled)
@@ -23,28 +33,36 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
                 context.Activity.Track("Warning: The task progress cache is disabled.");
                 response.ProcessStatusFlags |= MessageProcessStatusFlags.HadWarnings;
             }
-
-            context.Activity.Track($"Retrieving cached task progress info for Task ID '{request.TaskId}'.");
-            response.TaskProgressInfo = HyperNodeService.Instance.GetCachedTaskProgressInfo(request.TaskId);
-
-            // If we can't find any task progress info for the specified Task ID, we'll return a placeholder object in Completed status that informs the caller that no progress
-            // information exists for this task ID. This will prevent the caller from sitting in an infinite loop waiting for IsComplete to be true when there may not be a cache
-            // item available, or no cache at all
-            response.TaskProgressInfo ??= new HyperNodeTaskProgressInfo
+            else if (string.IsNullOrWhiteSpace(request.TaskId))
             {
-                IsComplete = true,
-                Activity = new List<HyperNodeActivityItem>
-                {
-                    new()
-                    {
-                        EventDateTime = DateTime.Now,
-                        EventDescription = $"No task progress information exists for Task ID '{request.TaskId}'.",
-                        Agent = context.ExecutingNodeName
-                    }
-                }
-            };
+                context.Activity.Track($"Invalid {nameof(request.TaskId)} value. The value must not be blank.");
 
-            response.ProcessStatusFlags |= MessageProcessStatusFlags.Success;
+                response.ProcessStatusFlags |= MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
+            }
+            else
+            {
+                context.Activity.Track($"Retrieving cached task progress info for Task ID '{request.TaskId}'.");
+                response.TaskProgressInfo = _adminService.GetCachedTaskProgressInfo(request.TaskId);
+
+                // If we can't find any task progress info for the specified Task ID, we'll return a placeholder object in Completed status that informs the caller that no progress
+                // information exists for this task ID. This will prevent the caller from sitting in an infinite loop waiting for IsComplete to be true when there may not be a cache
+                // item available, or no cache at all
+                response.TaskProgressInfo ??= new HyperNodeTaskProgressInfo
+                {
+                    IsComplete = true,
+                    Activity = new []
+                    {
+                        new HyperNodeActivityItem
+                        {
+                            EventDateTime = DateTime.Now,
+                            EventDescription = $"No task progress information exists for Task ID '{request.TaskId}'.",
+                            Agent = context.ExecutingNodeName
+                        }
+                    }
+                };
+            
+                response.ProcessStatusFlags |= MessageProcessStatusFlags.Success;
+            }
 
             return response;
         }

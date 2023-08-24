@@ -10,7 +10,7 @@ namespace HyperSoa.Service
         /// <summary>
         /// The name of the command specified in the <see cref="HyperNodeMessageRequest"/>.
         /// </summary>
-        string CommandName { get; }
+        string? CommandName { get; }
 
         /// <summary>
         /// The name of the agent that created the <see cref="HyperNodeMessageRequest"/>.

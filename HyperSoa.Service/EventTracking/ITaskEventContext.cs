@@ -1,5 +1,4 @@
 ﻿using HyperSoa.Contracts;
-using HyperSoa.Service.CommandModules;
 
 namespace HyperSoa.Service.EventTracking
 {

@@ -19,6 +19,7 @@ namespace HyperSoa.Service
 
         private static readonly IHyperNodeEventHandler DefaultEventHandler = new HyperNodeEventHandlerBase();
         private static readonly ITaskIdProvider DefaultTaskIdProvider = new GuidTaskIdProvider();
+        internal const string DefaultNodeName = "DefaultInstance";
         internal const bool DefaultTaskProgressCacheEnabled = false;
         internal const bool DefaultDiagnosticsEnabled = false;
         internal const int DefaultProgressCacheDurationMinutes = 60;
@@ -29,40 +30,23 @@ namespace HyperSoa.Service
         #region Configuration
 
         /// <summary>
-        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
+        /// Initializes an instance of the <see cref="HyperNodeService"/> class with a default <see cref="IHyperNodeConfigurationProvider"/>
+        /// and no <see cref="IServiceProvider"/>.
         /// </summary>
-        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
-        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider)
-        {
-            if (_instance == null)
-            {
-                lock (Lock)
-                {
-                    _instance ??= Create(configProvider, null);
-                }
-            }
-        }
+        public HyperNodeService() : this(DefaultConfigurationProvider) { }
 
         /// <summary>
-        /// Creates the singleton instance of <see cref="HyperNodeService"/> using the specified <see cref="IHyperNodeConfigurationProvider"/>.
+        /// Initializes an instance of the <see cref="HyperNodeService"/> class with the specified <see cref="IHyperNodeConfigurationProvider"/>
+        /// and an optional <see cref="IServiceProvider"/>.
         /// </summary>
-        /// <param name="configProvider">The <see cref="IHyperNodeConfigurationProvider"/> to use to configure the service.</param>
-        /// <param name="serviceProvider">The DI <see cref="IServiceProvider"/> to use to create instances of our dynamic types.</param>
-        public static void CreateAndConfigure(IHyperNodeConfigurationProvider configProvider, IServiceProvider serviceProvider)
-        {
-            if (_instance == null)
-            {
-                lock (Lock)
-                {
-                    _instance ??= Create(configProvider, serviceProvider);
-                }
-            }
-        }
-
-        private static HyperNodeService Create(IHyperNodeConfigurationProvider configProvider, IServiceProvider? serviceProvider)
+        /// <param name="configProvider">DI dependency for the config</param>
+        /// <param name="serviceProvider">Optional DI dependency for the <see cref="IServiceProvider"/></param>
+        public HyperNodeService(IHyperNodeConfigurationProvider configProvider, IServiceProvider? serviceProvider = null)
         {
             if (configProvider == null)
                 throw new ArgumentNullException(nameof(configProvider));
+            if (serviceProvider == null)
+                throw new ArgumentNullException(nameof(serviceProvider));
 
             IHyperNodeConfiguration config;
 
@@ -88,26 +72,23 @@ namespace HyperSoa.Service
             if (builder.Length > 0)
             { throw new HyperNodeConfigurationException(builder.ToString()); }
 
-            var service = new HyperNodeService(config.HyperNodeName)
-            {
-                ServiceProvider = serviceProvider,
-                Logger = serviceProvider?.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance,
-                EnableTaskProgressCache = config.EnableTaskProgressCache ?? DefaultTaskProgressCacheEnabled,
-                EnableDiagnostics = config.EnableDiagnostics ?? DefaultDiagnosticsEnabled,
-                TaskProgressCacheDuration = TimeSpan.FromMinutes(config.TaskProgressCacheDurationMinutes ?? DefaultProgressCacheDurationMinutes),
-                MaxConcurrentTasks = config.MaxConcurrentTasks ?? DefaultMaxConcurrentTasks
-            };
+            HyperNodeName = config.HyperNodeName ?? DefaultNodeName;
 
-            ConfigureRemoteAdminCommands(service, config);
-            ConfigureTaskProvider(service, config, serviceProvider);
-            ConfigureActivityMonitors(service, config, serviceProvider);
-            ConfigureCommandModules(service, config, serviceProvider);
-            ConfigureHyperNodeEventHandler(service, config, serviceProvider);
+            ServiceProvider = serviceProvider;
+            Logger = serviceProvider.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance;
+            EnableTaskProgressCache = config.EnableTaskProgressCache ?? DefaultTaskProgressCacheEnabled;
+            EnableDiagnostics = config.EnableDiagnostics ?? DefaultDiagnosticsEnabled;
+            TaskProgressCacheDuration = TimeSpan.FromMinutes(config.TaskProgressCacheDurationMinutes ?? DefaultProgressCacheDurationMinutes);
+            MaxConcurrentTasks = config.MaxConcurrentTasks ?? DefaultMaxConcurrentTasks;
 
-            return service;
+            ConfigureRemoteAdminCommands(config);
+            ConfigureTaskProvider(config, serviceProvider);
+            ConfigureActivityMonitors(config, serviceProvider);
+            ConfigureCommandModules(config, serviceProvider);
+            ConfigureHyperNodeEventHandler(config, serviceProvider);
         }
 
-        private static void ConfigureRemoteAdminCommands(HyperNodeService service, IHyperNodeConfiguration config)
+        private void ConfigureRemoteAdminCommands(IHyperNodeConfiguration config)
         {
             // Grab our user-defined default for remote admin commands being enabled or disabled
             bool? userDefinedRemoteAdminCommandsEnabledDefault = null;
@@ -186,7 +167,7 @@ namespace HyperSoa.Service
             foreach (var remoteAdminCommandConfig in remoteAdminCommandConfigs)
             {
                 // Allow each remote admin command to be enabled or disabled individually. This takes precedence over any defaults defined previously
-                if (config.RemoteAdminCommands != null && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandConfig.CommandName))
+                if (config.RemoteAdminCommands != null && !string.IsNullOrWhiteSpace(remoteAdminCommandConfig.CommandName) && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandConfig.CommandName))
                 {
                     var userConfig = config.RemoteAdminCommands.GetByCommandName(remoteAdminCommandConfig.CommandName);
                     if (userConfig != null)
@@ -194,11 +175,11 @@ namespace HyperSoa.Service
                 }
 
                 // Finally, try to add this remote admin command to our collection
-                service.AddCommandModuleConfiguration(remoteAdminCommandConfig);
+                AddCommandModuleConfiguration(remoteAdminCommandConfig);
             }
         }
 
-        private static void ConfigureTaskProvider(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
+        private void ConfigureTaskProvider(IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             ITaskIdProvider? taskIdProvider = null;
 
@@ -218,10 +199,10 @@ namespace HyperSoa.Service
                 taskIdProvider.Initialize();
             }
 
-            service.TaskIdProvider = taskIdProvider ?? DefaultTaskIdProvider;
+            TaskIdProvider = taskIdProvider ?? DefaultTaskIdProvider;
         }
 
-        private static void ConfigureActivityMonitors(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
+        private void ConfigureActivityMonitors(IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             // Consider a null collection equivalent to an empty one
             if (config.ActivityMonitors == null)
@@ -248,19 +229,19 @@ namespace HyperSoa.Service
 
                     monitor.Initialize();
 
-                    if (service._customActivityMonitors.Any(m => m.Name == monitorConfig.MonitorName))
+                    if (_customActivityMonitors.Any(m => m.Name == monitorConfig.MonitorName))
                     {
                         throw new DuplicateActivityMonitorException(
                             $"An activity monitor already exists with the {nameof(monitorConfig.MonitorName)} '{monitorConfig.MonitorName}'."
                         );
                     }
 
-                    service._customActivityMonitors.Add(monitor);
+                    _customActivityMonitors.Add(monitor);
                 }
             }
         }
 
-        private static void ConfigureCommandModules(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
+        private void ConfigureCommandModules(IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             // Consider a null collection equivalent to an empty one
             if (config.CommandModules == null)
@@ -275,7 +256,7 @@ namespace HyperSoa.Service
             foreach (var commandModuleConfig in config.CommandModules)
             {
                 var commandModuleType = Type.GetType(
-                    commandModuleConfig.CommandModuleType,
+                    commandModuleConfig.CommandModuleType!,
                     true
                 ) ?? throw new HyperNodeConfigurationException($"Unable to determine command type from '{commandModuleConfig.CommandModuleType}'.");
 
@@ -311,12 +292,12 @@ namespace HyperSoa.Service
                         ContractSerializer = configContractSerializer ?? DefaultContractSerializer
                     };
 
-                    service.AddCommandModuleConfiguration(commandConfig);
+                    AddCommandModuleConfiguration(commandConfig);
                 }
             }
         }
 
-        private static void ConfigureHyperNodeEventHandler(HyperNodeService service, IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
+        private void ConfigureHyperNodeEventHandler(IHyperNodeConfiguration config, IServiceProvider? serviceProvider)
         {
             IHyperNodeEventHandler? eventHandler = null;
 
@@ -336,7 +317,7 @@ namespace HyperSoa.Service
                 eventHandler.Initialize();
             }
 
-            service.EventHandler = eventHandler ?? DefaultEventHandler;
+            EventHandler = eventHandler ?? DefaultEventHandler;
         }
         
         #endregion Configuration

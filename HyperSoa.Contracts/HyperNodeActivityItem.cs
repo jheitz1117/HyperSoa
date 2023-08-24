@@ -18,7 +18,7 @@ namespace HyperSoa.Contracts
         /// The name of the agent reporting the activity event.
         /// </summary>
         [ProtoMember(2)]
-        public string Agent { get; set; }
+        public string? Agent { get; set; }
 
         /// <summary>
         /// The amount of time that has elapsed since the first <see cref="HyperNodeActivityItem"/> was tracked for the task.

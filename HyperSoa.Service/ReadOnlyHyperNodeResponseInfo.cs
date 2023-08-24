@@ -9,8 +9,8 @@ namespace HyperSoa.Service
     /// </summary>
     internal class ReadOnlyHyperNodeResponseInfo : IReadOnlyHyperNodeResponseInfo
     {
-        public string TaskId { get; }
-        public string RespondingNodeName { get; }
+        public string? TaskId { get; }
+        public string? RespondingNodeName { get; }
         public TimeSpan? TotalRunTime { get; }
         public HyperNodeActionType NodeAction { get; }
         public HyperNodeActionReasonType NodeActionReason { get; }

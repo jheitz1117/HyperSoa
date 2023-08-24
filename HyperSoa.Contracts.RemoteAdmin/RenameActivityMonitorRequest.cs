@@ -12,12 +12,12 @@ namespace HyperSoa.Contracts.RemoteAdmin
         /// The name of the custom activity monitor to rename.
         /// </summary>
         [ProtoMember(1)]
-        public string OldName { get; set; }
+        public string? OldName { get; set; }
 
         /// <summary>
         /// The new name of the custom activity monitor.
         /// </summary>
         [ProtoMember(2)]
-        public string NewName { get; set; }
+        public string? NewName { get; set; }
     }
 }

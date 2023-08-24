@@ -40,21 +40,21 @@ namespace HyperSoa.Contracts.RemoteAdmin
         public int MaxConcurrentTasks { get; set; }
 
         /// <summary>
-        /// A list of <see cref="CommandStatus"/> objects reporting the status of each command module in the <see cref="IHyperNodeService"/>.
+        /// Array of <see cref="CommandStatus"/> objects reporting the status of each command module in the <see cref="IHyperNodeService"/>.
         /// </summary>
         [ProtoMember(6)]
-        public IEnumerable<CommandStatus> Commands { get; set; } = new List<CommandStatus>();
+        public CommandStatus[]? Commands { get; set; }
 
         /// <summary>
-        /// A list of <see cref="ActivityMonitorStatus"/> objects reporting the status of each custom activity monitor in the <see cref="IHyperNodeService"/>.
+        /// Array of <see cref="ActivityMonitorStatus"/> objects reporting the status of each custom activity monitor in the <see cref="IHyperNodeService"/>.
         /// </summary>
         [ProtoMember(7)]
-        public IEnumerable<ActivityMonitorStatus> ActivityMonitors { get; set; } = new List<ActivityMonitorStatus>();
+        public ActivityMonitorStatus[]? ActivityMonitors { get; set; }
 
         ///// <summary>
-        ///// A list of <see cref="LiveTaskStatus"/> objects reporting the status of each live task in the <see cref="IHyperNodeService"/>.
+        ///// Array of <see cref="LiveTaskStatus"/> objects reporting the status of each live task in the <see cref="IHyperNodeService"/>.
         ///// </summary>
         [ProtoMember(8)]
-        public IEnumerable<LiveTaskStatus> LiveTasks { get; set; } = new List<LiveTaskStatus>();
+        public LiveTaskStatus[]? LiveTasks { get; set; }
     }
 }

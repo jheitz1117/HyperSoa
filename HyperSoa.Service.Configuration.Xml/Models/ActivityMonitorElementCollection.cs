@@ -4,7 +4,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
 {
     internal sealed class ActivityMonitorElementCollection : ConfigurationElementCollection, IActivityMonitorConfigurationCollection
     {
-        public ActivityMonitorElement this[int index]
+        public ActivityMonitorElement? this[int index]
         {
             get => BaseGet(index) as ActivityMonitorElement;
             set
@@ -15,7 +15,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
             }
         }
 
-        public new ActivityMonitorElement this[string name]
+        public new ActivityMonitorElement? this[string name]
         {
             get => BaseGet(name) as ActivityMonitorElement;
             set

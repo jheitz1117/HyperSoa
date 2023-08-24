@@ -19,6 +19,6 @@ namespace HostingTest.Contracts
         public int FiveHundredLessThanRequest { get; set; }
         
         [ProtoMember(5)]
-        public string ResponseStringNotTheSame { get; set; }
+        public string? ResponseStringNotTheSame { get; set; }
     }
 }

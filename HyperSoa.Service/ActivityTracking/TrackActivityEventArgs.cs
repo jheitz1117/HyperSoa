@@ -3,7 +3,7 @@
 namespace HyperSoa.Service.ActivityTracking
 {
     /// <summary>
-    /// Event arguments for <see cref="HyperActivityTracker"/> objects.
+    /// Event arguments for <see cref="HyperNodeTaskActivityTracker"/> objects.
     /// </summary>
     public class TrackActivityEventArgs : EventArgs
     {

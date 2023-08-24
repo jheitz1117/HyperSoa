@@ -20,8 +20,7 @@ namespace HyperSoa.Service
 {
     /// <summary>
     /// Processes <see cref="HyperNodeMessageRequest"/> objects and returns <see cref="HyperNodeMessageResponse"/> objects.
-    /// This class is a singleton and must be referenced using the static <see cref="HyperNodeService.Instance"/> property.
-    /// This class cannot be inherited.
+    /// This class should be registered as a singleton in a DI container. This class cannot be inherited.
     /// </summary>
     public sealed partial class HyperNodeService : IHyperNodeService, IDisposable
     {
@@ -33,8 +32,6 @@ namespace HyperSoa.Service
         #endregion Defaults
 
         #region Private Members
-
-        private static readonly object Lock = new();
 
         private readonly TaskProgressCacheMonitor _taskProgressCacheMonitor = new();
         private readonly List<HyperNodeServiceActivityMonitor> _customActivityMonitors = new();
@@ -60,28 +57,12 @@ namespace HyperSoa.Service
             set => _taskProgressCacheMonitor.CacheDuration = value;
         }
 
-        private IServiceProvider? ServiceProvider { get; init; }
-        private ILogger<HyperNodeService> Logger { get; init; } = NullLogger<HyperNodeService>.Instance;
+        private IServiceProvider? ServiceProvider { get; }
+        private ILogger<HyperNodeService> Logger { get; } = NullLogger<HyperNodeService>.Instance;
         private ITaskIdProvider TaskIdProvider { get; set; } = DefaultTaskIdProvider;
         private IHyperNodeEventHandler EventHandler { get; set; } = DefaultEventHandler;
         internal bool EnableDiagnostics { get; set; }
         internal int MaxConcurrentTasks { get; set; }
-
-        /// <summary>
-        /// Represents the singleton instance of the <see cref="HyperNodeService"/>.
-        /// </summary>
-        public static HyperNodeService Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    CreateAndConfigure(DefaultConfigurationProvider);
-
-                return _instance ?? throw new HyperNodeConfigurationException("Unable to configure HyperNode service.");
-            }
-        }
-
-        private static HyperNodeService? _instance;
 
         #endregion Properties
 
@@ -96,10 +77,10 @@ namespace HyperSoa.Service
         {
             Logger.LogTrace($"In {nameof(ProcessMessageAsync)}.");
             Logger.LogTrace($"{nameof(HyperNodeMessageRequest)} Values:");
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CommandName)}", message.CommandName == null ? "<null>" : $"\"{message.CommandName}\"");
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.ProcessOptionFlags)}", message.ProcessOptionFlags);
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CreatedByAgentName)}", message.CreatedByAgentName == null ? "<null>" : $"\"{message.CreatedByAgentName}\"");
-            Logger.LogTrace("    {n,-19} = {v}", $"{nameof(message.CommandRequestBytes)}", message.CommandRequestBytes?.Length.ToString("Array (Count: #)") ?? "<null>");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandName), message.CommandName == null ? "<null>" : $"\"{message.CommandName}\"");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.ProcessOptionFlags), message.ProcessOptionFlags);
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CreatedByAgentName), message.CreatedByAgentName == null ? "<null>" : $"\"{message.CreatedByAgentName}\"");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandRequestBytes), message.CommandRequestBytes?.Length.ToString("Array (Count: #)") ?? "<null>");
 
             var response = new HyperNodeMessageResponse
             {
@@ -388,15 +369,6 @@ namespace HyperSoa.Service
 
         #region Private Methods
 
-        /// <summary>
-        /// Initializes an instance of the <see cref="HyperNodeService"/> class with the specified name.
-        /// </summary>
-        /// <param name="hyperNodeName">The name of the <see cref="HyperNodeService"/>.</param>
-        private HyperNodeService(string hyperNodeName)
-        {
-            HyperNodeName = hyperNodeName;
-        }
-
         private void InitializeActivityTracker(HyperNodeTaskInfo currentTaskInfo, TaskTraceMonitor taskTraceMonitor)
         {
             currentTaskInfo.Activity = new HyperNodeTaskActivityTracker(
@@ -620,7 +592,7 @@ namespace HyperSoa.Service
             if (!string.IsNullOrWhiteSpace(args.Message.CommandName) &&
                 _commandModuleConfigurations.ContainsKey(args.Message.CommandName) &&
                 _commandModuleConfigurations.TryGetValue(args.Message.CommandName, out var commandModuleConfig) &&
-                commandModuleConfig.Enabled)
+                commandModuleConfig is { Enabled: true, CommandModuleType: not null })
             {
                 // Create our command module instance (with DI if available)
                 var commandInstance = ServiceProvider != null
@@ -666,7 +638,7 @@ namespace HyperSoa.Service
                         CreatedByAgentName = args.Message.CreatedByAgentName,
                         ProcessOptionFlags = args.Message.ProcessOptionFlags,
                         Request = commandRequest,
-                        Activity = args.Activity,
+                        Activity = args.Activity ?? (ITaskActivityTracker)NullActivityTracker.Instance,
                         Logger = commandLogger,
                         Token = args.Token
                     };

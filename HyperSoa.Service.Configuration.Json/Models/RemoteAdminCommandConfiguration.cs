@@ -2,9 +2,9 @@
 {
     internal class RemoteAdminCommandConfiguration : IRemoteAdminCommandConfiguration
     {
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public bool Enabled { get; set; }
 
-        string IRemoteAdminCommandConfiguration.CommandName => Name;
+        string? IRemoteAdminCommandConfiguration.CommandName => Name;
     }
 }

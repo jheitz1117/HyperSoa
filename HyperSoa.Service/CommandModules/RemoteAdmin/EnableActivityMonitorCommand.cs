@@ -8,15 +8,25 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 {
     internal class EnableActivityMonitorCommand : ICommandModule, IServiceContractSerializerFactory
     {
+        private readonly HyperNodeService _adminService;
+
+        public EnableActivityMonitorCommand(IHyperNodeService serviceInstance)
+        {
+            if (serviceInstance is not HyperNodeService adminService)
+                throw new ArgumentException($"Implementation must be {typeof(HyperNodeService)}.", nameof(serviceInstance));
+                
+            _adminService = adminService;
+        }
+
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
             if (context.Request is not EnableActivityMonitorRequest request)
                 throw new InvalidCommandRequestTypeException(typeof(EnableActivityMonitorRequest), context.Request?.GetType());
 
             var processStatusFlags = MessageProcessStatusFlags.Failure | MessageProcessStatusFlags.InvalidCommandRequest;
-            if (HyperNodeService.Instance.IsKnownActivityMonitor(request.ActivityMonitorName))
+            if (_adminService.IsKnownActivityMonitor(request.ActivityMonitorName))
             {
-                var result = HyperNodeService.Instance.EnableActivityMonitor(request.ActivityMonitorName, request.Enable);
+                var result = _adminService.EnableActivityMonitor(request.ActivityMonitorName, request.Enable);
                 context.Activity.Track(
                     $"The activity monitor '{request.ActivityMonitorName}' {(result ? "is now" : "could not be")} {(request.Enable ? "enabled" : "disabled")}."
                 );
