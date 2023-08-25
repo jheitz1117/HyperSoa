@@ -40,10 +40,10 @@ namespace HyperSoa.Service.Configuration
             { throw new ArgumentNullException(nameof(config)); }
 
             var configClassName = config.GetType().FullName;
-            if (string.IsNullOrWhiteSpace(config.HyperNodeName))
+            if (string.IsNullOrWhiteSpace(config.InstanceName))
             {
                 RaiseValidationEvent(
-                    new HyperNodeConfigurationException($"The HyperNodeName property is required for {configClassName}.")
+                    new HyperNodeConfigurationException($"The {nameof(config.InstanceName)} property is required for {configClassName}.")
                 );
             }
 

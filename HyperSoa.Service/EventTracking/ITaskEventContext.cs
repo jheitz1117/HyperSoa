@@ -10,7 +10,7 @@ namespace HyperSoa.Service.EventTracking
         /// <summary>
         /// The name of the <see cref="IHyperNodeService"/>.
         /// </summary>
-        string HyperNodeName { get; }
+        string ExecutingNodeName { get; }
 
         /// <summary>
         /// The name of the command being executed.

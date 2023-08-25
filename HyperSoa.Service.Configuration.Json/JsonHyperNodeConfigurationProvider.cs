@@ -9,7 +9,7 @@ namespace HyperSoa.Service.Configuration.Json
 
         public JsonHyperNodeConfigurationProvider(IConfiguration config)
         {
-            _hyperNodeConfig = config.GetRequiredSection("HyperNode").Get<HyperNodeConfiguration>() ?? throw new InvalidOperationException($"Unable to deserialize {nameof(HyperNodeConfiguration)} from configuration.");
+            _hyperNodeConfig = config.GetRequiredSection("HyperSoa:ServiceConfig").Get<HyperNodeConfiguration>() ?? throw new InvalidOperationException($"Unable to deserialize {nameof(HyperNodeConfiguration)} from configuration.");
         }
 
         public IHyperNodeConfiguration GetConfiguration()

@@ -13,6 +13,7 @@ namespace HyperSoa.Service.CommandModules
         public string? CommandName { get; set; }
         public string? CreatedByAgentName { get; set; }
         public MessageProcessOptionFlags ProcessOptionFlags { get; set; }
+        public byte[]? CommandRequestBytes { get; set; }
         public ICommandRequest? Request { get; set; }
         public ITaskActivityTracker Activity { get; set; } = NullActivityTracker.Instance;
         public ILogger Logger { get; set; } = NullLogger.Instance;

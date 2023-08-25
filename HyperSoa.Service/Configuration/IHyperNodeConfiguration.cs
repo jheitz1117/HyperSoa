@@ -14,7 +14,7 @@ namespace HyperSoa.Service.Configuration
         /// <summary>
         /// The name of the <see cref="IHyperNodeService"/>. This property is required.
         /// </summary>
-        string? HyperNodeName { get; }
+        string? InstanceName { get; }
 
         /// <summary>
         /// Indicates whether the task progress cache will be enabled when the <see cref="IHyperNodeService"/> starts.

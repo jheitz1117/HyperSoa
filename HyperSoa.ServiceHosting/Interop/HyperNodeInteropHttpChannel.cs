@@ -10,8 +10,8 @@ namespace HyperSoa.ServiceHosting.Interop
     {
         private readonly ILogger<HyperNodeInteropHttpChannel> _logger;
 
-        public HyperNodeInteropHttpChannel(IHyperNodeHttpEndpoint[] httpBindings, IHyperNodeService serviceInstance, ILogger<HyperNodeInteropHttpChannel> logger)
-            : base(httpBindings, serviceInstance, logger)
+        public HyperNodeInteropHttpChannel(HyperNodeHttpEndpoint[] httpEndpoints, IHyperNodeService serviceInstance, ILogger<HyperNodeInteropHttpChannel> logger)
+            : base(httpEndpoints, serviceInstance, logger)
         {
             _logger = logger;
         }

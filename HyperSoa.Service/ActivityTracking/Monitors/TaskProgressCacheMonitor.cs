@@ -13,7 +13,7 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         private static readonly MemoryCache Cache = MemoryCache.Default;
         private static readonly CacheItemPolicy CachePolicy = new();
 
-        public TimeSpan CacheDuration
+        public static TimeSpan CacheDuration
         {
             get => CachePolicy.SlidingExpiration;
             set => CachePolicy.SlidingExpiration = value;
@@ -24,6 +24,12 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
             Name = nameof(TaskProgressCacheMonitor);
         }
 
+        public static void ResetTaskIdProgress(string? taskId)
+        {
+            if (!string.IsNullOrWhiteSpace(taskId))
+                Cache.Remove(taskId);
+        }
+
         public override void OnTrack(IHyperNodeActivityEventItem activity)
         {
             // Ignore all activity that doesn't have a task ID
@@ -32,13 +38,6 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
 
             // First add a new cache item or get the existing cache item with the specified key
             var taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new CachedTaskProgressInfo());
-
-            // If we try to cache activity for a task that has already completed, evict the previous entry and initialize a new instance with that key.
-            if (taskProgressInfo.IsComplete)
-            {
-                Cache.Remove(activity.TaskId);
-                taskProgressInfo = AddOrGetExisting(activity.TaskId, () => new CachedTaskProgressInfo());
-            }
 
             // Now add our specific item to our list of activity items. Need lock because list is not thread-safe
             lock (Lock)
@@ -94,7 +93,7 @@ namespace HyperSoa.Service.ActivityTracking.Monitors
         /// </summary>
         /// <param name="taskId">The task ID to look for.</param>
         /// <returns></returns>
-        public HyperNodeTaskProgressInfo? GetTaskProgressInfo(string taskId)
+        public static HyperNodeTaskProgressInfo? GetTaskProgressInfo(string taskId)
         {
             HyperNodeTaskProgressInfo? snapshot = null;
 

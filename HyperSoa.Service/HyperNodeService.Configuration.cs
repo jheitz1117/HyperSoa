@@ -19,7 +19,7 @@ namespace HyperSoa.Service
 
         private static readonly IHyperNodeEventHandler DefaultEventHandler = new HyperNodeEventHandlerBase();
         private static readonly ITaskIdProvider DefaultTaskIdProvider = new GuidTaskIdProvider();
-        internal const string DefaultNodeName = "DefaultInstance";
+        internal const string DefaultInstanceName = "DefaultInstance";
         internal const bool DefaultTaskProgressCacheEnabled = false;
         internal const bool DefaultDiagnosticsEnabled = false;
         internal const int DefaultProgressCacheDurationMinutes = 60;
@@ -72,7 +72,7 @@ namespace HyperSoa.Service
             if (builder.Length > 0)
             { throw new HyperNodeConfigurationException(builder.ToString()); }
 
-            HyperNodeName = config.HyperNodeName ?? DefaultNodeName;
+            InstanceName = config.InstanceName ?? DefaultInstanceName;
 
             ServiceProvider = serviceProvider;
             Logger = serviceProvider.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance;

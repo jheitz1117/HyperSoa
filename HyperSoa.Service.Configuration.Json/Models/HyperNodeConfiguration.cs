@@ -2,7 +2,7 @@
 {
     internal class HyperNodeConfiguration : IHyperNodeConfiguration
     {
-        public string? Name { get; set; }
+        public string? InstanceName { get; set; }
         public bool? EnableTaskProgressCache { get; set; }
         public bool? EnableDiagnostics { get; set; }
         public int? TaskProgressCacheDuration { get; set; }
@@ -14,7 +14,6 @@
         public RemoteAdminConfigurationCollection? RemoteAdmin { get; set; }
         public CommandModuleConfigurationCollection? CommandConfig { get; set; }
 
-        string? IHyperNodeConfiguration.HyperNodeName => Name;
         int? IHyperNodeConfiguration.TaskProgressCacheDurationMinutes => TaskProgressCacheDuration;
         IActivityMonitorConfigurationCollection? IHyperNodeConfiguration.ActivityMonitors => ActivityMonitors;
         IRemoteAdminConfigurationCollection? IHyperNodeConfiguration.RemoteAdminCommands => RemoteAdmin;

@@ -23,7 +23,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             return new GetNodeStatusResponse
             {
                 DiagnosticsEnabled = _adminService.EnableDiagnostics,
-                TaskProgressCacheDuration = _adminService.TaskProgressCacheDuration,
+                TaskProgressCacheDuration = HyperNodeService.TaskProgressCacheDuration,
                 TaskProgressCacheEnabled = _adminService.EnableTaskProgressCache,
                 MaxConcurrentTasks = _adminService.MaxConcurrentTasks,
                 Commands = _adminService.GetCommandStatuses().ToArray(),

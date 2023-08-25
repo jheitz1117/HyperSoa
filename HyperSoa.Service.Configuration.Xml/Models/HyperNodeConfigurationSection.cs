@@ -8,7 +8,7 @@ namespace HyperSoa.Service.Configuration.Xml.Models
         /// Specifies the name of the <see cref="HyperNodeService"/>. This attribute is required.
         /// </summary>
         [ConfigurationProperty("name", IsRequired = true)]
-        public string HyperNodeName
+        public string InstanceName
         {
             get => (string)this["name"];
             set => this["name"] = value;

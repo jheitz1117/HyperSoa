@@ -88,8 +88,14 @@ namespace TestClient
                     case "ComplexCommand":
                         response = await RunComplexCommand(optionFlags);
                         break;
-                    case "TestLongRunningCommand":
+                    case "LongRunningCommand":
                         response = await RunLongRunningCommand(optionFlags);
+                        break;
+                    case "RejectedCommand":
+                        response = await RunRejectedCommand(optionFlags);
+                        break;
+                    case "Echo":
+                        response = await RunEchoCommand(optionFlags);
                         break;
                     default:
                         response = null;
@@ -354,6 +360,43 @@ namespace TestClient
                     TotalRunTime = TimeSpan.FromHours(1),
                     MinimumSleepInterval = TimeSpan.FromSeconds(1),
                     MaximumSleepInterval = TimeSpan.FromSeconds(5)
+                }
+            );
+
+            var msg = new HyperNodeMessageRequest
+            {
+                CreatedByAgentName = ClientAgentName,
+                CommandName = cboCommandNames.Text,
+                CommandRequestBytes = commandRequestBytes,
+                ProcessOptionFlags = optionFlags
+            };
+
+            var client = new HyperNodeClient(TargetEndpoint);
+            return await client.ProcessMessageAsync(msg);
+        }
+
+        private async Task<HyperNodeMessageResponse> RunRejectedCommand(MessageProcessOptionFlags optionFlags)
+        {
+            // Create our message request
+            var msg = new HyperNodeMessageRequest
+            {
+                CreatedByAgentName = ClientAgentName,
+                CommandName = cboCommandNames.Text,
+                ProcessOptionFlags = optionFlags
+            };
+
+            var client = new HyperNodeClient(TargetEndpoint);
+            return await client.ProcessMessageAsync(msg);
+        }
+
+        private async Task<HyperNodeMessageResponse> RunEchoCommand(MessageProcessOptionFlags optionFlags)
+        {
+            // Create our message request
+            var serializer = new ProtoContractSerializer<EchoRequest, EchoResponse>();
+            var commandRequestBytes = serializer.SerializeRequest(
+                new EchoRequest
+                {
+                    Prompt = "Marco!"
                 }
             );
 

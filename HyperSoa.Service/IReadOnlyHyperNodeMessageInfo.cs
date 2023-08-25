@@ -21,5 +21,10 @@ namespace HyperSoa.Service
         /// The processing flags specified in the <see cref="IHyperNodeService"/>.
         /// </summary>
         MessageProcessOptionFlags ProcessOptionFlags { get; }
+
+        /// <summary>
+        /// Contains the request bytes specified in the <see cref="HyperNodeMessageRequest"/>.
+        /// </summary>
+        public byte[]? CommandRequestBytes { get; }
     }
 }

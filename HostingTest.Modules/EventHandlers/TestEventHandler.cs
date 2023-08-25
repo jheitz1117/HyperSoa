@@ -6,29 +6,28 @@ namespace HostingTest.Modules.EventHandlers
     {
         public override void OnMessageReceived(IMessageReceivedEventArgs args)
         {
-            args.Activity.Track("This is 1 from OnMessageReceived!", "WOW!!!");
-            Thread.Sleep(100);
-            args.Activity.Track("This is 2 from OnMessageReceived!", "WOW!!!");
-            Thread.Sleep(100);
-            args.Activity.Track("This is 3 from OnMessageReceived!", "WOW!!!");
-            Thread.Sleep(100);
-            args.Activity.Track("This is 4 from OnMessageReceived!", "WOW!!!");
-            Thread.Sleep(100);
-            args.Activity.Track("This is 5 from OnMessageReceived!", "WOW!!!");
-            Thread.Sleep(100);
-
-            if (args.TaskContext.CommandName == "TestLongRunningCommand2")
+            if (args.TaskContext.CommandName == "RejectedCommand")
             {
-                args.RejectMessage("Barnacle!");
+                args.RejectMessage("Rejected!");
             }
         }
 
         public override void OnTaskStarted(ITaskStartedEventArgs args)
         {
-            if (args.TaskContext.CommandName == "TestLongRunningCommand")
+            if (args.TaskContext.CommandName == "LongRunningCommand")
             {
                 //args.CancelTask();
             }
+        }
+
+        public override void OnMessageProcessed(IHyperNodeEventArgs args)
+        {
+            args.Activity.Track($"Message processed by {args.TaskContext.ExecutingNodeName}");
+        }
+
+        public override void OnTaskCompleted(ITaskCompletedEventArgs args)
+        {
+            args.Activity.Track("From task completed event");
         }
     }
 }
