@@ -18,6 +18,7 @@
     <Copyright>Copyright (c) Heitz 2023</Copyright>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageOutputPath>..\NuGetPub</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
