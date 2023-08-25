@@ -3,6 +3,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.Extensions;
+using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Service.ActivityTracking;
 using HyperSoa.Service.ActivityTracking.Monitors;
 using HyperSoa.Service.ActivityTracking.Trackers;
@@ -51,10 +52,10 @@ namespace HyperSoa.Service
             set => _taskProgressCacheMonitor.Enabled = value;
         }
 
-        internal TimeSpan TaskProgressCacheDuration
+        internal static TimeSpan TaskProgressCacheDuration
         {
-            get => _taskProgressCacheMonitor.CacheDuration;
-            set => _taskProgressCacheMonitor.CacheDuration = value;
+            get => TaskProgressCacheMonitor.CacheDuration;
+            set => TaskProgressCacheMonitor.CacheDuration = value;
         }
 
         private IServiceProvider? ServiceProvider { get; }
@@ -191,8 +192,6 @@ namespace HyperSoa.Service
                     // Check if user cancelled the message in the OnTaskStarted event
                     currentTaskInfo.Token.ThrowIfCancellationRequested();
                     
-                    currentTaskInfo.Activity?.Track("Attempting to process message...");
-
                     // Define the method in a safe way (i.e. with a try/catch around it)
                     var processMessageInternalSafe = new Func<HyperNodeTaskInfo, Task>(
                         async args =>
@@ -400,6 +399,9 @@ namespace HyperSoa.Service
                  *****************************************************************************************************************/
                 if (EnableTaskProgressCache && currentTaskInfo.Message.ProgressCacheRequested())
                 {
+                    // We support reusable task IDs, so we need to reset the progress for the task ID in case we have stale progress for it.
+                    TaskProgressCacheMonitor.ResetTaskIdProgress(currentTaskInfo.TaskId);
+
                     Logger.LogTrace("Adding task progress cache monitor.");
                     systemActivityMonitors.Add(_taskProgressCacheMonitor);
                 }
@@ -482,6 +484,7 @@ namespace HyperSoa.Service
             try
             {
                 // Allow the user to reject the message if necessary
+                queueTracker.Track("Message received.");
                 EventHandler.OnMessageReceived(
                     new MessageReceivedEventArgs(
                         queueTracker,
@@ -625,7 +628,11 @@ namespace HyperSoa.Service
                 var loggerFactory = ServiceProvider?.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
                 var commandLogger = loggerFactory.CreateLogger(commandModuleConfig.CommandModuleType);
 
-                TrackActivityEventHandler commandActivityHandler = (_, e) => commandLogger.LogTrace("{m}", e.ActivityItem.EventDescription);
+                TrackActivityEventHandler? commandActivityHandler = null;
+
+                // Admin commands are in the HyperSoa namespace, so they get logged alongside the service logs. So we don't need a separate logger for them.
+                if (!RemoteAdminCommandName.IsRemoteAdminCommand(args.Message.CommandName))
+                    commandActivityHandler = (_, e) => commandLogger.LogTrace("{m}", e.ActivityItem.EventDescription);
 
                 try
                 {
@@ -637,6 +644,7 @@ namespace HyperSoa.Service
                         CommandName = args.Message.CommandName,
                         CreatedByAgentName = args.Message.CreatedByAgentName,
                         ProcessOptionFlags = args.Message.ProcessOptionFlags,
+                        CommandRequestBytes = args.Message.CommandRequestBytes,
                         Request = commandRequest,
                         Activity = args.Activity ?? (ITaskActivityTracker)NullActivityTracker.Instance,
                         Logger = commandLogger,
@@ -644,7 +652,7 @@ namespace HyperSoa.Service
                     };
 
                     // Subscribe our command activity handler to the activity feed
-                    if (args.Activity != null)
+                    if (args.Activity != null && commandActivityHandler != null)
                         args.Activity.TrackActivityHandler += commandActivityHandler;
 
                     // Execute the command
@@ -661,7 +669,7 @@ namespace HyperSoa.Service
                 finally
                 {
                     // Unsubscribe our command activity handler from any further updates
-                    if (args.Activity != null)
+                    if (args.Activity != null && commandActivityHandler != null)
                         args.Activity.TrackActivityHandler -= commandActivityHandler;
 
                     // Check if our module is disposable and take care of it appropriately

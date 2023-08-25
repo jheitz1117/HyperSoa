@@ -1,5 +1,6 @@
 ﻿using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Contracts.RemoteAdmin.Models;
+using HyperSoa.Service.ActivityTracking.Monitors;
 
 namespace HyperSoa.Service
 {
@@ -7,9 +8,9 @@ namespace HyperSoa.Service
     {
         #region System Commands
 
-        internal HyperNodeTaskProgressInfo? GetCachedTaskProgressInfo(string taskId)
+        internal static HyperNodeTaskProgressInfo? GetCachedTaskProgressInfo(string taskId)
         {
-            return _taskProgressCacheMonitor.GetTaskProgressInfo(taskId);
+            return TaskProgressCacheMonitor.GetTaskProgressInfo(taskId);
         }
 
         internal IEnumerable<CommandStatus> GetCommandStatuses()

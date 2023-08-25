@@ -42,7 +42,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
             else
             {
                 context.Activity.Track($"Retrieving cached task progress info for Task ID '{request.TaskId}'.");
-                response.TaskProgressInfo = _adminService.GetCachedTaskProgressInfo(request.TaskId);
+                response.TaskProgressInfo = HyperNodeService.GetCachedTaskProgressInfo(request.TaskId);
 
                 // If we can't find any task progress info for the specified Task ID, we'll return a placeholder object in Completed status that informs the caller that no progress
                 // information exists for this task ID. This will prevent the caller from sitting in an infinite loop waiting for IsComplete to be true when there may not be a cache

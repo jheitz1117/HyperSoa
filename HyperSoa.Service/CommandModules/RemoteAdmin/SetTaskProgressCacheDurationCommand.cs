@@ -33,7 +33,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
                 response.ProcessStatusFlags |= MessageProcessStatusFlags.HadWarnings;
             }
 
-            _adminService.TaskProgressCacheDuration = request.CacheDuration;
+            HyperNodeService.TaskProgressCacheDuration = request.CacheDuration;
             context.Activity.Track($"The task progress cache duration is now {request.CacheDuration}.");
             
             response.ProcessStatusFlags |= MessageProcessStatusFlags.Success;

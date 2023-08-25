@@ -19,7 +19,7 @@ namespace HyperSoa.Service
 
         #region Properties
 
-        public string HyperNodeName { get; }
+        public string ExecutingNodeName { get; }
 
         public string? CommandName => Message.CommandName;
 
@@ -49,9 +49,9 @@ namespace HyperSoa.Service
 
         #region Public Methods
 
-        public HyperNodeTaskInfo(string hyperNodeName, HyperNodeMessageRequest message, HyperNodeMessageResponse response, bool enableDiagnostics, CancellationToken masterToken)
+        public HyperNodeTaskInfo(string executingNodeName, HyperNodeMessageRequest message, HyperNodeMessageResponse response, bool enableDiagnostics, CancellationToken masterToken)
         {
-            HyperNodeName = hyperNodeName;
+            ExecutingNodeName = executingNodeName;
             _taskTokenSource = CancellationTokenSource.CreateLinkedTokenSource(masterToken);
             Message = message;
             Response = response;

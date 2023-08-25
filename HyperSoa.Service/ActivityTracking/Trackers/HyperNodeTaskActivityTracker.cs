@@ -132,7 +132,7 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
                 new TrackActivityEventArgs(
                     new HyperNodeActivityEventItem
                     {
-                        Agent = _taskContext.HyperNodeName,
+                        Agent = _taskContext.ExecutingNodeName,
                         TaskId = _taskContext.TaskId,
                         CommandName = _taskContext.CommandName,
                         Elapsed = _taskContext.Elapsed,
