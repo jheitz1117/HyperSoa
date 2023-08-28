@@ -48,7 +48,10 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
             }
             catch (Exception ex)
             {
-                TrackException(ex);
+                TrackException(
+                    ex,
+                    $"An exception was thrown from the {nameof(IHyperNodeEventHandler.OnTaskStarted)} event. See the {nameof(IActivityItem.EventDetail)} property for details."
+                );
             }
         }
 
@@ -64,7 +67,10 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
             }
             catch (Exception ex)
             {
-                TrackException(ex);
+                TrackException(
+                    ex,
+                    $"An exception was thrown from the {nameof(IHyperNodeEventHandler.OnMessageProcessed)} event. See the {nameof(IActivityItem.EventDetail)} property for details."
+                );
             }
         }
 
@@ -88,7 +94,10 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
             }
             catch (Exception ex)
             {
-                TrackException(ex);
+                TrackException(
+                    ex,
+                    $"An exception was thrown from the {nameof(IHyperNodeEventHandler.OnTaskCompleted)} event. See the {nameof(IActivityItem.EventDetail)} property for details."
+                );
             }
         }
 
@@ -99,34 +108,37 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
             );
         }
 
-        #region ITaskActivityTracker Implementation
-
-        public void Track(string? eventDescription)
+        public void Track(LogLevel logLevel, string? eventDescription)
         {
-            Track(eventDescription, null);
+            Track(logLevel, eventDescription, null);
         }
 
-        public void Track(string? eventDescription, string? eventDetail)
+        public void Track(LogLevel logLevel, string? eventDescription, string? eventDetail)
         {
-            Track(eventDescription, eventDetail, null);
+            Track(logLevel, eventDescription, eventDetail, null);
         }
 
-        public void Track(string? eventDescription, string? eventDetail, object? eventData)
+        public void Track(LogLevel logLevel, string? eventDescription, string? eventDetail, object? eventData)
         {
-            Track(eventDescription, eventDetail, eventData, null, null);
+            Track(logLevel, eventDescription, eventDetail, eventData, null, null);
         }
 
-        public void Track(string? eventDescription, double? progressPart, double? progressTotal)
+        public void Track(LogLevel logLevel, string? eventDescription, double? progressPart, double? progressTotal)
         {
-            Track(eventDescription, null, progressPart, progressTotal);
+            Track(logLevel, eventDescription, null, progressPart, progressTotal);
         }
 
-        public void Track(string? eventDescription, string? eventDetail, double? progressPart, double? progressTotal)
+        public void Track(LogLevel logLevel, string? eventDescription, string? eventDetail, double? progressPart, double? progressTotal)
         {
-            Track(eventDescription, eventDetail, null, progressPart, progressTotal);
+            Track(logLevel, eventDescription, eventDetail, null, progressPart, progressTotal);
         }
 
-        public void Track(string? eventDescription, string? eventDetail, object? eventData, double? progressPart, double? progressTotal)
+        public void TrackFormat(LogLevel logLevel, string eventDescriptionFormat, params object?[] args)
+        {
+            Track(logLevel, string.Format(eventDescriptionFormat, args));
+        }
+
+        public void Track(LogLevel logLevel, string? eventDescription, string? eventDetail, object? eventData, double? progressPart, double? progressTotal)
         {
             OnTrackActivity(
                 new TrackActivityEventArgs(
@@ -142,19 +154,57 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
                         EventData = eventData,
                         ProgressPart = progressPart,
                         ProgressTotal = progressTotal
-                    }
+                    },
+                    logLevel
                 )
             );
         }
 
+        #region ITaskActivityTracker Implementation
+
+        public void Track(string? eventDescription)
+        {
+            Track(LogLevel.Trace, eventDescription);
+        }
+
+        public void Track(string? eventDescription, string? eventDetail)
+        {
+            Track(LogLevel.Trace, eventDescription, eventDetail);
+        }
+
+        public void Track(string? eventDescription, string? eventDetail, object? eventData)
+        {
+            Track(LogLevel.Trace, eventDescription, eventDetail, eventData);
+        }
+
+        public void Track(string? eventDescription, double? progressPart, double? progressTotal)
+        {
+            Track(LogLevel.Trace, eventDescription, progressPart, progressTotal);
+        }
+
+        public void Track(string? eventDescription, string? eventDetail, double? progressPart, double? progressTotal)
+        {
+            Track(LogLevel.Trace, eventDescription, eventDetail, progressPart, progressTotal);
+        }
+
+        public void Track(string? eventDescription, string? eventDetail, object? eventData, double? progressPart, double? progressTotal)
+        {
+            Track(LogLevel.Trace, eventDescription, eventDetail, eventData, progressPart, progressTotal);
+        }
+
         public void TrackFormat(string eventDescriptionFormat, params object?[] args)
         {
-            Track(string.Format(eventDescriptionFormat, args));
+            TrackFormat(LogLevel.Trace, string.Format(eventDescriptionFormat, args));
         }
 
         public void TrackException(Exception exception)
         {
-            Track(exception.Message, exception.ToString());
+            Track(LogLevel.Error, exception.ToString());
+        }
+
+        public void TrackException(Exception exception, string? eventDescription)
+        {
+            Track(LogLevel.Error, eventDescription, exception.ToString());
         }
 
         #endregion ITaskActivityTracker Implementation
@@ -173,7 +223,11 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
                 handler = TrackActivityHandler;
             }
 
-            _serviceLogger.LogTrace("{m}", e.ActivityItem.EventDescription);
+            _serviceLogger.Log(e.LogLevel, "{m}", e.ActivityItem.EventDescription);
+
+            if (!string.IsNullOrWhiteSpace(e.ActivityItem.EventDetail))
+                _serviceLogger.Log(e.LogLevel, "{m}", e.ActivityItem.EventDetail);
+
             handler.Invoke(this, e);
         }
 

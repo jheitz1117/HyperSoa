@@ -179,13 +179,6 @@ namespace HyperSoa.Service
 
                 try
                 {
-                    if (currentTaskInfo.TaskId != null)
-                    {
-                        currentTaskInfo.BeginTaskIdLogScope(
-                            Logger.BeginScope(currentTaskInfo.TaskId)
-                        );
-                    }
-
                     // Track that we've started a task to process the message.
                     currentTaskInfo.Activity?.TrackTaskStarted();
 
@@ -210,7 +203,10 @@ namespace HyperSoa.Service
                                 if (ex is InvalidCommandRequestTypeException)
                                     args.Response.ProcessStatusFlags |= MessageProcessStatusFlags.InvalidCommandRequest;
 
-                                args.Activity?.TrackException(ex);
+                                args.Activity?.TrackException(
+                                    ex,
+                                    $"An exception was thrown while attempting to process the message. See the {nameof(IActivityItem.EventDetail)} property for details."
+                                );
                             }
                             finally
                             {
@@ -430,7 +426,8 @@ namespace HyperSoa.Service
                             monitor,
                             liveEvents,
                             Scheduler.CurrentThread,
-                            currentTaskInfo
+                            currentTaskInfo,
+                            Logger
                         )
                     )
                 );
@@ -459,7 +456,8 @@ namespace HyperSoa.Service
                             monitor,
                             liveEvents,
                             Scheduler.CurrentThread,
-                            currentTaskInfo
+                            currentTaskInfo,
+                            Logger
                         )
                     )
                 );
@@ -574,6 +572,11 @@ namespace HyperSoa.Service
 
                         // Don't forget to set the task ID in our task info object
                         taskInfo.TaskId = taskId;
+
+                        // Begin the log scope for all remaining logs for this task.
+                        taskInfo.BeginTaskIdLogScope(
+                            Logger.BeginScope(taskId)
+                        );
                     }
                 }
             }
@@ -665,6 +668,12 @@ namespace HyperSoa.Service
 
                     // Serialize the response to send back
                     args.Response.CommandResponseBytes = contractSerializer.SerializeResponse(commandResponse);
+                }
+                catch (Exception ex)
+                {
+                    // Make sure the command logger has a chance to log the exception before we unsubscribe
+                    commandLogger.LogError(ex, "Command threw an unhandled exception.");
+                    throw;
                 }
                 finally
                 {
