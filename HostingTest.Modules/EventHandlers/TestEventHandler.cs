@@ -6,6 +6,8 @@ namespace HostingTest.Modules.EventHandlers
     {
         public override void OnMessageReceived(IMessageReceivedEventArgs args)
         {
+            args.Activity.Track("OnMessageReceived Event");
+
             if (args.TaskContext.CommandName == "RejectedCommand")
             {
                 args.RejectMessage("Rejected!");
@@ -14,6 +16,8 @@ namespace HostingTest.Modules.EventHandlers
 
         public override void OnTaskStarted(ITaskStartedEventArgs args)
         {
+            args.Activity.Track("OnTaskStarted Event");
+
             if (args.TaskContext.CommandName == "LongRunningCommand")
             {
                 //args.CancelTask();
@@ -22,12 +26,12 @@ namespace HostingTest.Modules.EventHandlers
 
         public override void OnMessageProcessed(IHyperNodeEventArgs args)
         {
-            args.Activity.Track($"Message processed by {args.TaskContext.ExecutingNodeName}");
+            args.Activity.Track("OnMessageProcessed Event");
         }
 
         public override void OnTaskCompleted(ITaskCompletedEventArgs args)
         {
-            args.Activity.Track("From task completed event");
+            args.Activity.Track("OnTaskCompleted Event");
         }
     }
 }

@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
-using System.Reactive.Concurrency;
+﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using HyperSoa.Contracts;
+using Microsoft.Extensions.Logging;
 
 namespace HyperSoa.Service.ActivityTracking
 {
@@ -14,13 +13,15 @@ namespace HyperSoa.Service.ActivityTracking
         private readonly ITaskActivityTracker? _activity;
         private readonly IDisposable? _subscription;
         private readonly IScheduler _scheduler;
+        private readonly ILogger _logger;
         private bool _isDisposed;
 
-        public HyperNodeActivityObserver(HyperNodeServiceActivityMonitor underlyingMonitor, IObservable<IHyperNodeActivityEventItem> activityEventStream, IScheduler scheduler, HyperNodeTaskInfo taskInfo)
+        public HyperNodeActivityObserver(HyperNodeServiceActivityMonitor underlyingMonitor, IObservable<IHyperNodeActivityEventItem> activityEventStream, IScheduler scheduler, HyperNodeTaskInfo taskInfo, ILogger logger)
         {
             _underlyingMonitor = underlyingMonitor;
             _activity = taskInfo.Activity;
             _scheduler = scheduler;
+            _logger = logger;
             _subscription = activityEventStream
                 .Where(
                     e =>
@@ -36,10 +37,8 @@ namespace HyperSoa.Service.ActivityTracking
                         {
                             // This is legal at this point because we already subscribed our cache and task trace monitors earlier
                             _activity?.TrackException(
-                                new ActivityMonitorException(
-                                    $"Unable to subscribe activity monitor '{underlyingMonitor.Name}' because its {nameof(HyperNodeServiceActivityMonitor.ShouldTrack)}() method threw an exception.",
-                                    ex
-                                )
+                                ex,
+                                $"Unable to subscribe activity monitor '{underlyingMonitor.Name}' because its {nameof(HyperNodeServiceActivityMonitor.ShouldTrack)}() method threw an exception. See the {nameof(IActivityItem.EventDetail)} property for details."
                             );
                         }
 
@@ -67,10 +66,8 @@ namespace HyperSoa.Service.ActivityTracking
 
                 // Tattle to everyone else and alert the other observers of what the original problem was
                 _activity?.TrackException(
-                    new ActivityMonitorException(
-                        $"Activity monitor with {nameof(_underlyingMonitor.Name)} '{_underlyingMonitor.Name}' of type '{_underlyingMonitor.GetType().FullName}' threw an exception while attempting to track an activity event. The monitor has been unsubscribed and will not receive any additional notifications. See the {nameof(HyperNodeActivityItem.EventDetail)} property for details.",
-                        ex
-                    )
+                    ex,
+                    $"Activity monitor with {nameof(_underlyingMonitor.Name)} '{_underlyingMonitor.Name}' of type '{_underlyingMonitor.GetType().FullName}' threw an exception while attempting to track an activity event. The monitor has been unsubscribed and will not receive any additional notifications. See the {nameof(IActivityItem.EventDetail)} property for details."
                 );
             }
         }
@@ -90,15 +87,17 @@ namespace HyperSoa.Service.ActivityTracking
                  * monitor and shame it by telling all the other monitors about the problem. However, in this case,
                  * all of the other monitors have already been notified of the exception and furthermore cannot be
                  * notified any further problems because the event sequence has been terminated. Therefore we are
-                 * out of options and are forced to eat the exception. The best we can hope for is to trace it, so
+                 * out of options and are forced to eat the exception. The best we can hope for is to log it, so
                  * we'll at least do that. In any case, hopefully one of the other monitors was able to handle the
                  * error successfully so that we have some chance of resolving the problem.
                  */
-                Trace.WriteLine(
-                    new ActivityMonitorException(
-                        $"Activity monitor with {nameof(_underlyingMonitor.Name)} '{_underlyingMonitor.Name}' of type '{_underlyingMonitor.GetType().FullName}' threw an exception while attempting to track an error thrown by the event stream. See the {nameof(HyperNodeActivityItem.EventDetail)} property for details.",
-                        ex
-                    )
+                _logger.LogError(
+                    ex,
+                    "Activity monitor with {nameProperty} '{nameValue}' of type '{typeName}' threw an exception while attempting to track an error thrown by the event stream. See the {eventDetail} property for details.",
+                    nameof(_underlyingMonitor.Name),
+                    _underlyingMonitor.Name,
+                    _underlyingMonitor.GetType().FullName,
+                    nameof(IActivityItem.EventDetail)
                 );
             }
         }
@@ -114,13 +113,15 @@ namespace HyperSoa.Service.ActivityTracking
                 /*
                  * If we get here, we end up in a similar situation compared to the OnError() delegate. Basically,
                  * we threw an exception after the task has completed and therefore we are unable to report it
-                 * to anyone. We'll just trace it and let that be the end of it.
+                 * to anyone. We'll just log it and let that be the end of it.
                  */
-                Trace.WriteLine(
-                    new ActivityMonitorException(
-                        $"Activity monitor with {nameof(_underlyingMonitor.Name)} '{_underlyingMonitor.Name}' of type '{_underlyingMonitor.GetType().FullName}' threw an exception in response to the event stream's completion event. See the {nameof(HyperNodeActivityItem.EventDetail)} property for details.",
-                        ex
-                    )
+                _logger.LogError(
+                    ex,
+                    "Activity monitor with {nameProperty} '{nameValue}' of type '{typeName}' threw an exception in response to the event stream's completion event. See the {eventDetail} property for details.",
+                    nameof(_underlyingMonitor.Name),
+                    _underlyingMonitor.Name,
+                    _underlyingMonitor.GetType().FullName,
+                    nameof(IActivityItem.EventDetail)
                 );
             }
         }

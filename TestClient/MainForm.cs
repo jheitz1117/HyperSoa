@@ -91,14 +91,11 @@ namespace TestClient
                     case "LongRunningCommand":
                         response = await RunLongRunningCommand(optionFlags);
                         break;
-                    case "RejectedCommand":
-                        response = await RunRejectedCommand(optionFlags);
-                        break;
                     case "Echo":
                         response = await RunEchoCommand(optionFlags);
                         break;
                     default:
-                        response = null;
+                        response = await RunEmptyContractCommand(optionFlags);
                         break;
                 }
 
@@ -375,20 +372,6 @@ namespace TestClient
             return await client.ProcessMessageAsync(msg);
         }
 
-        private async Task<HyperNodeMessageResponse> RunRejectedCommand(MessageProcessOptionFlags optionFlags)
-        {
-            // Create our message request
-            var msg = new HyperNodeMessageRequest
-            {
-                CreatedByAgentName = ClientAgentName,
-                CommandName = cboCommandNames.Text,
-                ProcessOptionFlags = optionFlags
-            };
-
-            var client = new HyperNodeClient(TargetEndpoint);
-            return await client.ProcessMessageAsync(msg);
-        }
-
         private async Task<HyperNodeMessageResponse> RunEchoCommand(MessageProcessOptionFlags optionFlags)
         {
             // Create our message request
@@ -405,6 +388,19 @@ namespace TestClient
                 CreatedByAgentName = ClientAgentName,
                 CommandName = cboCommandNames.Text,
                 CommandRequestBytes = commandRequestBytes,
+                ProcessOptionFlags = optionFlags
+            };
+
+            var client = new HyperNodeClient(TargetEndpoint);
+            return await client.ProcessMessageAsync(msg);
+        }
+
+        private async Task<HyperNodeMessageResponse> RunEmptyContractCommand(MessageProcessOptionFlags optionFlags)
+        {
+            var msg = new HyperNodeMessageRequest
+            {
+                CreatedByAgentName = ClientAgentName,
+                CommandName = cboCommandNames.Text,
                 ProcessOptionFlags = optionFlags
             };
 

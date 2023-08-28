@@ -39,5 +39,7 @@
         public void TrackFormat(string eventDescriptionFormat, params object?[] args) { }
 
         public void TrackException(Exception exception) { }
+
+        public void TrackException(Exception exception, string? eventDescription) { }
     }
 }

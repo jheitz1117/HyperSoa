@@ -62,7 +62,12 @@ namespace HyperSoa.Service.ActivityTracking.Trackers
 
         public void TrackException(Exception exception)
         {
-            Track(exception.Message, exception.ToString());
+            Track(exception.ToString());
+        }
+
+        public void TrackException(Exception exception, string? eventDescription)
+        {
+            Track(eventDescription, exception.ToString());
         }
     }
 }

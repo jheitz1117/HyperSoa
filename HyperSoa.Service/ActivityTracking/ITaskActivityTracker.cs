@@ -65,10 +65,16 @@ namespace HyperSoa.Service.ActivityTracking
 
         /// <summary>
         /// Raises an <see cref="IHyperNodeActivityEventItem"/> containing information about the specified <see cref="Exception"/>.
-        /// The value of the <see cref="Exception.Message"/> property is used for the event description, and the result of calling
-        /// <see cref="Exception.ToString()"/> is used for the event detail.
         /// </summary>
         /// <param name="exception">The <see cref="Exception"/> to track.</param>
         void TrackException(Exception exception);
+
+        /// <summary>
+        /// Raises an <see cref="IHyperNodeActivityEventItem"/> containing information about the specified <see cref="Exception"/>.
+        /// The exception information is included in the <see cref="IActivityItem.EventDetail"/>.
+        /// </summary>
+        /// <param name="exception">The <see cref="Exception"/> to track.</param>
+        /// <param name="eventDescription">A description of the error.</param>
+        void TrackException(Exception exception, string? eventDescription);
     }
 }
