@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HyperSoa.Contracts.Legacy\HyperSoa.Contracts.Legacy.csproj" />
     <ProjectReference Include="..\HyperSoa.Contracts\HyperSoa.Contracts.csproj" />
     <ProjectReference Include="..\HyperSoa.Service\HyperSoa.Service.csproj" />
   </ItemGroup>
