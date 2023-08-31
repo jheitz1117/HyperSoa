@@ -1,4 +1,5 @@
-﻿using HyperSoa.Contracts;
+﻿using HyperSoa.Client.Extensions;
+using HyperSoa.Contracts;
 
 namespace HyperSoa.Client
 {
@@ -7,8 +8,6 @@ namespace HyperSoa.Client
         private readonly IHyperNodeService _underlyingService;
 
         public string? ClientApplicationName { get; set; }
-        public bool ReturnTaskTrace { get; set; }
-        public bool CacheTaskProgress { get; set; }
 
         protected OpinionatedHyperNodeClientBase(IHyperNodeService underlyingService)
         {
@@ -20,23 +19,15 @@ namespace HyperSoa.Client
             return await _underlyingService.ProcessMessageAsync(message).ConfigureAwait(false);
         }
 
-        protected async Task<string> ProcessMessageAsync(string commandName, byte[]? commandRequestBytes, Action<byte[]?>? onCommandResponse = null)
+        protected async Task<string> ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? requestMetaData, Action<byte[]?>? onCommandResponse = null)
+            where T : ICommandRequest
         {
-            var optionFlags = MessageProcessOptionFlags.None;
-            if (ReturnTaskTrace)
-                optionFlags |= MessageProcessOptionFlags.ReturnTaskTrace;
-            if (CacheTaskProgress)
-                optionFlags |= MessageProcessOptionFlags.CacheTaskProgress;
-            if (onCommandResponse == null)
-                optionFlags |= MessageProcessOptionFlags.RunConcurrently;
+            var hyperNodeRequest = requestMetaData.ToHyperNodeMessageRequest(
+                commandName,
+                onCommandResponse == null
+            );
 
-            var hyperNodeRequest = new HyperNodeMessageRequest
-            {
-                CommandName = commandName,
-                CommandRequestBytes = commandRequestBytes,
-                CreatedByAgentName = ClientApplicationName,
-                ProcessOptionFlags = optionFlags
-            };
+            hyperNodeRequest.CreatedByAgentName ??= ClientApplicationName;
 
             var hyperNodeResponse = await ProcessMessageAsync(hyperNodeRequest).ConfigureAwait(false);
 

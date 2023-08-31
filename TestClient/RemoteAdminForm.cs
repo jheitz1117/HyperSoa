@@ -26,7 +26,16 @@ namespace TestClient
         {
             try
             {
-                var echoResponse = await RunEchoCommand(chkReturnTaskTrace.Checked, chkCacheProgressInfo.Checked);
+                var echoResponse = await _client.EchoAsync(
+                    new EchoRequest
+                    {
+                        Prompt = "Hello!"
+                    }.WithMetaData(
+                        _client.ClientApplicationName,
+                        chkReturnTaskTrace.Checked,
+                        chkCacheProgressInfo.Checked
+                    )
+                ).ConfigureAwait(false);
 
                 MessageBox.Show(echoResponse.Reply, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -37,23 +46,5 @@ namespace TestClient
         }
 
         #endregion Events
-
-        #region Private Methods
-        
-        private async Task<EchoResponse> RunEchoCommand(bool includeTaskTrace, bool cacheTaskProgress)
-        {
-            return await _client.WithTaskTrace(
-                includeTaskTrace
-            ).WithProgressCaching(
-                cacheTaskProgress
-            ).EchoAsync(
-                new EchoRequest
-                {
-                    Prompt = "Hello!"
-                }
-            ).ConfigureAwait(false);
-        }
-        
-        #endregion Private Methods
     }
 }

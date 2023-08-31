@@ -1,5 +1,4 @@
 ﻿using HyperSoa.Client;
-using HyperSoa.Client.Extensions;
 using HyperSoa.Contracts;
 
 namespace HyperSoa.RemoteAdminClient.Extensions
@@ -37,20 +36,8 @@ namespace HyperSoa.RemoteAdminClient.Extensions
 
             return new RemoteAdminHyperNodeClient(client)
             {
-                ClientApplicationName = client.ClientApplicationName,
-                ReturnTaskTrace = client.ReturnTaskTrace,
-                CacheTaskProgress = client.CacheTaskProgress
+                ClientApplicationName = client.ClientApplicationName
             };
-        }
-
-        public static IOpinionatedHyperNodeClient WithTaskTrace(this IRemoteAdminHyperNodeClient client, string? clientApplicationName, bool returnTaskTrace)
-        {
-            if (client == null)
-                throw new ArgumentNullException(nameof(client));
-
-            return client.From(
-                clientApplicationName
-            ).WithTaskTrace(returnTaskTrace);
         }
     }
 }

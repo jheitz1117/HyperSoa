@@ -13,25 +13,46 @@ namespace HostingTest.Client
             : base(underlyingService) { }
 
         public HostingTestClient(string clientApplicationName, string endpoint)
-            : base(new HyperNodeHttpClient(endpoint).From(clientApplicationName)) { }
+            : base(new HyperNodeHttpClient(endpoint))
+        {
+            ClientApplicationName = clientApplicationName;
+        }
 
         #region Public Methods
 
         public async Task<string> RunLongRunningCommandAsync(LongRunningCommandRequest request)
         {
+            return await RunLongRunningCommandAsync(
+                request.CreatedBy(ClientApplicationName)
+            ).ConfigureAwait(false);
+        }
+
+        public async Task<string> RunLongRunningCommandAsync(ICommandMetaData<LongRunningCommandRequest> request)
+        {
             return await ProcessMessageAsync<LongRunningCommandRequest, EmptyCommandResponse>(
                 "LongRunningCommand",
-                request
+                request.WithSerializer(
+                    new DataContractJsonSerializer<LongRunningCommandRequest, EmptyCommandResponse>()
+                )
             ).ConfigureAwait(false);
         }
 
         public async Task<ComplexCommandResponse> ComplexCommandAsync(ComplexCommandRequest request)
         {
+            return await ComplexCommandAsync(
+                request.CreatedBy(ClientApplicationName)
+            );
+        }
+
+        public async Task<ComplexCommandResponse> ComplexCommandAsync(ICommandMetaData<ComplexCommandRequest> request)
+        {
             ComplexCommandResponse? commandResponse = null;
 
             await ProcessMessageAsync<ComplexCommandRequest, ComplexCommandResponse>(
                 "ComplexCommand",
-                request,
+                request.WithSerializer(
+                    new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>()
+                ),
                 r => commandResponse = r
             ).ConfigureAwait(false);
 
@@ -40,9 +61,16 @@ namespace HostingTest.Client
 
         public async Task EmptyContractCommandAsync()
         {
+            await EmptyContractCommandAsync(
+                new EmptyCommandRequest().CreatedBy(ClientApplicationName)
+            ).ConfigureAwait(false);
+        }
+
+        public async Task EmptyContractCommandAsync(ICommandMetaData<EmptyCommandRequest> request)
+        {
             await ProcessMessageAsync<EmptyCommandRequest, EmptyCommandResponse>(
-                "EmptyContractCommand",
-                null,
+                "EmptyCommand",
+                request,
                 _ => {}
             ).ConfigureAwait(false);
         }
@@ -51,12 +79,13 @@ namespace HostingTest.Client
 
         #region Private Methods
 
-        private async Task<string> ProcessMessageAsync<TRequest, TResponse>(string commandName, TRequest? request, Action<TResponse?>? onCommandResponse = null)
+        private async Task<string> ProcessMessageAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData, Action<TResponse?>? onCommandResponse = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
         {
-            var serializer = CreateSerializer<TRequest, TResponse>(commandName);
-
+            if (metaData is { Serializer: null })
+                metaData.Serializer = new ProtoContractSerializer<TRequest, TResponse>();
+            
             Action<byte[]?>? onCommandResponseBytes = null;
 
             if (onCommandResponse != null)
@@ -65,8 +94,8 @@ namespace HostingTest.Client
                 {
                     TResponse? commandResponse = default;
 
-                    if (commandResponseBytes?.Length > 0)
-                        commandResponse = serializer.DeserializeResponse(commandResponseBytes);
+                    if (commandResponseBytes?.Length > 0 && metaData?.Serializer != null)
+                        commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(commandResponseBytes);
                         
                     onCommandResponse(commandResponse);
                 };
@@ -74,28 +103,9 @@ namespace HostingTest.Client
 
             return await base.ProcessMessageAsync(
                 commandName,
-                serializer.SerializeRequest(request),
+                metaData,
                 onCommandResponseBytes
             ).ConfigureAwait(false);
-        }
-
-        private static IClientContractSerializer<TRequest, TResponse> CreateSerializer<TRequest, TResponse>(string commandName)
-            where TRequest : ICommandRequest
-            where TResponse : ICommandResponse
-        {
-            IClientContractSerializer<TRequest, TResponse> serializer;
-
-            switch (commandName)
-            {
-                case "ComplexCommand":
-                    serializer = new DataContractJsonSerializer<TRequest, TResponse>();
-                    break;
-                default:
-                    serializer = new ProtoContractSerializer<TRequest, TResponse>();
-                    break;
-            }
-
-            return serializer;
         }
         
         #endregion Private Methods
