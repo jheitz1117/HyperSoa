@@ -1,5 +1,7 @@
 ﻿using System.Net;
+using System.Text;
 using HyperSoa.Contracts;
+using HyperSoa.Contracts.Legacy;
 using HyperSoa.ServiceHosting.Configuration;
 using HyperSoa.ServiceHosting.Extensions;
 using Microsoft.Extensions.Logging;
@@ -26,7 +28,7 @@ namespace HyperSoa.ServiceHosting.Interop
 
                 try
                 {
-                    var legacyRequest = DeserializeSoapXml();
+                    var legacyRequest = DeserializeSoapXml(httpContext.Request.InputStream);
 
                     var legacyResponse = (
                         await ServiceInstance.ProcessMessageAsync(
@@ -74,16 +76,14 @@ namespace HyperSoa.ServiceHosting.Interop
 
         #region Private Methods
 
-        private LegacyHyperNodeMessageRequest DeserializeSoapXml()
+        private LegacyHyperNodeMessageRequest DeserializeSoapXml(Stream stream)
         {
-            // TODO: Deserialize SOAP XML as LegacyHyperNodeMessageRequest
-            return new LegacyHyperNodeMessageRequest();
+            return new LegacyHyperNodeMessageRequest(stream);
         }
 
         private byte[] SerializeToSoapXml(LegacyHyperNodeMessageResponse legacyResponse)
         {
-            // TODO: Serialize LegacyHyperNodeMessageResponse as SOAP XML
-            return Array.Empty<byte>();
+            return Encoding.UTF8.GetBytes(legacyResponse.SerializeToSoapXml());
         }
         
         #endregion Private Methods
