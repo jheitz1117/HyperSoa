@@ -2,13 +2,13 @@
 
 namespace HyperSoa.Client
 {
-    public class HyperNodeClient : IHyperNodeService
+    public class HyperNodeHttpClient : IHyperNodeService
     {
         private static readonly HttpClient HttpClient = new();
 
         private readonly string _endpoint;
 
-        public HyperNodeClient(string endpoint)
+        public HyperNodeHttpClient(string endpoint)
         {
             _endpoint = endpoint;
         }

@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             pnlLeft = new Panel();
+            btnLaunchRemoteAdmin = new Button();
             grpRealTimeResponse = new GroupBox();
             lstRealTimeResponse = new ListBox();
             grpRealTimeTaskTrace = new GroupBox();
@@ -42,12 +43,12 @@
             btnRunCommand = new Button();
             grpHyperNodeActivity = new GroupBox();
             spcHyperNodeActivity = new SplitContainer();
-            grpActivityItems = new GroupBox();
-            lstActivityItems = new ListBox();
-            grpTaskTrace = new GroupBox();
-            tvwTaskTrace = new TreeView();
-            grpResponseSummary = new GroupBox();
-            lstResponseSummary = new ListBox();
+            grpCachedActivity = new GroupBox();
+            lstCachedActivityItems = new ListBox();
+            grpCachedTaskTrace = new GroupBox();
+            tvwCachedTaskTrace = new TreeView();
+            grpCachedResponseSummary = new GroupBox();
+            lstCachedResponseSummary = new ListBox();
             pnlHyperNodeActivityTop = new Panel();
             txtTaskId = new TextBox();
             btnCancelCurrentTask = new Button();
@@ -60,14 +61,15 @@
             spcHyperNodeActivity.Panel1.SuspendLayout();
             spcHyperNodeActivity.Panel2.SuspendLayout();
             spcHyperNodeActivity.SuspendLayout();
-            grpActivityItems.SuspendLayout();
-            grpTaskTrace.SuspendLayout();
-            grpResponseSummary.SuspendLayout();
+            grpCachedActivity.SuspendLayout();
+            grpCachedTaskTrace.SuspendLayout();
+            grpCachedResponseSummary.SuspendLayout();
             pnlHyperNodeActivityTop.SuspendLayout();
             SuspendLayout();
             // 
             // pnlLeft
             // 
+            pnlLeft.Controls.Add(btnLaunchRemoteAdmin);
             pnlLeft.Controls.Add(grpRealTimeResponse);
             pnlLeft.Controls.Add(grpRealTimeTaskTrace);
             pnlLeft.Controls.Add(btnRefreshCommandList);
@@ -82,6 +84,16 @@
             pnlLeft.Name = "pnlLeft";
             pnlLeft.Size = new Size(369, 664);
             pnlLeft.TabIndex = 0;
+            // 
+            // btnLaunchRemoteAdmin
+            // 
+            btnLaunchRemoteAdmin.Location = new Point(258, 3);
+            btnLaunchRemoteAdmin.Name = "btnLaunchRemoteAdmin";
+            btnLaunchRemoteAdmin.Size = new Size(108, 23);
+            btnLaunchRemoteAdmin.TabIndex = 13;
+            btnLaunchRemoteAdmin.Text = "Remote Admin";
+            btnLaunchRemoteAdmin.UseVisualStyleBackColor = true;
+            btnLaunchRemoteAdmin.Click += btnLaunchRemoteAdmin_Click;
             // 
             // grpRealTimeResponse
             // 
@@ -216,76 +228,76 @@
             // 
             // spcHyperNodeActivity.Panel1
             // 
-            spcHyperNodeActivity.Panel1.Controls.Add(grpActivityItems);
+            spcHyperNodeActivity.Panel1.Controls.Add(grpCachedActivity);
             // 
             // spcHyperNodeActivity.Panel2
             // 
-            spcHyperNodeActivity.Panel2.Controls.Add(grpTaskTrace);
-            spcHyperNodeActivity.Panel2.Controls.Add(grpResponseSummary);
+            spcHyperNodeActivity.Panel2.Controls.Add(grpCachedTaskTrace);
+            spcHyperNodeActivity.Panel2.Controls.Add(grpCachedResponseSummary);
             spcHyperNodeActivity.Size = new Size(819, 618);
             spcHyperNodeActivity.SplitterDistance = 314;
             spcHyperNodeActivity.TabIndex = 4;
             // 
-            // grpActivityItems
+            // grpCachedActivity
             // 
-            grpActivityItems.Controls.Add(lstActivityItems);
-            grpActivityItems.Dock = DockStyle.Fill;
-            grpActivityItems.Location = new Point(0, 0);
-            grpActivityItems.Name = "grpActivityItems";
-            grpActivityItems.Size = new Size(819, 314);
-            grpActivityItems.TabIndex = 1;
-            grpActivityItems.TabStop = false;
-            grpActivityItems.Text = "Activity Items";
+            grpCachedActivity.Controls.Add(lstCachedActivityItems);
+            grpCachedActivity.Dock = DockStyle.Fill;
+            grpCachedActivity.Location = new Point(0, 0);
+            grpCachedActivity.Name = "grpCachedActivity";
+            grpCachedActivity.Size = new Size(819, 314);
+            grpCachedActivity.TabIndex = 1;
+            grpCachedActivity.TabStop = false;
+            grpCachedActivity.Text = "Cached Activity";
             // 
-            // lstActivityItems
+            // lstCachedActivityItems
             // 
-            lstActivityItems.Dock = DockStyle.Fill;
-            lstActivityItems.FormattingEnabled = true;
-            lstActivityItems.ItemHeight = 15;
-            lstActivityItems.Location = new Point(3, 19);
-            lstActivityItems.Name = "lstActivityItems";
-            lstActivityItems.Size = new Size(813, 292);
-            lstActivityItems.TabIndex = 0;
+            lstCachedActivityItems.Dock = DockStyle.Fill;
+            lstCachedActivityItems.FormattingEnabled = true;
+            lstCachedActivityItems.ItemHeight = 15;
+            lstCachedActivityItems.Location = new Point(3, 19);
+            lstCachedActivityItems.Name = "lstCachedActivityItems";
+            lstCachedActivityItems.Size = new Size(813, 292);
+            lstCachedActivityItems.TabIndex = 0;
             // 
-            // grpTaskTrace
+            // grpCachedTaskTrace
             // 
-            grpTaskTrace.Controls.Add(tvwTaskTrace);
-            grpTaskTrace.Dock = DockStyle.Fill;
-            grpTaskTrace.Location = new Point(292, 0);
-            grpTaskTrace.Name = "grpTaskTrace";
-            grpTaskTrace.Size = new Size(527, 300);
-            grpTaskTrace.TabIndex = 3;
-            grpTaskTrace.TabStop = false;
-            grpTaskTrace.Text = "Task Trace";
+            grpCachedTaskTrace.Controls.Add(tvwCachedTaskTrace);
+            grpCachedTaskTrace.Dock = DockStyle.Fill;
+            grpCachedTaskTrace.Location = new Point(292, 0);
+            grpCachedTaskTrace.Name = "grpCachedTaskTrace";
+            grpCachedTaskTrace.Size = new Size(527, 300);
+            grpCachedTaskTrace.TabIndex = 3;
+            grpCachedTaskTrace.TabStop = false;
+            grpCachedTaskTrace.Text = "Cached Task Trace";
             // 
-            // tvwTaskTrace
+            // tvwCachedTaskTrace
             // 
-            tvwTaskTrace.Dock = DockStyle.Fill;
-            tvwTaskTrace.Location = new Point(3, 19);
-            tvwTaskTrace.Name = "tvwTaskTrace";
-            tvwTaskTrace.Size = new Size(521, 278);
-            tvwTaskTrace.TabIndex = 0;
+            tvwCachedTaskTrace.Dock = DockStyle.Fill;
+            tvwCachedTaskTrace.Location = new Point(3, 19);
+            tvwCachedTaskTrace.Name = "tvwCachedTaskTrace";
+            tvwCachedTaskTrace.Size = new Size(521, 278);
+            tvwCachedTaskTrace.TabIndex = 0;
             // 
-            // grpResponseSummary
+            // grpCachedResponseSummary
             // 
-            grpResponseSummary.Controls.Add(lstResponseSummary);
-            grpResponseSummary.Dock = DockStyle.Left;
-            grpResponseSummary.Location = new Point(0, 0);
-            grpResponseSummary.Name = "grpResponseSummary";
-            grpResponseSummary.Size = new Size(292, 300);
-            grpResponseSummary.TabIndex = 2;
-            grpResponseSummary.TabStop = false;
-            grpResponseSummary.Text = "Response Summary";
+            grpCachedResponseSummary.Controls.Add(lstCachedResponseSummary);
+            grpCachedResponseSummary.Dock = DockStyle.Left;
+            grpCachedResponseSummary.Location = new Point(0, 0);
+            grpCachedResponseSummary.Name = "grpCachedResponseSummary";
+            grpCachedResponseSummary.Size = new Size(292, 300);
+            grpCachedResponseSummary.TabIndex = 2;
+            grpCachedResponseSummary.TabStop = false;
+            grpCachedResponseSummary.Text = "Cached Response Summary";
             // 
-            // lstResponseSummary
+            // lstCachedResponseSummary
             // 
-            lstResponseSummary.Dock = DockStyle.Fill;
-            lstResponseSummary.FormattingEnabled = true;
-            lstResponseSummary.ItemHeight = 15;
-            lstResponseSummary.Location = new Point(3, 19);
-            lstResponseSummary.Name = "lstResponseSummary";
-            lstResponseSummary.Size = new Size(286, 278);
-            lstResponseSummary.TabIndex = 0;
+            lstCachedResponseSummary.Dock = DockStyle.Fill;
+            lstCachedResponseSummary.FormattingEnabled = true;
+            lstCachedResponseSummary.ItemHeight = 15;
+            lstCachedResponseSummary.Location = new Point(3, 19);
+            lstCachedResponseSummary.Name = "lstCachedResponseSummary";
+            lstCachedResponseSummary.Size = new Size(286, 278);
+            lstCachedResponseSummary.TabIndex = 0;
             // 
             // pnlHyperNodeActivityTop
             // 
@@ -345,9 +357,9 @@
             spcHyperNodeActivity.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)spcHyperNodeActivity).EndInit();
             spcHyperNodeActivity.ResumeLayout(false);
-            grpActivityItems.ResumeLayout(false);
-            grpTaskTrace.ResumeLayout(false);
-            grpResponseSummary.ResumeLayout(false);
+            grpCachedActivity.ResumeLayout(false);
+            grpCachedTaskTrace.ResumeLayout(false);
+            grpCachedResponseSummary.ResumeLayout(false);
             pnlHyperNodeActivityTop.ResumeLayout(false);
             pnlHyperNodeActivityTop.PerformLayout();
             ResumeLayout(false);
@@ -362,13 +374,13 @@
         private Panel pnlHyperNodeActivityTop;
         private Button btnCancelCurrentTask;
         private Label lblTaskId;
-        private GroupBox grpActivityItems;
+        private GroupBox grpCachedActivity;
         private TextBox txtTaskId;
-        private GroupBox grpTaskTrace;
-        private TreeView tvwTaskTrace;
-        private GroupBox grpResponseSummary;
-        private ListBox lstResponseSummary;
-        private ListBox lstActivityItems;
+        private GroupBox grpCachedTaskTrace;
+        private TreeView tvwCachedTaskTrace;
+        private GroupBox grpCachedResponseSummary;
+        private ListBox lstCachedResponseSummary;
+        private ListBox lstCachedActivityItems;
         private TreeView tvwRealTimeTaskTrace;
         private CheckBox chkCacheProgressInfo;
         private CheckBox chkRunConcurrently;
@@ -379,5 +391,6 @@
         private GroupBox grpRealTimeResponse;
         private GroupBox grpRealTimeTaskTrace;
         private SplitContainer spcHyperNodeActivity;
+        private Button btnLaunchRemoteAdmin;
     }
 }

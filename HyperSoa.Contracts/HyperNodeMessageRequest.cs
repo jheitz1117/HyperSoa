@@ -6,7 +6,7 @@ namespace HyperSoa.Contracts
     /// The primary request object used by <see cref="IHyperNodeService"/> instances.
     /// </summary>
     [ProtoContract]
-    public class HyperNodeMessageRequest
+    public sealed class HyperNodeMessageRequest
     {
         /// <summary>
         /// The name of the agent that created this <see cref="HyperNodeMessageRequest"/>.

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HyperSoa.Client\HyperSoa.Client.csproj" />
+    <ProjectReference Include="..\HyperSoa.Contracts.RemoteAdmin\HyperSoa.Contracts.RemoteAdmin.csproj" />
+    <ProjectReference Include="..\HyperSoa.Contracts\HyperSoa.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -6,7 +6,7 @@ namespace HyperSoa.Contracts
     /// The primary response object used by <see cref="IHyperNodeService"/> instances.
     /// </summary>
     [ProtoContract]
-    public class HyperNodeMessageResponse
+    public sealed class HyperNodeMessageResponse
     {
         /// <summary>
         /// The ID of the task started as a result of the <see cref="HyperNodeMessageRequest"/>. This value

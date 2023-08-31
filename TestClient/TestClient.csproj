@@ -9,10 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HostingTest.Client\HostingTest.Client.csproj" />
     <ProjectReference Include="..\HostingTest.Contracts\HostingTest.Contracts.csproj" />
     <ProjectReference Include="..\HyperSoa.Client\HyperSoa.Client.csproj" />
     <ProjectReference Include="..\HyperSoa.Contracts.RemoteAdmin\HyperSoa.Contracts.RemoteAdmin.csproj" />
     <ProjectReference Include="..\HyperSoa.Contracts\HyperSoa.Contracts.csproj" />
+    <ProjectReference Include="..\HyperSoa.RemoteAdminClient\HyperSoa.RemoteAdminClient.csproj" />
   </ItemGroup>
 
 </Project>
