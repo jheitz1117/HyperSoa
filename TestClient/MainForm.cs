@@ -32,7 +32,7 @@ namespace TestClient
 
         private void btnLaunchRemoteAdmin_Click(object sender, EventArgs e)
         {
-            new RemoteAdminForm(new HyperNodeHttpClient(TargetEndpoint)).Show(this);
+            new RemoteAdminForm().Show(this);
         }
 
         private async void btnRefreshCommandList_Click(object sender, EventArgs e)
@@ -84,18 +84,16 @@ namespace TestClient
                 {
                     case "ComplexCommand":
                         response = await RunComplexCommand(optionFlags);
-                        var complexResponse = await RunComplexCommand(chkReturnTaskTrace.Checked, chkCacheProgressInfo.Checked);
                         break;
                     case "LongRunningCommand":
+                    case "LongRunningSingletonCommand":
                         response = await RunLongRunningCommand(optionFlags);
-                        var longRunningTaskID = await RunLongRunningCommand(chkReturnTaskTrace.Checked, chkCacheProgressInfo.Checked);
                         break;
                     case "Echo":
                         response = await RunEchoCommand(optionFlags);
                         break;
                     default:
                         response = await RunEmptyContractCommand(optionFlags);
-                        await RunEmptyContractCommand(chkReturnTaskTrace.Checked, chkCacheProgressInfo.Checked);
                         break;
                 }
 

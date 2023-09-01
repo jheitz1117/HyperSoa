@@ -91,6 +91,18 @@ namespace HyperSoa.Client.Extensions
             };
         }
 
+        public static ICommandMetaData<T> RegisterSuccessDelegate<T>(this T request, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onSuccess)
+            where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return new CommandMetaData<T>(request)
+            {
+                OnSuccess = onSuccess
+            };
+        }
+
         public static ICommandMetaData<T> CreatedBy<T>(this ICommandMetaData<T> metaData, string? createdByAgentName)
             where T : ICommandRequest
         {
@@ -149,6 +161,20 @@ namespace HyperSoa.Client.Extensions
                 throw new ArgumentNullException(nameof(metaData));
 
             metaData.Serializer = serializer;
+
+            return metaData;
+        }
+
+        public static ICommandMetaData<T> RegisterSuccessDelegate<T>(this ICommandMetaData<T> metaData, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onSuccess)
+            where T : ICommandRequest
+        {
+            if (metaData == null)
+                throw new ArgumentNullException(nameof(metaData));
+
+            if (metaData.OnSuccess == null)
+                metaData.OnSuccess = onSuccess;
+            else
+                metaData.OnSuccess += onSuccess;
 
             return metaData;
         }

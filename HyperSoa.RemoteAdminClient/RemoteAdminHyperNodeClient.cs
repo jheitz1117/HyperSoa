@@ -32,7 +32,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<GetCachedTaskProgressInfoResponse> GetCachedTaskProgressInfoAsync(ICommandMetaData<GetCachedTaskProgressInfoRequest> request)
         {
-            return await ProcessMessageAsync<GetCachedTaskProgressInfoRequest, GetCachedTaskProgressInfoResponse>(
+            return await GetCommandResponseAsync<GetCachedTaskProgressInfoRequest, GetCachedTaskProgressInfoResponse>(
                 RemoteAdminCommandName.GetCachedTaskProgressInfo,
                 request
             ).ConfigureAwait(false);
@@ -40,17 +40,39 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<GetNodeStatusResponse> GetNodeStatusAsync()
         {
+            return await GetNodeStatusAsync(false).ConfigureAwait(false);
+        }
+
+        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(bool excludeSelfTaskStatus)
+        {
             return await GetNodeStatusAsync(
-                new EmptyCommandRequest().CreatedBy(ClientApplicationName)
+                new EmptyCommandRequest().CreatedBy(ClientApplicationName),
+                excludeSelfTaskStatus
             ).ConfigureAwait(false);
         }
 
-        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(ICommandMetaData<EmptyCommandRequest> request)
+        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(ICommandMetaData<EmptyCommandRequest> request, bool excludeSelfTaskStatus)
         {
-            return await ProcessMessageAsync<EmptyCommandRequest, GetNodeStatusResponse>(
+            string? selfTaskId = null;
+
+            var commandResponse = await GetCommandResponseAsync<EmptyCommandRequest, GetNodeStatusResponse>(
                 RemoteAdminCommandName.GetNodeStatus,
-                request
+                request.RegisterSuccessDelegate(
+                    (_, hyperNodeResponse) =>
+                    {
+                        selfTaskId = hyperNodeResponse.TaskId;
+                    }
+                )
             ).ConfigureAwait(false);
+
+            if (excludeSelfTaskStatus)
+            {
+                commandResponse.LiveTasks = commandResponse.LiveTasks?.Where(
+                    t => t.TaskId != selfTaskId
+                ).ToArray();
+            }
+
+            return commandResponse;
         }
 
         public async Task<EchoResponse> EchoAsync(EchoRequest request)
@@ -62,7 +84,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<EchoResponse> EchoAsync(ICommandMetaData<EchoRequest> request)
         {
-            return await ProcessMessageAsync<EchoRequest, EchoResponse>(
+            return await GetCommandResponseAsync<EchoRequest, EchoResponse>(
                 RemoteAdminCommandName.Echo,
                 request
             ).ConfigureAwait(false);
@@ -77,7 +99,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<EmptyCommandResponse> EnableCommandAsync(ICommandMetaData<EnableCommandModuleRequest> request)
         {
-            return await ProcessMessageAsync<EnableCommandModuleRequest, EmptyCommandResponse>(
+            return await GetCommandResponseAsync<EnableCommandModuleRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableCommand,
                 request
             ).ConfigureAwait(false);
@@ -92,7 +114,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<EmptyCommandResponse> EnableActivityMonitorAsync(ICommandMetaData<EnableActivityMonitorRequest> request)
         {
-            return await ProcessMessageAsync<EnableActivityMonitorRequest, EmptyCommandResponse>(
+            return await GetCommandResponseAsync<EnableActivityMonitorRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableActivityMonitor,
                 request
             ).ConfigureAwait(false);
@@ -107,7 +129,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<EmptyCommandResponse> RenameActivityMonitorAsync(ICommandMetaData<RenameActivityMonitorRequest> request)
         {
-            return await ProcessMessageAsync<RenameActivityMonitorRequest, EmptyCommandResponse>(
+            return await GetCommandResponseAsync<RenameActivityMonitorRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.RenameActivityMonitor,
                 request
             ).ConfigureAwait(false);
@@ -122,7 +144,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<EmptyCommandResponse> EnableTaskProgressCacheAsync(ICommandMetaData<EnableTaskProgressCacheRequest> request)
         {
-            return await ProcessMessageAsync<EnableTaskProgressCacheRequest, EmptyCommandResponse>(
+            return await GetCommandResponseAsync<EnableTaskProgressCacheRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableTaskProgressCache,
                 request
             ).ConfigureAwait(false);
@@ -137,7 +159,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<EmptyCommandResponse> CancelTaskAsync(ICommandMetaData<CancelTaskRequest> request)
         {
-            return await ProcessMessageAsync<CancelTaskRequest, EmptyCommandResponse>(
+            return await GetCommandResponseAsync<CancelTaskRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.CancelTask,
                 request
             ).ConfigureAwait(false);
@@ -152,7 +174,7 @@ namespace HyperSoa.RemoteAdminClient
 
         public async Task<SetTaskProgressCacheDurationResponse> SetTaskProgressCacheDurationAsync(ICommandMetaData<SetTaskProgressCacheDurationRequest> request)
         {
-            return await ProcessMessageAsync<SetTaskProgressCacheDurationRequest, SetTaskProgressCacheDurationResponse>(
+            return await GetCommandResponseAsync<SetTaskProgressCacheDurationRequest, SetTaskProgressCacheDurationResponse>(
                 RemoteAdminCommandName.SetTaskProgressCacheDuration,
                 request
             ).ConfigureAwait(false);
@@ -160,33 +182,30 @@ namespace HyperSoa.RemoteAdminClient
 
         #endregion Public Methods
 
-        #region Private Methods
+        #region Protected Methods
 
-        private async Task<TResponse> ProcessMessageAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest> metaData)
-            where TRequest : ICommandRequest
-            where TResponse : ICommandResponse
+        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
         {
-            if (metaData == null)
-                throw new ArgumentNullException(nameof(metaData));
-
-            // Create our message request
-            var serializer = new ProtoContractSerializer<TRequest, TResponse>();
-
-            TResponse? commandResponse = default;
-
-            await ProcessMessageAsync(
+            // Always override the serializer since ours is the only valid one for remote admin commands
+            return base.GetCommandResponseAsync<TRequest, TResponse>(
                 commandName,
-                metaData.WithSerializer(serializer),
-                commandResponseBytes =>
-                {
-                    if (commandResponseBytes?.Length > 0)
-                        commandResponse = serializer.DeserializeResponse(commandResponseBytes);
-                }
-            ).ConfigureAwait(false);
-
-            return commandResponse ?? throw new InvalidOperationException("Unable to deserialize command response.");
+                metaData?.WithSerializer(
+                    new ProtoContractSerializer<TRequest, TResponse>()
+                )
+            );
         }
-        
-        #endregion Private Methods
+
+        protected override Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
+        {
+            // Always override the serializer since ours is the only valid one for remote admin commands
+            return base.RunCommandAsync(
+                commandName,
+                metaData?.WithSerializer(
+                    new ProtoContractSerializer<TRequest, ICommandResponse>()
+                )
+            );
+        }
+
+        #endregion Protected Methods
     }
 }

@@ -14,17 +14,69 @@ namespace HyperSoa.Client
             _underlyingService = underlyingService ?? throw new ArgumentNullException(nameof(underlyingService));
         }
 
+        #region Public Methods
+        
         public async Task<HyperNodeMessageResponse> ProcessMessageAsync(HyperNodeMessageRequest message)
         {
             return await _underlyingService.ProcessMessageAsync(message).ConfigureAwait(false);
         }
 
-        protected async Task<string> ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? requestMetaData, Action<byte[]?>? onCommandResponse = null)
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected virtual async Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
+            where TRequest : ICommandRequest
+        {
+            string? taskId = null;
+
+            await ProcessMessageAsync(
+                commandName,
+                metaData,
+                true,
+                (hyperNodeRequest, hyperNodeResponse) =>
+                {
+                    metaData?.OnSuccess?.Invoke(hyperNodeRequest, hyperNodeResponse);
+
+                    taskId = hyperNodeResponse.TaskId;
+                }
+            ).ConfigureAwait(false);
+
+            return taskId ?? throw new InvalidOperationException("Unable to run task asynchronously.");
+        }
+
+        protected virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
+            where TRequest : ICommandRequest
+            where TResponse : ICommandResponse
+        {
+            TResponse? commandResponse = default;
+
+            await ProcessMessageAsync(
+                commandName,
+                metaData,
+                false,
+                (hyperNodeRequest, hyperNodeResponse) =>
+                {
+                    metaData?.OnSuccess?.Invoke(hyperNodeRequest, hyperNodeResponse);
+
+                    if (hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
+                        commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
+                }
+            ).ConfigureAwait(false);
+            
+            return commandResponse ?? throw new InvalidOperationException("Unable to deserialize command response.");
+        }
+        
+        #endregion Protected Methods
+
+        #region Private Methods
+
+        private async Task ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? metaData, bool runAsync, Action<HyperNodeMessageRequest, HyperNodeMessageResponse>? onSuccess = null)
             where T : ICommandRequest
         {
-            var hyperNodeRequest = requestMetaData.ToHyperNodeMessageRequest(
+            var hyperNodeRequest = metaData.ToHyperNodeMessageRequest(
                 commandName,
-                onCommandResponse == null
+                runAsync
             );
 
             hyperNodeRequest.CreatedByAgentName ??= ClientApplicationName;
@@ -67,9 +119,9 @@ namespace HyperSoa.Client
                 throw new InvalidOperationException(errorMessage);
             }
 
-            onCommandResponse?.Invoke(hyperNodeResponse.CommandResponseBytes);
-
-            return hyperNodeResponse.TaskId ?? throw new InvalidOperationException("Unable to run command asynchronously.");
+            onSuccess?.Invoke(hyperNodeRequest, hyperNodeResponse);
         }
+
+        #endregion Private Methods
     }
 }

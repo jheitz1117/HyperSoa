@@ -29,11 +29,24 @@ namespace HostingTest.Client
 
         public async Task<string> RunLongRunningCommandAsync(ICommandMetaData<LongRunningCommandRequest> request)
         {
-            return await ProcessMessageAsync<LongRunningCommandRequest, EmptyCommandResponse>(
+            return await RunCommandAsync(
                 "LongRunningCommand",
-                request.WithSerializer(
-                    new DataContractJsonSerializer<LongRunningCommandRequest, EmptyCommandResponse>()
-                )
+                request
+            ).ConfigureAwait(false);
+        }
+
+        public async Task<string> RunLongRunningSingletonCommandAsync(LongRunningCommandRequest request)
+        {
+            return await RunLongRunningSingletonCommandAsync(
+                request.CreatedBy(ClientApplicationName)
+            ).ConfigureAwait(false);
+        }
+
+        public async Task<string> RunLongRunningSingletonCommandAsync(ICommandMetaData<LongRunningCommandRequest> request)
+        {
+            return await RunCommandAsync(
+                "LongRunningSingletonCommand",
+                request
             ).ConfigureAwait(false);
         }
 
@@ -46,17 +59,12 @@ namespace HostingTest.Client
 
         public async Task<ComplexCommandResponse> ComplexCommandAsync(ICommandMetaData<ComplexCommandRequest> request)
         {
-            ComplexCommandResponse? commandResponse = null;
-
-            await ProcessMessageAsync<ComplexCommandRequest, ComplexCommandResponse>(
+            return await GetCommandResponseAsync<ComplexCommandRequest, ComplexCommandResponse>(
                 "ComplexCommand",
                 request.WithSerializer(
                     new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>()
-                ),
-                r => commandResponse = r
+                )
             ).ConfigureAwait(false);
-
-            return commandResponse ?? throw new InvalidOperationException("Unable to deserialize command response.");
         }
 
         public async Task EmptyContractCommandAsync()
@@ -68,46 +76,34 @@ namespace HostingTest.Client
 
         public async Task EmptyContractCommandAsync(ICommandMetaData<EmptyCommandRequest> request)
         {
-            await ProcessMessageAsync<EmptyCommandRequest, EmptyCommandResponse>(
+            await GetCommandResponseAsync<EmptyCommandRequest, EmptyCommandResponse>(
                 "EmptyCommand",
-                request,
-                _ => {}
+                request
             ).ConfigureAwait(false);
         }
 
         #endregion Public Methods
 
-        #region Private Methods
+        #region Protected Methods
 
-        private async Task<string> ProcessMessageAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData, Action<TResponse?>? onCommandResponse = null)
-            where TRequest : ICommandRequest
-            where TResponse : ICommandResponse
+        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
         {
+            // By default, use protobuf for serialization
             if (metaData is { Serializer: null })
                 metaData.Serializer = new ProtoContractSerializer<TRequest, TResponse>();
-            
-            Action<byte[]?>? onCommandResponseBytes = null;
 
-            if (onCommandResponse != null)
-            {
-                onCommandResponseBytes = commandResponseBytes =>
-                {
-                    TResponse? commandResponse = default;
-
-                    if (commandResponseBytes?.Length > 0 && metaData?.Serializer != null)
-                        commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(commandResponseBytes);
-                        
-                    onCommandResponse(commandResponse);
-                };
-            }
-
-            return await base.ProcessMessageAsync(
-                commandName,
-                metaData,
-                onCommandResponseBytes
-            ).ConfigureAwait(false);
+            return base.GetCommandResponseAsync<TRequest, TResponse>(commandName, metaData);
         }
-        
-        #endregion Private Methods
+
+        protected override Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
+        {
+            // By default, use protobuf for serialization
+            if (metaData is { Serializer: null })
+                metaData.Serializer = new ProtoContractSerializer<TRequest, ICommandResponse>();
+
+            return base.RunCommandAsync(commandName, metaData);
+        }
+
+        #endregion Protected Methods
     }
 }
