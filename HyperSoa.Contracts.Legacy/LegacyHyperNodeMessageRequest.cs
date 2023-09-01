@@ -1,5 +1,4 @@
-﻿using HyperSoa.Contracts;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 namespace HyperSoa.Contracts.Legacy
 {

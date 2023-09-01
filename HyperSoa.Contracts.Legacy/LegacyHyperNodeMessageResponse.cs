@@ -1,8 +1,5 @@
-﻿using HyperSoa.Contracts;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using System.Xml;
-using System.Text.Unicode;
-using System.Text;
 
 namespace HyperSoa.Contracts.Legacy {
     public class LegacyHyperNodeMessageResponse {
