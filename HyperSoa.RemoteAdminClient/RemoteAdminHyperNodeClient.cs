@@ -150,6 +150,21 @@ namespace HyperSoa.RemoteAdminClient
             ).ConfigureAwait(false);
         }
 
+        public async Task<EmptyCommandResponse> EnableDiagnosticsAsync(EnableDiagnosticsRequest request)
+        {
+            return await EnableDiagnosticsAsync(
+                request.CreatedBy(ClientApplicationName)
+            ).ConfigureAwait(false);
+        }
+
+        public async Task<EmptyCommandResponse> EnableDiagnosticsAsync(ICommandMetaData<EnableDiagnosticsRequest> request)
+        {
+            return await GetCommandResponseAsync<EnableDiagnosticsRequest, EmptyCommandResponse>(
+                RemoteAdminCommandName.EnableDiagnostics,
+                request
+            ).ConfigureAwait(false);
+        }
+
         public async Task<EmptyCommandResponse> CancelTaskAsync(CancelTaskRequest request)
         {
             return await CancelTaskAsync(

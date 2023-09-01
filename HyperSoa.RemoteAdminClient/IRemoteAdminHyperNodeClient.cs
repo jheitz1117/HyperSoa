@@ -12,6 +12,7 @@ namespace HyperSoa.RemoteAdminClient
         public Task<EmptyCommandResponse> EnableActivityMonitorAsync(EnableActivityMonitorRequest request);
         public Task<EmptyCommandResponse> RenameActivityMonitorAsync(RenameActivityMonitorRequest request);
         public Task<EmptyCommandResponse> EnableTaskProgressCacheAsync(EnableTaskProgressCacheRequest request);
+        public Task<EmptyCommandResponse> EnableDiagnosticsAsync(EnableDiagnosticsRequest request);
         public Task<EmptyCommandResponse> CancelTaskAsync(CancelTaskRequest request);
         public Task<SetTaskProgressCacheDurationResponse> SetTaskProgressCacheDurationAsync(SetTaskProgressCacheDurationRequest request);
     }

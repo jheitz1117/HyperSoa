@@ -21,7 +21,7 @@ namespace TestClient
         private const string EveHttpEndpoint1 = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8005/HyperNode/EveLocal00";
         private const string EveHttpEndpoint2 = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8020/HyperNode/EveLocal01";
 
-        private const string TargetEndpoint = AliceHttpEndpoint;
+        private const string TargetEndpoint = EveHttpEndpoint1;
 
         public MainForm()
         {
