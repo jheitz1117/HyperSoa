@@ -81,7 +81,7 @@ namespace HyperSoa.Service
             Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandName), message.CommandName == null ? "<null>" : $"\"{message.CommandName}\"");
             Logger.LogTrace("    {n,-19} = {v}", nameof(message.ProcessOptionFlags), message.ProcessOptionFlags);
             Logger.LogTrace("    {n,-19} = {v}", nameof(message.CreatedByAgentName), message.CreatedByAgentName == null ? "<null>" : $"\"{message.CreatedByAgentName}\"");
-            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandRequestBytes), message.CommandRequestBytes?.Length.ToString("Array (Count: #)") ?? "<null>");
+            Logger.LogTrace("    {n,-19} = {v}", nameof(message.CommandRequestBytes), message.CommandRequestBytes?.Length.ToString("Array (Count: 0)") ?? "<null>");
 
             var response = new HyperNodeMessageResponse
             {

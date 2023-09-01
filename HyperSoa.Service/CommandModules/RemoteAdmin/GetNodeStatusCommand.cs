@@ -35,7 +35,7 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 
         public IServiceContractSerializer Create()
         {
-            return new ProtoContractSerializer<ICommandRequest, GetNodeStatusResponse>();
+            return new ProtoContractSerializer<EmptyCommandRequest, GetNodeStatusResponse>();
         }
     }
 }

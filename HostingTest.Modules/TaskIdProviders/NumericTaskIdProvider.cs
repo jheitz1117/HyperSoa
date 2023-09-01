@@ -11,9 +11,9 @@ namespace HostingTest.Modules.TaskIdProviders
 
         public override string CreateTaskId(IReadOnlyHyperNodeMessageInfo message)
         {
-            if (message.CommandName == "LongRunningCommand")
+            if (message.CommandName == "LongRunningSingletonCommand")
             {
-                return "LadeeDa__TestLongRunningCommandKey";
+                return "LongRunningSingletonTaskID";
             }
             else
             {

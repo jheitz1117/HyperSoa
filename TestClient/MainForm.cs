@@ -1,24 +1,27 @@
 using System.Diagnostics;
+using HostingTest.Client;
+using HostingTest.Client.Serialization;
 using HostingTest.Contracts;
 using HyperSoa.Client;
+using HyperSoa.Client.Extensions;
+using HyperSoa.Client.RemoteAdmin.Extensions;
 using HyperSoa.Client.Serialization;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Contracts.RemoteAdmin.Models;
-using TestClient.Serialization;
 
 namespace TestClient
 {
     public partial class MainForm : Form
     {
-        private const string ClientAgentName = "HyperNodeTestClient";
+        internal const string ClientAgentName = "HyperNodeTestClient";
 
         private const bool EnableFiddler = false;
         private const string AliceHttpEndpoint = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8005/HyperNode/AliceLocal00";
         private const string EveHttpEndpoint1 = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8005/HyperNode/EveLocal00";
         private const string EveHttpEndpoint2 = $"http://localhost{(EnableFiddler ? ".fiddler" : "")}:8020/HyperNode/EveLocal01";
 
-        private const string TargetEndpoint = AliceHttpEndpoint;
+        private const string TargetEndpoint = EveHttpEndpoint1;
 
         public MainForm()
         {
@@ -27,36 +30,30 @@ namespace TestClient
 
         #region Events
 
+        private void btnLaunchRemoteAdmin_Click(object sender, EventArgs e)
+        {
+            new RemoteAdminForm().Show(this);
+        }
+
         private async void btnRefreshCommandList_Click(object sender, EventArgs e)
         {
             try
             {
                 cboCommandNames.DataSource = null;
 
-                var serializer = new ProtoContractSerializer<EmptyCommandRequest, GetNodeStatusResponse>();
-                var msg = new HyperNodeMessageRequest
-                {
-                    CreatedByAgentName = ClientAgentName,
-                    CommandName = RemoteAdminCommandName.GetNodeStatus
-                };
+                var client = new HyperNodeHttpClient(
+                    TargetEndpoint
+                ).AsRemoteAdminClient(
+                    ClientAgentName
+                );
 
-                var client = new HyperNodeClient(TargetEndpoint);
-                var response = await client.ProcessMessageAsync(msg);
-
-                if (response.CommandResponseBytes?.Length > 0)
-                {
-                    cboCommandNames.DataSource = serializer.DeserializeResponse(
-                        response.CommandResponseBytes
-                    )?.Commands?.Select(
-                        c => c.CommandName
-                    ).OrderBy(
-                        cn => cn
-                    ).ToList();
-                }
-                else
-                {
-                    MessageBox.Show(response.RespondingNodeName + " did not send back a command response string.");
-                }
+                cboCommandNames.DataSource = (
+                    await client.GetNodeStatusAsync()
+                ).Commands?.Select(
+                    c => c.CommandName
+                ).OrderBy(
+                    cn => cn
+                ).ToArray();
             }
             catch (Exception ex)
             {
@@ -89,6 +86,7 @@ namespace TestClient
                         response = await RunComplexCommand(optionFlags);
                         break;
                     case "LongRunningCommand":
+                    case "LongRunningSingletonCommand":
                         response = await RunLongRunningCommand(optionFlags);
                         break;
                     case "Echo":
@@ -124,22 +122,15 @@ namespace TestClient
             var targetTaskId = txtTaskId.Text;
             if (!string.IsNullOrWhiteSpace(targetTaskId))
             {
-                // Create our message request
-                var serializer = new ProtoContractSerializer<CancelTaskRequest, EmptyCommandResponse>();
-                var msg = new HyperNodeMessageRequest
-                {
-                    CreatedByAgentName = ClientAgentName,
-                    CommandName = RemoteAdminCommandName.CancelTask,
-                    CommandRequestBytes = serializer.SerializeRequest(
+                var client = new HyperNodeHttpClient(TargetEndpoint).AsRemoteAdminClient(ClientAgentName);
+
+                var cancelSuccess = (
+                    await client.CancelTaskAsync(
                         new CancelTaskRequest
                         {
                             TaskId = targetTaskId
                         }
                     )
-                };
-
-                var cancelSuccess = (
-                    await new HyperNodeClient(TargetEndpoint).ProcessMessageAsync(msg)
                 ).ProcessStatusFlags.HasFlag(
                     MessageProcessStatusFlags.Success
                 );
@@ -162,9 +153,9 @@ namespace TestClient
             tvwRealTimeTaskTrace.Nodes.Clear();
 
             // Clear out the response data
-            lstActivityItems.DataSource = null;
-            lstResponseSummary.DataSource = null;
-            tvwTaskTrace.Nodes.Clear();
+            lstCachedActivityItems.DataSource = null;
+            lstCachedResponseSummary.DataSource = null;
+            tvwCachedTaskTrace.Nodes.Clear();
         }
 
         private static void PopulateResponseSummary(ListControl? lstTarget, HyperNodeMessageResponse? response)
@@ -252,7 +243,7 @@ namespace TestClient
             IProgress<HyperNodeTaskProgressInfo> progress = new Progress<HyperNodeTaskProgressInfo>(
                 progressInfo =>
                 {
-                    lstActivityItems.DataSource = GetActivityStrings(progressInfo.Activity);
+                    lstCachedActivityItems.DataSource = GetActivityStrings(progressInfo.Activity);
                 }
             );
 
@@ -264,50 +255,43 @@ namespace TestClient
 
                     var taskProgressInfo = new HyperNodeTaskProgressInfo();
 
-                    var alice = new HyperNodeClient(TargetEndpoint);
-                    var serializer = new ProtoContractSerializer<GetCachedTaskProgressInfoRequest, GetCachedTaskProgressInfoResponse>();
-                    var request = new HyperNodeMessageRequest
-                    {
-                        CreatedByAgentName = ClientAgentName,
-                        CommandName = RemoteAdminCommandName.GetCachedTaskProgressInfo,
-                        CommandRequestBytes = serializer.SerializeRequest(
-                            new GetCachedTaskProgressInfoRequest
-                            {
-                                TaskId = taskId
-                            }
-                        )
-                    };
+                    var client = new HyperNodeHttpClient(TargetEndpoint).AsRemoteAdminClient(ClientAgentName);
 
                     while (!taskProgressInfo.IsComplete && progressTimer.Elapsed <= TimeSpan.FromMinutes(2))
                     {
-                        var aliceResponse = await alice.ProcessMessageAsync(
-                            request
-                        ).ConfigureAwait(false);
-
-                        var targetResponse = aliceResponse;
-                        if (!(targetResponse.CommandResponseBytes?.Length > 0))
-                            break;
-
-                        var commandResponse = serializer.DeserializeResponse(targetResponse.CommandResponseBytes);
-                        taskProgressInfo = commandResponse?.TaskProgressInfo ?? new HyperNodeTaskProgressInfo();
-                        if (!(commandResponse?.TaskProgressCacheEnabled ?? false))
+                        try
                         {
-                            taskProgressInfo.Activity = new[]
-                            {
-                                new HyperNodeActivityItem
+                            var commandResponse = await client.GetCachedTaskProgressInfoAsync(
+                                new GetCachedTaskProgressInfoRequest
                                 {
-                                    Agent = ClientAgentName,
-                                    EventDescription = $"Warning: Task progress cache is not enabled for HyperNode at \'{TargetEndpoint}\'."
+                                    TaskId = taskId
                                 }
-                            };
+                            ).ConfigureAwait(false);
 
-                            // Make sure we exit the loop, since we're not going to get anything useful in this case.
-                            taskProgressInfo.IsComplete = true;
+                            taskProgressInfo = commandResponse.TaskProgressInfo ?? new HyperNodeTaskProgressInfo();
+                            if (!commandResponse.TaskProgressCacheEnabled)
+                            {
+                                taskProgressInfo.Activity = new[]
+                                {
+                                    new HyperNodeActivityItem
+                                    {
+                                        Agent = ClientAgentName,
+                                        EventDescription = $"Warning: Task progress cache is not enabled for HyperNode at \'{TargetEndpoint}\'."
+                                    }
+                                };
+
+                                // Make sure we exit the loop, since we're not going to get anything useful in this case.
+                                taskProgressInfo.IsComplete = true;
+                            }
+
+                            progress.Report(taskProgressInfo);
+
+                            Task.Delay(500).Wait();
                         }
-
-                        progress.Report(taskProgressInfo);
-
-                        Task.Delay(500).Wait();
+                        catch
+                        {
+                            break;
+                        }
                     }
 
                     progressTimer.Stop();
@@ -316,9 +300,29 @@ namespace TestClient
                 }
             );
 
-            lstActivityItems.DataSource = GetActivityStrings(finalTaskProgressInfo.Activity);
-            PopulateResponseSummary(lstResponseSummary, finalTaskProgressInfo.Response);
-            PopulateTaskTrace(tvwTaskTrace, finalTaskProgressInfo.Response);
+            lstCachedActivityItems.DataSource = GetActivityStrings(finalTaskProgressInfo.Activity);
+            PopulateResponseSummary(lstCachedResponseSummary, finalTaskProgressInfo.Response);
+            PopulateTaskTrace(tvwCachedTaskTrace, finalTaskProgressInfo.Response);
+        }
+
+        private async Task<ComplexCommandResponse> RunComplexCommand(bool includeTaskTrace, bool cacheTaskProgress)
+        {
+            return await new HostingTestClient(
+                ClientAgentName,
+                TargetEndpoint
+            ).ComplexCommandAsync(
+                new ComplexCommandRequest
+                {
+                    MyDateTime = new DateTime(2002, 4, 12),
+                    MyInt32 = 1000,
+                    MyString = "My String!",
+                    MyTimeSpan = TimeSpan.FromMinutes(17)
+                }.WithMetaData(
+                    ClientAgentName,
+                    includeTaskTrace,
+                    cacheTaskProgress
+                )
+            ).ConfigureAwait(false);
         }
 
         private async Task<HyperNodeMessageResponse> RunComplexCommand(MessageProcessOptionFlags optionFlags)
@@ -335,16 +339,17 @@ namespace TestClient
                 }
             );
 
-            var msg = new HyperNodeMessageRequest
-            {
-                CreatedByAgentName = ClientAgentName,
-                CommandName = cboCommandNames.Text,
-                CommandRequestBytes = commandRequestBytes,
-                ProcessOptionFlags = optionFlags
-            };
-
-            var client = new HyperNodeClient(TargetEndpoint);
-            return await client.ProcessMessageAsync(msg);
+            return await new HyperNodeHttpClient(
+                TargetEndpoint
+            ).ProcessMessageAsync(
+                new HyperNodeMessageRequest
+                {
+                    CreatedByAgentName = ClientAgentName,
+                    CommandName = cboCommandNames.Text,
+                    CommandRequestBytes = commandRequestBytes,
+                    ProcessOptionFlags = optionFlags
+                }
+            ).ConfigureAwait(false);
         }
 
         private async Task<HyperNodeMessageResponse> RunLongRunningCommand(MessageProcessOptionFlags optionFlags)
@@ -360,16 +365,36 @@ namespace TestClient
                 }
             );
 
-            var msg = new HyperNodeMessageRequest
-            {
-                CreatedByAgentName = ClientAgentName,
-                CommandName = cboCommandNames.Text,
-                CommandRequestBytes = commandRequestBytes,
-                ProcessOptionFlags = optionFlags
-            };
+            return await new HyperNodeHttpClient(
+                TargetEndpoint
+            ).ProcessMessageAsync(
+                new HyperNodeMessageRequest
+                {
+                    CreatedByAgentName = ClientAgentName,
+                    CommandName = cboCommandNames.Text,
+                    CommandRequestBytes = commandRequestBytes,
+                    ProcessOptionFlags = optionFlags
+                }
+            ).ConfigureAwait(false);
+        }
 
-            var client = new HyperNodeClient(TargetEndpoint);
-            return await client.ProcessMessageAsync(msg);
+        private async Task<string> RunLongRunningCommand(bool includeTaskTrace, bool cacheTaskProgress)
+        {
+            return await new HostingTestClient(
+                ClientAgentName,
+                TargetEndpoint
+            ).RunLongRunningCommandAsync(
+                new LongRunningCommandRequest
+                {
+                    TotalRunTime = TimeSpan.FromHours(1),
+                    MinimumSleepInterval = TimeSpan.FromSeconds(1),
+                    MaximumSleepInterval = TimeSpan.FromSeconds(5)
+                }.WithTaskTrace(
+                    includeTaskTrace
+                ).WithProgressCaching(
+                    cacheTaskProgress
+                )
+            ).ConfigureAwait(false);
         }
 
         private async Task<HyperNodeMessageResponse> RunEchoCommand(MessageProcessOptionFlags optionFlags)
@@ -383,29 +408,45 @@ namespace TestClient
                 }
             );
 
-            var msg = new HyperNodeMessageRequest
-            {
-                CreatedByAgentName = ClientAgentName,
-                CommandName = cboCommandNames.Text,
-                CommandRequestBytes = commandRequestBytes,
-                ProcessOptionFlags = optionFlags
-            };
+            return await new HyperNodeHttpClient(
+                TargetEndpoint
+            ).ProcessMessageAsync(
+                new HyperNodeMessageRequest
+                {
+                    CreatedByAgentName = ClientAgentName,
+                    CommandName = cboCommandNames.Text,
+                    CommandRequestBytes = commandRequestBytes,
+                    ProcessOptionFlags = optionFlags
+                }
+            ).ConfigureAwait(false);
+        }
 
-            var client = new HyperNodeClient(TargetEndpoint);
-            return await client.ProcessMessageAsync(msg);
+        private static async Task RunEmptyContractCommand(bool includeTaskTrace, bool cacheTaskProgress)
+        {
+            await new HostingTestClient(
+                ClientAgentName,
+                TargetEndpoint
+            ).EmptyContractCommandAsync(
+                new EmptyCommandRequest().WithMetaData(
+                    ClientAgentName,
+                    includeTaskTrace,
+                    cacheTaskProgress
+                )
+            ).ConfigureAwait(false);
         }
 
         private async Task<HyperNodeMessageResponse> RunEmptyContractCommand(MessageProcessOptionFlags optionFlags)
         {
-            var msg = new HyperNodeMessageRequest
-            {
-                CreatedByAgentName = ClientAgentName,
-                CommandName = cboCommandNames.Text,
-                ProcessOptionFlags = optionFlags
-            };
-
-            var client = new HyperNodeClient(TargetEndpoint);
-            return await client.ProcessMessageAsync(msg);
+            return await new HyperNodeHttpClient(
+                TargetEndpoint
+            ).ProcessMessageAsync(
+                new HyperNodeMessageRequest
+                {
+                    CreatedByAgentName = ClientAgentName,
+                    CommandName = cboCommandNames.Text,
+                    ProcessOptionFlags = optionFlags
+                }
+            ).ConfigureAwait(false);
         }
 
         #endregion Private Methods

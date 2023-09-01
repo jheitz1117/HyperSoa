@@ -3,7 +3,7 @@ using System.Runtime.Serialization.Json;
 using HyperSoa.Client.Serialization;
 using HyperSoa.Contracts;
 
-namespace TestClient.Serialization
+namespace HostingTest.Client.Serialization
 {
     public sealed class DataContractJsonSerializer<TRequest, TResponse> : IClientContractSerializer<TRequest, TResponse>
         where TRequest : ICommandRequest
