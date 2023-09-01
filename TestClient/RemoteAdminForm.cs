@@ -1,7 +1,7 @@
 ﻿using HyperSoa.Client.Extensions;
+using HyperSoa.Client.RemoteAdmin;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
-using HyperSoa.RemoteAdminClient;
 using TestClient.ViewModels;
 
 namespace TestClient

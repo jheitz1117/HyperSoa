@@ -1,7 +1,7 @@
 ﻿using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Contracts;
 
-namespace HyperSoa.RemoteAdminClient
+namespace HyperSoa.Client.RemoteAdmin
 {
     public interface IRemoteAdminHyperNodeClient : IHyperNodeService
     {

@@ -1,7 +1,6 @@
-﻿using HyperSoa.Client;
-using HyperSoa.Contracts;
+﻿using HyperSoa.Contracts;
 
-namespace HyperSoa.RemoteAdminClient.Extensions
+namespace HyperSoa.Client.RemoteAdmin.Extensions
 {
     public static class HyperNodeServiceExtensions
     {

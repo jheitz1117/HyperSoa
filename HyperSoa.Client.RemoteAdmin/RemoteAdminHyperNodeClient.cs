@@ -1,10 +1,9 @@
-﻿using HyperSoa.Client;
-using HyperSoa.Client.Extensions;
+﻿using HyperSoa.Client.Extensions;
 using HyperSoa.Client.Serialization;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
 
-namespace HyperSoa.RemoteAdminClient
+namespace HyperSoa.Client.RemoteAdmin
 {
     public class RemoteAdminHyperNodeClient : OpinionatedHyperNodeClientBase, IRemoteAdminHyperNodeClient
     {

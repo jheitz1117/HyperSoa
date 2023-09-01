@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\HyperSoa.Client\HyperSoa.Client.csproj" />
     <ProjectReference Include="..\HyperSoa.Contracts.RemoteAdmin\HyperSoa.Contracts.RemoteAdmin.csproj" />
-    <ProjectReference Include="..\HyperSoa.Contracts\HyperSoa.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

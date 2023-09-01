@@ -4,11 +4,11 @@ using HostingTest.Client.Serialization;
 using HostingTest.Contracts;
 using HyperSoa.Client;
 using HyperSoa.Client.Extensions;
+using HyperSoa.Client.RemoteAdmin.Extensions;
 using HyperSoa.Client.Serialization;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
 using HyperSoa.Contracts.RemoteAdmin.Models;
-using HyperSoa.RemoteAdminClient.Extensions;
 
 namespace TestClient
 {
