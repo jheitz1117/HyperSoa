@@ -6,7 +6,7 @@ namespace HyperSoa.Client.RemoteAdmin
     public interface IRemoteAdminHyperNodeClient : IHyperNodeService
     {
         public Task<GetCachedTaskProgressInfoResponse> GetCachedTaskProgressInfoAsync(GetCachedTaskProgressInfoRequest request);
-        public Task<GetNodeStatusResponse> GetNodeStatusAsync();
+        public Task<GetNodeStatusResponse> GetNodeStatusAsync(GetNodeStatusRequest request);
         public Task<EchoResponse> EchoAsync(EchoRequest request);
         public Task<EmptyCommandResponse> EnableCommandAsync(EnableCommandModuleRequest request);
         public Task<EmptyCommandResponse> EnableActivityMonitorAsync(EnableActivityMonitorRequest request);

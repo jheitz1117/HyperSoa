@@ -3,7 +3,22 @@ using HyperSoa.Contracts;
 
 namespace HyperSoa.Client
 {
-    public delegate bool HyperNodeResponseHandler(HyperNodeMessageRequest hyperNodeRequest, HyperNodeMessageResponse hyperNodeResponse);
+    public class HyperNodeResponseContext
+    {
+        public HyperNodeMessageRequest HyperNodeRequest { get; }
+        public HyperNodeMessageResponse HyperNodeResponse { get; }
+        public ICommandRequest? CommandRequest { get; internal set; }
+        public ICommandResponse? CommandResponse { get; internal set; }
+        public bool ResponseHandled { get; set; }
+
+        public HyperNodeResponseContext(HyperNodeMessageRequest hyperNodeRequest, HyperNodeMessageResponse hyperNodeResponse)
+        {
+            HyperNodeRequest = hyperNodeRequest ?? throw new ArgumentNullException(nameof(hyperNodeRequest));
+            HyperNodeResponse = hyperNodeResponse ?? throw new ArgumentNullException(nameof(hyperNodeResponse));
+        }
+    }
+
+    public delegate void HyperNodeResponseHandler(HyperNodeResponseContext args);
 
     public abstract class OpinionatedHyperNodeClientBase : IOpinionatedHyperNodeClient
     {
@@ -37,25 +52,10 @@ namespace HyperSoa.Client
         {
             string? taskId = null;
 
-            // Needed to avoid infinite recursion in closure below
-            var innerHandler = metaData?.ResponseHandler;
-            
             await ProcessMessageAsync(
                 commandName,
-                (metaData ?? new CommandMetaData()).WithResponseHandler(
-                    // Wrap our handler in another handler that calls our handler and also extracts the task ID
-                    (hyperNodeRequest, hyperNodeResponse) =>
-                    {
-                        var responseHandled = innerHandler?.Invoke(
-                            hyperNodeRequest,
-                            hyperNodeResponse
-                        ) ?? false;
-
-                        if (!responseHandled)
-                            taskId = hyperNodeResponse.TaskId;
-
-                        return responseHandled;
-                    }
+                (metaData ?? new CommandMetaDataImpl()).AddResponseHandler(
+                    context => taskId = context.HyperNodeResponse.TaskId
                 ),
                 true
             ).ConfigureAwait(false);
@@ -73,36 +73,28 @@ namespace HyperSoa.Client
         {
             await ProcessMessageAsync(
                 commandName,
-                metaData ?? new CommandMetaData(),
+                metaData ?? new CommandMetaDataImpl(),
                 false
             ).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Executes the specified command on the remote server and blocks until the command to completes or a timeout is reached. If
+        /// a command response is returned, it is deserialized.
+        /// </summary>
+        /// <param name="commandName">The name of the command to execute.</param>
+        /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
+        /// <returns></returns>
         protected virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
         {
             TResponse? commandResponse = default;
 
-            // Needed to avoid infinite recursion in closure below
-            var innerHandler = metaData?.ResponseHandler;
-
             await ProcessMessageAsync(
                 commandName,
-                (metaData ?? new CommandMetaData()).WithResponseHandler(
-                    // Wrap our handler in another handler that calls our handler and also deserializes our command response
-                    (hyperNodeRequest, hyperNodeResponse) =>
-                    {
-                        var responseHandled = innerHandler?.Invoke(
-                            hyperNodeRequest,
-                            hyperNodeResponse
-                        ) ?? false;
-
-                        if (!responseHandled && hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
-                            commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
-
-                        return responseHandled;
-                    }
+                (metaData ?? new CommandMetaDataImpl()).AddResponseHandler(
+                    context => commandResponse = (TResponse?)context.CommandResponse
                 ),
                 false
             ).ConfigureAwait(false);
@@ -128,7 +120,7 @@ namespace HyperSoa.Client
                 optionFlags |= MessageProcessOptionFlags.RunConcurrently;
 
             byte[]? commandRequestBytes = null;
-            if (metaData.Serializer != null)
+            if (metaData is { Serializer: not null, CommandRequest: not null })
                 commandRequestBytes = metaData.Serializer.SerializeRequest(metaData.CommandRequest);
 
             var hyperNodeRequest = new HyperNodeMessageRequest
@@ -143,13 +135,23 @@ namespace HyperSoa.Client
                 hyperNodeRequest
             ).ConfigureAwait(false);
 
-            var responseHandled = metaData.ResponseHandler?.Invoke(
+            ICommandResponse? commandResponse = null;
+            if (hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData.Serializer != null)
+                commandResponse = metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
+
+            var responseContext = new HyperNodeResponseContext(
                 hyperNodeRequest,
                 hyperNodeResponse
-            ) ?? false;
+            )
+            {
+                CommandRequest = metaData.CommandRequest,
+                CommandResponse = commandResponse
+            };
+
+            metaData.ResponseHandler?.Invoke(responseContext);
 
             // Only perform error checking here if the response was not fully handled by the custom handler above
-            if (!responseHandled)
+            if (!responseContext.ResponseHandled)
             {
                 if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.InvalidCommand))
                     throw new ArgumentException($"The node '{hyperNodeResponse.RespondingNodeName}' does not recognize the command name '{hyperNodeRequest.CommandName}'.", nameof(hyperNodeRequest.CommandName));

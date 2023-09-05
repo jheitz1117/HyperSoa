@@ -37,51 +37,19 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<GetNodeStatusResponse> GetNodeStatusAsync()
-        {
-            return await GetNodeStatusAsync(false).ConfigureAwait(false);
-        }
-
-        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(bool excludeSelfTaskStatus)
+        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(GetNodeStatusRequest request)
         {
             return await GetNodeStatusAsync(
-                new EmptyCommandRequest().CreatedBy(ClientApplicationName),
-                excludeSelfTaskStatus
+                request.CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
-        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(ICommandMetaData metaData, bool excludeSelfTaskStatus)
+        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(ICommandMetaData metaData)
         {
-            string? selfTaskId = null;
-
-            // Needed to avoid infinite recursion in the closure below
-            var innerHandler = metaData.ResponseHandler;
-
-            var commandResponse = await GetCommandResponseAsync<EmptyCommandRequest, GetNodeStatusResponse>(
+            return await GetCommandResponseAsync<GetNodeStatusRequest, GetNodeStatusResponse>(
                 RemoteAdminCommandName.GetNodeStatus,
-                metaData.WithResponseHandler(
-                    (hyperNodeRequest, hyperNodeResponse) =>
-                    {
-                        var responseHandled = innerHandler?.Invoke(
-                            hyperNodeRequest,
-                            hyperNodeResponse
-                        ) ?? false;
-
-                        selfTaskId = hyperNodeResponse.TaskId;
-
-                        return responseHandled;
-                    }
-                )
+                metaData
             ).ConfigureAwait(false);
-
-            if (excludeSelfTaskStatus)
-            {
-                commandResponse.LiveTasks = commandResponse.LiveTasks?.Where(
-                    t => t.TaskId != selfTaskId
-                ).ToArray();
-            }
-
-            return commandResponse;
         }
 
         public async Task<EchoResponse> EchoAsync(EchoRequest request)

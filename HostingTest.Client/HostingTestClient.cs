@@ -1,5 +1,4 @@
-﻿using HostingTest.Client.Extensions;
-using HostingTest.Client.Serialization;
+﻿using HostingTest.Client.Serialization;
 using HostingTest.Contracts;
 using HyperSoa.Client;
 using HyperSoa.Client.Extensions;
@@ -30,9 +29,9 @@ namespace HostingTest.Client
 
         public async Task<string> RunLongRunningCommandAsync(ICommandMetaData metaData)
         {
-            return await RunCommandAsync(
+            return await RunCommandAsync<LongRunningCommandRequest>(
                 "LongRunningCommand",
-                metaData.WithDefaultSerializer<LongRunningCommandRequest, ICommandResponse>()
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -45,9 +44,9 @@ namespace HostingTest.Client
 
         public async Task<string> RunLongRunningSingletonCommandAsync(ICommandMetaData metaData)
         {
-            return await RunCommandAsync(
+            return await RunCommandAsync<LongRunningCommandRequest>(
                 "LongRunningSingletonCommand",
-                metaData.WithDefaultSerializer<LongRunningCommandRequest, ICommandResponse>()
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -68,17 +67,32 @@ namespace HostingTest.Client
             ).ConfigureAwait(false);
         }
 
-        public async Task EmptyContractCommandAsync()
+        public async Task NoContractCommandAsync()
         {
-            await EmptyContractCommandAsync(
-                new EmptyCommandRequest().CreatedBy(ClientApplicationName)
+            await NoContractCommandAsync(
+                CommandMetaData.Empty().CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
-        public async Task EmptyContractCommandAsync(ICommandMetaData metaData)
+        public async Task NoContractCommandAsync(ICommandMetaData metaData)
         {
-            await GetCommandResponseAsync<EmptyCommandRequest, EmptyCommandResponse>(
-                "EmptyCommand",
+            await ExecuteCommandAsync<EmptyCommandRequest>(
+                "NoContractCommand",
+                metaData
+            ).ConfigureAwait(false);
+        }
+
+        public async Task<string> RunNoContractCommandAsync()
+        {
+            return await RunNoContractCommandAsync(
+                CommandMetaData.Empty().CreatedBy(ClientApplicationName)
+            ).ConfigureAwait(false);
+        }
+
+        public async Task<string> RunNoContractCommandAsync(ICommandMetaData metaData)
+        {
+            return await RunCommandAsync(
+                "NoContractCommand",
                 metaData
             ).ConfigureAwait(false);
         }
@@ -86,6 +100,26 @@ namespace HostingTest.Client
         #endregion Public Methods
 
         #region Protected Methods
+
+        protected Task<string> RunCommandAsync<T>(string commandName, ICommandMetaData? metaData = null)
+            where T : ICommandRequest
+        {
+            // By default, use protobuf for serialization
+            if (metaData is { Serializer: null })
+                metaData.Serializer = new ProtoContractSerializer<T, ICommandResponse>();
+
+            return base.RunCommandAsync(commandName, metaData);
+        }
+
+        protected Task ExecuteCommandAsync<T>(string commandName, ICommandMetaData? metaData = null)
+            where T : ICommandRequest
+        {
+            // By default, use protobuf for serialization
+            if (metaData is { Serializer: null })
+                metaData.Serializer = new ProtoContractSerializer<T, ICommandResponse>();
+
+            return base.ExecuteCommandAsync(commandName, metaData);
+        }
 
         protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
         {

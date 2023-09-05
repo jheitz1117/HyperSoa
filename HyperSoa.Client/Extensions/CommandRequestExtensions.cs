@@ -11,7 +11,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData(request);
+            return new CommandMetaDataImpl(request);
         }
 
         public static ICommandMetaData CreatedBy<T>(this T request, string? createdByAgentName)
@@ -20,7 +20,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData(
+            return new CommandMetaDataImpl(
                 request
             ).CreatedBy(
                 createdByAgentName
@@ -52,7 +52,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData(
+            return new CommandMetaDataImpl(
                 request
             ).WithTaskTrace(
                 returnTaskTrace
@@ -92,7 +92,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData(
+            return new CommandMetaDataImpl(
                 request
             ).WithProgressCaching(
                 cacheTaskProgress
@@ -123,7 +123,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData(
+            return new CommandMetaDataImpl(
                 request
             ).WithSerializer(
                 serializer
@@ -146,7 +146,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData(
+            return new CommandMetaDataImpl(
                 request
             ).WithResponseHandler(
                 responseHandler
@@ -159,6 +159,21 @@ namespace HyperSoa.Client.Extensions
                 throw new ArgumentNullException(nameof(metaData));
 
             metaData.ResponseHandler = responseHandler;
+
+            return metaData;
+        }
+
+        public static ICommandMetaData AddResponseHandler(this ICommandMetaData metaData, HyperNodeResponseHandler responseHandler)
+        {
+            if (metaData == null)
+                throw new ArgumentNullException(nameof(metaData));
+            if (responseHandler == null)
+                throw new ArgumentNullException(nameof(responseHandler));
+
+            if (metaData.ResponseHandler == null)
+                metaData.ResponseHandler = responseHandler;
+            else
+                metaData.ResponseHandler += responseHandler;
 
             return metaData;
         }

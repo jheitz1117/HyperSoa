@@ -4,7 +4,7 @@ using HyperSoa.Service.CommandModules;
 
 namespace HostingTest.Modules.CommandModules
 {
-    public class EmptyCommandModule: ICommandModule
+    public class NoContractCommandModule: ICommandModule
     {
         public ICommandResponse Execute(ICommandExecutionContext context)
         {

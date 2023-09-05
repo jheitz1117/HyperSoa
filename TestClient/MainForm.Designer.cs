@@ -53,6 +53,7 @@
             txtTaskId = new TextBox();
             btnCancelCurrentTask = new Button();
             lblTaskId = new Label();
+            btnHostingTestForm = new Button();
             pnlLeft.SuspendLayout();
             grpRealTimeResponse.SuspendLayout();
             grpRealTimeTaskTrace.SuspendLayout();
@@ -69,6 +70,7 @@
             // 
             // pnlLeft
             // 
+            pnlLeft.Controls.Add(btnHostingTestForm);
             pnlLeft.Controls.Add(btnLaunchRemoteAdmin);
             pnlLeft.Controls.Add(grpRealTimeResponse);
             pnlLeft.Controls.Add(grpRealTimeTaskTrace);
@@ -339,6 +341,16 @@
             lblTaskId.Text = "Task ID";
             lblTaskId.TextAlign = ContentAlignment.MiddleLeft;
             // 
+            // btnHostingTestForm
+            // 
+            btnHostingTestForm.Location = new Point(3, 3);
+            btnHostingTestForm.Name = "btnHostingTestForm";
+            btnHostingTestForm.Size = new Size(141, 23);
+            btnHostingTestForm.TabIndex = 14;
+            btnHostingTestForm.Text = "Hosting Test Form";
+            btnHostingTestForm.UseVisualStyleBackColor = true;
+            btnHostingTestForm.Click += btnHostingTestForm_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -392,5 +404,6 @@
         private GroupBox grpRealTimeTaskTrace;
         private SplitContainer spcHyperNodeActivity;
         private Button btnLaunchRemoteAdmin;
+        private Button btnHostingTestForm;
     }
 }
