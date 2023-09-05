@@ -317,9 +317,11 @@ namespace TestClient
                     MyInt32 = 1000,
                     MyString = "My String!",
                     MyTimeSpan = TimeSpan.FromMinutes(17)
-                }.WithMetaData(
-                    ClientAgentName,
-                    includeTaskTrace,
+                }.CreatedBy(
+                    ClientAgentName
+                ).WithTaskTrace(
+                    includeTaskTrace
+                ).WithProgressCaching(
                     cacheTaskProgress
                 )
             ).ConfigureAwait(false);
@@ -427,9 +429,11 @@ namespace TestClient
                 ClientAgentName,
                 TargetEndpoint
             ).EmptyContractCommandAsync(
-                new EmptyCommandRequest().WithMetaData(
-                    ClientAgentName,
-                    includeTaskTrace,
+                new EmptyCommandRequest().CreatedBy(
+                    ClientAgentName
+                ).WithTaskTrace(
+                    includeTaskTrace
+                ).WithProgressCaching(
                     cacheTaskProgress
                 )
             ).ConfigureAwait(false);

@@ -29,11 +29,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<GetCachedTaskProgressInfoResponse> GetCachedTaskProgressInfoAsync(ICommandMetaData<GetCachedTaskProgressInfoRequest> request)
+        public async Task<GetCachedTaskProgressInfoResponse> GetCachedTaskProgressInfoAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<GetCachedTaskProgressInfoRequest, GetCachedTaskProgressInfoResponse>(
                 RemoteAdminCommandName.GetCachedTaskProgressInfo,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -50,18 +50,26 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(ICommandMetaData<EmptyCommandRequest> request, bool excludeSelfTaskStatus)
+        public async Task<GetNodeStatusResponse> GetNodeStatusAsync(ICommandMetaData metaData, bool excludeSelfTaskStatus)
         {
             string? selfTaskId = null;
 
+            // Needed to avoid infinite recursion in the closure below
+            var innerHandler = metaData.ResponseHandler;
+
             var commandResponse = await GetCommandResponseAsync<EmptyCommandRequest, GetNodeStatusResponse>(
                 RemoteAdminCommandName.GetNodeStatus,
-                request.RegisterHyperNodeResponseHandler(
-                    (_, hyperNodeResponse) =>
+                metaData.WithResponseHandler(
+                    (hyperNodeRequest, hyperNodeResponse) =>
                     {
+                        var responseHandled = innerHandler?.Invoke(
+                            hyperNodeRequest,
+                            hyperNodeResponse
+                        ) ?? false;
+
                         selfTaskId = hyperNodeResponse.TaskId;
 
-                        return false;
+                        return responseHandled;
                     }
                 )
             ).ConfigureAwait(false);
@@ -83,11 +91,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EchoResponse> EchoAsync(ICommandMetaData<EchoRequest> request)
+        public async Task<EchoResponse> EchoAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<EchoRequest, EchoResponse>(
                 RemoteAdminCommandName.Echo,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -98,11 +106,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EmptyCommandResponse> EnableCommandAsync(ICommandMetaData<EnableCommandModuleRequest> request)
+        public async Task<EmptyCommandResponse> EnableCommandAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<EnableCommandModuleRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableCommand,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -113,11 +121,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EmptyCommandResponse> EnableActivityMonitorAsync(ICommandMetaData<EnableActivityMonitorRequest> request)
+        public async Task<EmptyCommandResponse> EnableActivityMonitorAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<EnableActivityMonitorRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableActivityMonitor,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -128,11 +136,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EmptyCommandResponse> RenameActivityMonitorAsync(ICommandMetaData<RenameActivityMonitorRequest> request)
+        public async Task<EmptyCommandResponse> RenameActivityMonitorAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<RenameActivityMonitorRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.RenameActivityMonitor,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -143,11 +151,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EmptyCommandResponse> EnableTaskProgressCacheAsync(ICommandMetaData<EnableTaskProgressCacheRequest> request)
+        public async Task<EmptyCommandResponse> EnableTaskProgressCacheAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<EnableTaskProgressCacheRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableTaskProgressCache,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -158,11 +166,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EmptyCommandResponse> EnableDiagnosticsAsync(ICommandMetaData<EnableDiagnosticsRequest> request)
+        public async Task<EmptyCommandResponse> EnableDiagnosticsAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<EnableDiagnosticsRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.EnableDiagnostics,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -173,11 +181,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<EmptyCommandResponse> CancelTaskAsync(ICommandMetaData<CancelTaskRequest> request)
+        public async Task<EmptyCommandResponse> CancelTaskAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<CancelTaskRequest, EmptyCommandResponse>(
                 RemoteAdminCommandName.CancelTask,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -188,11 +196,11 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        public async Task<SetTaskProgressCacheDurationResponse> SetTaskProgressCacheDurationAsync(ICommandMetaData<SetTaskProgressCacheDurationRequest> request)
+        public async Task<SetTaskProgressCacheDurationResponse> SetTaskProgressCacheDurationAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<SetTaskProgressCacheDurationRequest, SetTaskProgressCacheDurationResponse>(
                 RemoteAdminCommandName.SetTaskProgressCacheDuration,
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -200,7 +208,7 @@ namespace HyperSoa.Client.RemoteAdmin
 
         #region Protected Methods
 
-        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
+        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
         {
             // Always override the serializer since ours is the only valid one for remote admin commands
             return base.GetCommandResponseAsync<TRequest, TResponse>(

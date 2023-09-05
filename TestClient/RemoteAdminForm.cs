@@ -234,9 +234,11 @@ namespace TestClient
                     new EchoRequest
                     {
                         Prompt = "Hello!"
-                    }.WithMetaData(
-                        _client.ClientApplicationName,
-                        chkReturnTaskTrace.Checked,
+                    }.CreatedBy(
+                        _client.ClientApplicationName
+                    ).WithTaskTrace(
+                        chkReturnTaskTrace.Checked
+                    ).WithProgressCaching(
                         chkCacheProgressInfo.Checked
                     )
                 ).ConfigureAwait(false);

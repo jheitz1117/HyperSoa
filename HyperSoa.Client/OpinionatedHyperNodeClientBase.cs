@@ -37,37 +37,26 @@ namespace HyperSoa.Client
         {
             string? taskId = null;
 
-            if (metaData != null)
-            {
-                // Wrap our handler in another handler that calls our handler and also extracts the task ID
-                metaData.ResponseHandler = (hyperNodeRequest, hyperNodeResponse) =>
-                {
-                    var responseHandled = metaData.ResponseHandler?.Invoke(
-                        hyperNodeRequest,
-                        hyperNodeResponse
-                    ) ?? false;
-
-                    if (!responseHandled)
-                        taskId = hyperNodeResponse.TaskId;
-
-                    return responseHandled;
-                };
-            }
-            else
-            {
-                metaData = new CommandMetaData().RegisterHyperNodeResponseHandler(
-                    (_, hyperNodeResponse) =>
-                    {
-                        taskId = hyperNodeResponse.TaskId;
-
-                        return false;
-                    }
-                );
-            }
+            // Needed to avoid infinite recursion in closure below
+            var innerHandler = metaData?.ResponseHandler;
             
             await ProcessMessageAsync(
                 commandName,
-                metaData,
+                (metaData ?? new CommandMetaData()).WithResponseHandler(
+                    // Wrap our handler in another handler that calls our handler and also extracts the task ID
+                    (hyperNodeRequest, hyperNodeResponse) =>
+                    {
+                        var responseHandled = innerHandler?.Invoke(
+                            hyperNodeRequest,
+                            hyperNodeResponse
+                        ) ?? false;
+
+                        if (!responseHandled)
+                            taskId = hyperNodeResponse.TaskId;
+
+                        return responseHandled;
+                    }
+                ),
                 true
             ).ConfigureAwait(false);
 
@@ -84,41 +73,37 @@ namespace HyperSoa.Client
         {
             await ProcessMessageAsync(
                 commandName,
-                new CommandMetaData(),
+                metaData ?? new CommandMetaData(),
                 false
             ).ConfigureAwait(false);
         }
 
-        protected virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
+        protected virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
         {
             TResponse? commandResponse = default;
 
-            if (metaData != null)
-            {
-                // Wrap our handler in another handler that calls our handler and also deserializes our command response
-                metaData.ResponseHandler = (hyperNodeRequest, hyperNodeResponse) =>
-                {
-                    var responseHandled = metaData.ResponseHandler?.Invoke(
-                        hyperNodeRequest,
-                        hyperNodeResponse
-                    ) ?? false;
-
-                    if (!responseHandled && hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData.Serializer != null)
-                        commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
-
-                    return responseHandled;
-                };
-            }
-            else
-            {
-                metaData = new CommandMetaData<TRequest>();
-            }
+            // Needed to avoid infinite recursion in closure below
+            var innerHandler = metaData?.ResponseHandler;
 
             await ProcessMessageAsync(
                 commandName,
-                metaData,
+                (metaData ?? new CommandMetaData()).WithResponseHandler(
+                    // Wrap our handler in another handler that calls our handler and also deserializes our command response
+                    (hyperNodeRequest, hyperNodeResponse) =>
+                    {
+                        var responseHandled = innerHandler?.Invoke(
+                            hyperNodeRequest,
+                            hyperNodeResponse
+                        ) ?? false;
+
+                        if (!responseHandled && hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
+                            commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
+
+                        return responseHandled;
+                    }
+                ),
                 false
             ).ConfigureAwait(false);
             
@@ -142,10 +127,14 @@ namespace HyperSoa.Client
             if (runAsync)
                 optionFlags |= MessageProcessOptionFlags.RunConcurrently;
 
+            byte[]? commandRequestBytes = null;
+            if (metaData.Serializer != null)
+                commandRequestBytes = metaData.Serializer.SerializeRequest(metaData.CommandRequest);
+
             var hyperNodeRequest = new HyperNodeMessageRequest
             {
                 CommandName = commandName,
-                CommandRequestBytes = metaData.GetCommandRequestBytes(),
+                CommandRequestBytes = commandRequestBytes,
                 CreatedByAgentName = metaData.CreatedByAgentName ?? ClientApplicationName,
                 ProcessOptionFlags = optionFlags
             };

@@ -1,4 +1,5 @@
-﻿using HostingTest.Client.Serialization;
+﻿using HostingTest.Client.Extensions;
+using HostingTest.Client.Serialization;
 using HostingTest.Contracts;
 using HyperSoa.Client;
 using HyperSoa.Client.Extensions;
@@ -27,11 +28,11 @@ namespace HostingTest.Client
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunLongRunningCommandAsync(ICommandMetaData<LongRunningCommandRequest> request)
+        public async Task<string> RunLongRunningCommandAsync(ICommandMetaData metaData)
         {
             return await RunCommandAsync(
                 "LongRunningCommand",
-                request
+                metaData.WithDefaultSerializer<LongRunningCommandRequest, ICommandResponse>()
             ).ConfigureAwait(false);
         }
 
@@ -42,11 +43,11 @@ namespace HostingTest.Client
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunLongRunningSingletonCommandAsync(ICommandMetaData<LongRunningCommandRequest> request)
+        public async Task<string> RunLongRunningSingletonCommandAsync(ICommandMetaData metaData)
         {
             return await RunCommandAsync(
                 "LongRunningSingletonCommand",
-                request
+                metaData.WithDefaultSerializer<LongRunningCommandRequest, ICommandResponse>()
             ).ConfigureAwait(false);
         }
 
@@ -57,11 +58,11 @@ namespace HostingTest.Client
             );
         }
 
-        public async Task<ComplexCommandResponse> ComplexCommandAsync(ICommandMetaData<ComplexCommandRequest> request)
+        public async Task<ComplexCommandResponse> ComplexCommandAsync(ICommandMetaData metaData)
         {
             return await GetCommandResponseAsync<ComplexCommandRequest, ComplexCommandResponse>(
                 "ComplexCommand",
-                request.WithSerializer(
+                metaData.WithSerializer(
                     new DataContractJsonSerializer<ComplexCommandRequest, ComplexCommandResponse>()
                 )
             ).ConfigureAwait(false);
@@ -74,11 +75,11 @@ namespace HostingTest.Client
             ).ConfigureAwait(false);
         }
 
-        public async Task EmptyContractCommandAsync(ICommandMetaData<EmptyCommandRequest> request)
+        public async Task EmptyContractCommandAsync(ICommandMetaData metaData)
         {
             await GetCommandResponseAsync<EmptyCommandRequest, EmptyCommandResponse>(
                 "EmptyCommand",
-                request
+                metaData
             ).ConfigureAwait(false);
         }
 
@@ -86,23 +87,13 @@ namespace HostingTest.Client
 
         #region Protected Methods
 
-        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
+        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
         {
             // By default, use protobuf for serialization
             if (metaData is { Serializer: null })
                 metaData.Serializer = new ProtoContractSerializer<TRequest, TResponse>();
 
             return base.GetCommandResponseAsync<TRequest, TResponse>(commandName, metaData);
-        }
-
-        protected Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
-            where TRequest : ICommandRequest
-        {
-            // By default, use protobuf for serialization
-            if (metaData is { Serializer: null })
-                metaData.Serializer = new ProtoContractSerializer<TRequest, ICommandResponse>();
-
-            return base.RunCommandAsync(commandName, metaData);
         }
 
         #endregion Protected Methods
