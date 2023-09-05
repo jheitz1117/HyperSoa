@@ -91,7 +91,7 @@ namespace HyperSoa.Client.Extensions
             };
         }
 
-        public static ICommandMetaData<T> RegisterSuccessDelegate<T>(this T request, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onSuccess)
+        public static ICommandMetaData<T> RegisterHyperNodeResponseDelegate<T>(this T request, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onHyperNodeResponse)
             where T : ICommandRequest
         {
             if (request == null)
@@ -99,7 +99,7 @@ namespace HyperSoa.Client.Extensions
 
             return new CommandMetaData<T>(request)
             {
-                OnSuccess = onSuccess
+                OnHyperNodeResponse = onHyperNodeResponse
             };
         }
 
@@ -165,16 +165,16 @@ namespace HyperSoa.Client.Extensions
             return metaData;
         }
 
-        public static ICommandMetaData<T> RegisterSuccessDelegate<T>(this ICommandMetaData<T> metaData, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onSuccess)
+        public static ICommandMetaData<T> RegisterHyperNodeResponseDelegate<T>(this ICommandMetaData<T> metaData, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onHyperNodeResponse)
             where T : ICommandRequest
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
 
-            if (metaData.OnSuccess == null)
-                metaData.OnSuccess = onSuccess;
+            if (metaData.OnHyperNodeResponse == null)
+                metaData.OnHyperNodeResponse = onHyperNodeResponse;
             else
-                metaData.OnSuccess += onSuccess;
+                metaData.OnHyperNodeResponse += onHyperNodeResponse;
 
             return metaData;
         }

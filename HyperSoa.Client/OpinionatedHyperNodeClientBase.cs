@@ -36,7 +36,7 @@ namespace HyperSoa.Client
                 true,
                 (hyperNodeRequest, hyperNodeResponse) =>
                 {
-                    metaData?.OnSuccess?.Invoke(hyperNodeRequest, hyperNodeResponse);
+                    metaData?.OnHyperNodeResponse?.Invoke(hyperNodeRequest, hyperNodeResponse);
 
                     taskId = hyperNodeResponse.TaskId;
                 }
@@ -57,7 +57,7 @@ namespace HyperSoa.Client
                 false,
                 (hyperNodeRequest, hyperNodeResponse) =>
                 {
-                    metaData?.OnSuccess?.Invoke(hyperNodeRequest, hyperNodeResponse);
+                    metaData?.OnHyperNodeResponse?.Invoke(hyperNodeRequest, hyperNodeResponse);
 
                     if (hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
                         commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
@@ -71,7 +71,7 @@ namespace HyperSoa.Client
 
         #region Private Methods
 
-        private async Task ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? metaData, bool runAsync, Action<HyperNodeMessageRequest, HyperNodeMessageResponse>? onSuccess = null)
+        private async Task ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? metaData, bool runAsync, Action<HyperNodeMessageRequest, HyperNodeMessageResponse>? onHyperNodeResponse = null)
             where T : ICommandRequest
         {
             var hyperNodeRequest = metaData.ToHyperNodeMessageRequest(
@@ -81,7 +81,11 @@ namespace HyperSoa.Client
 
             hyperNodeRequest.CreatedByAgentName ??= ClientApplicationName;
 
-            var hyperNodeResponse = await ProcessMessageAsync(hyperNodeRequest).ConfigureAwait(false);
+            var hyperNodeResponse = await ProcessMessageAsync(
+                hyperNodeRequest
+            ).ConfigureAwait(false);
+
+            onHyperNodeResponse?.Invoke(hyperNodeRequest, hyperNodeResponse);
 
             // Error checking
             if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.InvalidCommand))
@@ -118,8 +122,6 @@ namespace HyperSoa.Client
 
                 throw new InvalidOperationException(errorMessage);
             }
-
-            onSuccess?.Invoke(hyperNodeRequest, hyperNodeResponse);
         }
 
         #endregion Private Methods

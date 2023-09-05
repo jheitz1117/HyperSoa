@@ -32,8 +32,8 @@
 		</None>
 	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\HostingTest.Contracts\HostingTest.Contracts.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\HyperSoa.Contracts\HyperSoa.Contracts.csproj" />
+	</ItemGroup>
 
 </Project>

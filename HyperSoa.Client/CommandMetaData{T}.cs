@@ -11,7 +11,7 @@ namespace HyperSoa.Client
         public string? CreatedByAgentName { get; set; }
         public bool ReturnTaskTrace { get; set; }
         public bool CacheTaskProgress { get; set; }
-        public Action<HyperNodeMessageRequest, HyperNodeMessageResponse>? OnSuccess { get; set; }
+        public Action<HyperNodeMessageRequest, HyperNodeMessageResponse>? OnHyperNodeResponse { get; set; }
 
         public CommandMetaData(T? commandRequest)
         {
