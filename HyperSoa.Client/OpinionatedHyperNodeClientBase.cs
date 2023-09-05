@@ -27,18 +27,22 @@ namespace HyperSoa.Client
 
         #region Protected Methods
 
-        protected virtual async Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
-            where TRequest : ICommandRequest
+        /// <summary>
+        /// Starts the specified command on the remote server and returns the associated task ID without waiting for the command to complete.
+        /// </summary>
+        /// <param name="commandName">The name of the command to execute.</param>
+        /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
+        /// <returns></returns>
+        protected virtual async Task<string> RunCommandAsync(string commandName, ICommandMetaData? metaData = null)
         {
             string? taskId = null;
 
-            await ProcessMessageAsync(
-                commandName,
-                metaData,
-                true,
-                (hyperNodeRequest, hyperNodeResponse) =>
+            if (metaData != null)
+            {
+                // Wrap our handler in another handler that calls our handler and also extracts the task ID
+                metaData.ResponseHandler = (hyperNodeRequest, hyperNodeResponse) =>
                 {
-                    var responseHandled = metaData?.ResponseHandler?.Invoke(
+                    var responseHandled = metaData.ResponseHandler?.Invoke(
                         hyperNodeRequest,
                         hyperNodeResponse
                     ) ?? false;
@@ -47,10 +51,42 @@ namespace HyperSoa.Client
                         taskId = hyperNodeResponse.TaskId;
 
                     return responseHandled;
-                }
+                };
+            }
+            else
+            {
+                metaData = new CommandMetaData().RegisterHyperNodeResponseHandler(
+                    (_, hyperNodeResponse) =>
+                    {
+                        taskId = hyperNodeResponse.TaskId;
+
+                        return false;
+                    }
+                );
+            }
+            
+            await ProcessMessageAsync(
+                commandName,
+                metaData,
+                true
             ).ConfigureAwait(false);
 
             return taskId ?? throw new InvalidOperationException("Unable to run task asynchronously.");
+        }
+
+        /// <summary>
+        /// Executes the specified command on the remote server and blocks until the command to completes or a timeout is reached.
+        /// </summary>
+        /// <param name="commandName">The name of the command to execute.</param>
+        /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
+        /// <returns></returns>
+        protected virtual async Task ExecuteCommandAsync(string commandName, ICommandMetaData? metaData = null)
+        {
+            await ProcessMessageAsync(
+                commandName,
+                new CommandMetaData(),
+                false
+            ).ConfigureAwait(false);
         }
 
         protected virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData<TRequest>? metaData)
@@ -59,22 +95,31 @@ namespace HyperSoa.Client
         {
             TResponse? commandResponse = default;
 
-            await ProcessMessageAsync(
-                commandName,
-                metaData,
-                false,
-                (hyperNodeRequest, hyperNodeResponse) =>
+            if (metaData != null)
+            {
+                // Wrap our handler in another handler that calls our handler and also deserializes our command response
+                metaData.ResponseHandler = (hyperNodeRequest, hyperNodeResponse) =>
                 {
-                    var responseHandled = metaData?.ResponseHandler?.Invoke(
+                    var responseHandled = metaData.ResponseHandler?.Invoke(
                         hyperNodeRequest,
                         hyperNodeResponse
                     ) ?? false;
 
-                    if (!responseHandled && hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
+                    if (!responseHandled && hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData.Serializer != null)
                         commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
 
                     return responseHandled;
-                }
+                };
+            }
+            else
+            {
+                metaData = new CommandMetaData<TRequest>();
+            }
+
+            await ProcessMessageAsync(
+                commandName,
+                metaData,
+                false
             ).ConfigureAwait(false);
             
             return commandResponse ?? throw new InvalidOperationException("Unable to deserialize command response.");
@@ -84,21 +129,32 @@ namespace HyperSoa.Client
 
         #region Private Methods
 
-        private async Task ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? metaData, bool runAsync, HyperNodeResponseHandler? responseHandler = null)
-            where T : ICommandRequest
+        private async Task ProcessMessageAsync(string commandName, ICommandMetaData metaData, bool runAsync)
         {
-            var hyperNodeRequest = metaData.ToHyperNodeMessageRequest(
-                commandName,
-                runAsync
-            );
+            if (metaData == null)
+                throw new ArgumentNullException(nameof(metaData));
 
-            hyperNodeRequest.CreatedByAgentName ??= ClientApplicationName;
+            var optionFlags = MessageProcessOptionFlags.None;
+            if (metaData.ReturnTaskTrace)
+                optionFlags |= MessageProcessOptionFlags.ReturnTaskTrace;
+            if (metaData.CacheTaskProgress)
+                optionFlags |= MessageProcessOptionFlags.CacheTaskProgress;
+            if (runAsync)
+                optionFlags |= MessageProcessOptionFlags.RunConcurrently;
+
+            var hyperNodeRequest = new HyperNodeMessageRequest
+            {
+                CommandName = commandName,
+                CommandRequestBytes = metaData.GetCommandRequestBytes(),
+                CreatedByAgentName = metaData.CreatedByAgentName ?? ClientApplicationName,
+                ProcessOptionFlags = optionFlags
+            };
 
             var hyperNodeResponse = await ProcessMessageAsync(
                 hyperNodeRequest
             ).ConfigureAwait(false);
 
-            var responseHandled = responseHandler?.Invoke(
+            var responseHandled = metaData.ResponseHandler?.Invoke(
                 hyperNodeRequest,
                 hyperNodeResponse
             ) ?? false;

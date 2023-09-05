@@ -95,7 +95,8 @@ namespace HostingTest.Client
             return base.GetCommandResponseAsync<TRequest, TResponse>(commandName, metaData);
         }
 
-        protected override Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
+        protected Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
+            where TRequest : ICommandRequest
         {
             // By default, use protobuf for serialization
             if (metaData is { Serializer: null })

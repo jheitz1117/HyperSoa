@@ -211,17 +211,6 @@ namespace HyperSoa.Client.RemoteAdmin
             );
         }
 
-        protected override Task<string> RunCommandAsync<TRequest>(string commandName, ICommandMetaData<TRequest>? metaData)
-        {
-            // Always override the serializer since ours is the only valid one for remote admin commands
-            return base.RunCommandAsync(
-                commandName,
-                metaData?.WithSerializer(
-                    new ProtoContractSerializer<TRequest, ICommandResponse>()
-                )
-            );
-        }
-
         #endregion Protected Methods
     }
 }

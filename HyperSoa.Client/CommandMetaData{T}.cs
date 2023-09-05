@@ -13,9 +13,19 @@ namespace HyperSoa.Client
         public bool CacheTaskProgress { get; set; }
         public HyperNodeResponseHandler? ResponseHandler { get; set; }
 
+        public CommandMetaData()
+        {
+            CommandRequest = default;
+        }
+
         public CommandMetaData(T? commandRequest)
         {
             CommandRequest = commandRequest;
+        }
+
+        public byte[]? GetCommandRequestBytes()
+        {
+            return Serializer?.SerializeRequest(CommandRequest);
         }
     }
 }

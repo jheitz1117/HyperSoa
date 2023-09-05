@@ -5,30 +5,6 @@ namespace HyperSoa.Client.Extensions
 {
     public static class CommandRequestExtensions
     {
-        public static HyperNodeMessageRequest ToHyperNodeMessageRequest<T>(this ICommandMetaData<T>? metaData, string commandName, bool runAsync)
-            where T : ICommandRequest
-        {
-            var optionFlags = MessageProcessOptionFlags.None;
-            if (metaData?.ReturnTaskTrace ?? false)
-                optionFlags |= MessageProcessOptionFlags.ReturnTaskTrace;
-            if (metaData?.CacheTaskProgress ?? false)
-                optionFlags |= MessageProcessOptionFlags.CacheTaskProgress;
-            if (runAsync)
-                optionFlags |= MessageProcessOptionFlags.RunConcurrently;
-
-            byte[]? commandRequestBytes = null;
-            if (metaData?.Serializer != null)
-                commandRequestBytes = metaData.Serializer.SerializeRequest(metaData.CommandRequest);
-
-            return new HyperNodeMessageRequest
-            {
-                CommandName = commandName,
-                CommandRequestBytes = commandRequestBytes,
-                CreatedByAgentName = metaData?.CreatedByAgentName,
-                ProcessOptionFlags = optionFlags
-            };
-        }
-
         public static ICommandMetaData<T> CreatedBy<T>(this T request, string? createdByAgentName)
             where T : ICommandRequest
         {
@@ -169,6 +145,21 @@ namespace HyperSoa.Client.Extensions
 
         public static ICommandMetaData<T> RegisterHyperNodeResponseHandler<T>(this ICommandMetaData<T> metaData, HyperNodeResponseHandler responseHandler)
             where T : ICommandRequest
+        {
+            if (metaData == null)
+                throw new ArgumentNullException(nameof(metaData));
+            if (responseHandler == null)
+                throw new ArgumentNullException(nameof(responseHandler));
+
+            if (metaData.ResponseHandler == null)
+                metaData.ResponseHandler = responseHandler;
+            else
+                metaData.ResponseHandler += responseHandler;
+
+            return metaData;
+        }
+
+        public static ICommandMetaData RegisterHyperNodeResponseHandler(this ICommandMetaData metaData, HyperNodeResponseHandler responseHandler)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
