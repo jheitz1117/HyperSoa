@@ -56,10 +56,12 @@ namespace HyperSoa.Client.RemoteAdmin
 
             var commandResponse = await GetCommandResponseAsync<EmptyCommandRequest, GetNodeStatusResponse>(
                 RemoteAdminCommandName.GetNodeStatus,
-                request.RegisterHyperNodeResponseDelegate(
+                request.RegisterHyperNodeResponseHandler(
                     (_, hyperNodeResponse) =>
                     {
                         selfTaskId = hyperNodeResponse.TaskId;
+
+                        return false;
                     }
                 )
             ).ConfigureAwait(false);

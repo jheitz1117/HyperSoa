@@ -3,6 +3,8 @@ using HyperSoa.Contracts;
 
 namespace HyperSoa.Client
 {
+    public delegate bool HyperNodeResponseHandler(HyperNodeMessageRequest hyperNodeRequest, HyperNodeMessageResponse hyperNodeResponse);
+
     public abstract class OpinionatedHyperNodeClientBase : IOpinionatedHyperNodeClient
     {
         private readonly IHyperNodeService _underlyingService;
@@ -36,9 +38,15 @@ namespace HyperSoa.Client
                 true,
                 (hyperNodeRequest, hyperNodeResponse) =>
                 {
-                    metaData?.OnHyperNodeResponse?.Invoke(hyperNodeRequest, hyperNodeResponse);
+                    var responseHandled = metaData?.ResponseHandler?.Invoke(
+                        hyperNodeRequest,
+                        hyperNodeResponse
+                    ) ?? false;
 
-                    taskId = hyperNodeResponse.TaskId;
+                    if (!responseHandled)
+                        taskId = hyperNodeResponse.TaskId;
+
+                    return responseHandled;
                 }
             ).ConfigureAwait(false);
 
@@ -57,10 +65,15 @@ namespace HyperSoa.Client
                 false,
                 (hyperNodeRequest, hyperNodeResponse) =>
                 {
-                    metaData?.OnHyperNodeResponse?.Invoke(hyperNodeRequest, hyperNodeResponse);
+                    var responseHandled = metaData?.ResponseHandler?.Invoke(
+                        hyperNodeRequest,
+                        hyperNodeResponse
+                    ) ?? false;
 
-                    if (hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
+                    if (!responseHandled && hyperNodeResponse.CommandResponseBytes?.Length > 0 && metaData?.Serializer != null)
                         commandResponse = (TResponse?)metaData.Serializer.DeserializeResponse(hyperNodeResponse.CommandResponseBytes);
+
+                    return responseHandled;
                 }
             ).ConfigureAwait(false);
             
@@ -71,7 +84,7 @@ namespace HyperSoa.Client
 
         #region Private Methods
 
-        private async Task ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? metaData, bool runAsync, Action<HyperNodeMessageRequest, HyperNodeMessageResponse>? onHyperNodeResponse = null)
+        private async Task ProcessMessageAsync<T>(string commandName, ICommandMetaData<T>? metaData, bool runAsync, HyperNodeResponseHandler? responseHandler = null)
             where T : ICommandRequest
         {
             var hyperNodeRequest = metaData.ToHyperNodeMessageRequest(
@@ -85,42 +98,48 @@ namespace HyperSoa.Client
                 hyperNodeRequest
             ).ConfigureAwait(false);
 
-            onHyperNodeResponse?.Invoke(hyperNodeRequest, hyperNodeResponse);
+            var responseHandled = responseHandler?.Invoke(
+                hyperNodeRequest,
+                hyperNodeResponse
+            ) ?? false;
 
-            // Error checking
-            if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.InvalidCommand))
-                throw new ArgumentException($"The node '{hyperNodeResponse.RespondingNodeName}' does not recognize the command name '{hyperNodeRequest.CommandName}'.", nameof(hyperNodeRequest.CommandName));
-            if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.Cancelled))
+            // Only perform error checking here if the response was not fully handled by the custom handler above
+            if (!responseHandled)
             {
-                string errorMessage;
-                if (hyperNodeResponse.NodeAction == HyperNodeActionType.Rejected)
+                if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.InvalidCommand))
+                    throw new ArgumentException($"The node '{hyperNodeResponse.RespondingNodeName}' does not recognize the command name '{hyperNodeRequest.CommandName}'.", nameof(hyperNodeRequest.CommandName));
+                if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.Cancelled))
                 {
-                    if (hyperNodeResponse.NodeActionReason == HyperNodeActionReasonType.DuplicateTaskId)
-                        throw new InvalidOperationException($"The node '{hyperNodeResponse.RespondingNodeName}' is already running the specified task.");
+                    string errorMessage;
+                    if (hyperNodeResponse.NodeAction == HyperNodeActionType.Rejected)
+                    {
+                        if (hyperNodeResponse.NodeActionReason == HyperNodeActionReasonType.DuplicateTaskId)
+                            throw new InvalidOperationException($"The node '{hyperNodeResponse.RespondingNodeName}' is already running the specified task.");
 
-                    errorMessage = $"The node '{hyperNodeResponse.RespondingNodeName}' rejected the request. See the {nameof(hyperNodeResponse.NodeActionReason)} and {nameof(HyperNodeMessageResponse)}.{nameof(HyperNodeMessageResponse.TaskTrace)} properties for details.";
+                        errorMessage = $"The node '{hyperNodeResponse.RespondingNodeName}' rejected the request. See the {nameof(hyperNodeResponse.NodeActionReason)} and {nameof(HyperNodeMessageResponse)}.{nameof(HyperNodeMessageResponse.TaskTrace)} properties for details.";
+                    }
+                    else
+                    {
+                        errorMessage = $"The request was cancelled before it could be completed by the node '{hyperNodeResponse.RespondingNodeName}'. See the {nameof(hyperNodeResponse.NodeActionReason)} property for details.";
+                    }
+
+                    throw new OperationCanceledException(errorMessage);
                 }
-                else
+                if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.InvalidCommandRequest))
                 {
-                    errorMessage = $"The request was cancelled before it could be completed by the node '{hyperNodeResponse.RespondingNodeName}'. See the {nameof(hyperNodeResponse.NodeActionReason)} property for details.";
+                    throw new ArgumentException($"Either the request was the wrong type for the command '{hyperNodeRequest.CommandName}', or the request failed validation.", nameof(hyperNodeRequest.CommandRequestBytes));
                 }
+                if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.Failure))
+                {
+                    var errorMessage = $"The node '{hyperNodeResponse.RespondingNodeName}' failed to process the request. ";
 
-                throw new OperationCanceledException(errorMessage);
-            }
-            if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.InvalidCommandRequest))
-            {
-                throw new ArgumentException($"Either the request was the wrong type for the command '{hyperNodeRequest.CommandName}', or the request failed validation.", nameof(hyperNodeRequest.CommandRequestBytes));
-            }
-            if (hyperNodeResponse.ProcessStatusFlags.HasFlag(MessageProcessStatusFlags.Failure))
-            {
-                var errorMessage = $"The node '{hyperNodeResponse.RespondingNodeName}' failed to process the request. ";
+                    if (hyperNodeRequest.ProcessOptionFlags.HasFlag(MessageProcessOptionFlags.ReturnTaskTrace))
+                        errorMessage += $"See the {nameof(HyperNodeMessageResponse)}.{nameof(HyperNodeMessageResponse.TaskTrace)} property for details.";
+                    else
+                        errorMessage += $"Set the {nameof(MessageProcessOptionFlags.ReturnTaskTrace)} option flag and send the request again to see the trace for details.";
 
-                if (hyperNodeRequest.ProcessOptionFlags.HasFlag(MessageProcessOptionFlags.ReturnTaskTrace))
-                    errorMessage += $"See the {nameof(HyperNodeMessageResponse)}.{nameof(HyperNodeMessageResponse.TaskTrace)} property for details.";
-                else
-                    errorMessage += $"Set the {nameof(MessageProcessOptionFlags.ReturnTaskTrace)} option flag and send the request again to see the trace for details.";
-
-                throw new InvalidOperationException(errorMessage);
+                    throw new InvalidOperationException(errorMessage);
+                }
             }
         }
 
