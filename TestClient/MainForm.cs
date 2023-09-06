@@ -35,6 +35,11 @@ namespace TestClient
             new RemoteAdminForm().Show(this);
         }
 
+        private void btnHostingTestForm_Click(object sender, EventArgs e)
+        {
+            new HostingTestClientForm().Show(this);
+        }
+
         private async void btnRefreshCommandList_Click(object sender, EventArgs e)
         {
             try
@@ -48,7 +53,9 @@ namespace TestClient
                 );
 
                 cboCommandNames.DataSource = (
-                    await client.GetNodeStatusAsync()
+                    await client.GetNodeStatusAsync(
+                        new GetNodeStatusRequest()
+                    )
                 ).Commands?.Select(
                     c => c.CommandName
                 ).OrderBy(
@@ -93,7 +100,8 @@ namespace TestClient
                         response = await RunEchoCommand(optionFlags);
                         break;
                     default:
-                        response = await RunEmptyContractCommand(optionFlags);
+                        response = await RunNoContractCommand(optionFlags);
+                        await RunNoContractCommand(true, true);
                         break;
                 }
 
@@ -317,9 +325,11 @@ namespace TestClient
                     MyInt32 = 1000,
                     MyString = "My String!",
                     MyTimeSpan = TimeSpan.FromMinutes(17)
-                }.WithMetaData(
-                    ClientAgentName,
-                    includeTaskTrace,
+                }.CreatedBy(
+                    ClientAgentName
+                ).WithTaskTrace(
+                    includeTaskTrace
+                ).WithProgressCaching(
                     cacheTaskProgress
                 )
             ).ConfigureAwait(false);
@@ -421,21 +431,23 @@ namespace TestClient
             ).ConfigureAwait(false);
         }
 
-        private static async Task RunEmptyContractCommand(bool includeTaskTrace, bool cacheTaskProgress)
+        private static async Task RunNoContractCommand(bool includeTaskTrace, bool cacheTaskProgress)
         {
             await new HostingTestClient(
                 ClientAgentName,
                 TargetEndpoint
-            ).EmptyContractCommandAsync(
-                new EmptyCommandRequest().WithMetaData(
-                    ClientAgentName,
-                    includeTaskTrace,
+            ).NoContractCommandAsync(
+                new EmptyCommandRequest().CreatedBy(
+                    ClientAgentName
+                ).WithTaskTrace(
+                    includeTaskTrace
+                ).WithProgressCaching(
                     cacheTaskProgress
                 )
             ).ConfigureAwait(false);
         }
 
-        private async Task<HyperNodeMessageResponse> RunEmptyContractCommand(MessageProcessOptionFlags optionFlags)
+        private async Task<HyperNodeMessageResponse> RunNoContractCommand(MessageProcessOptionFlags optionFlags)
         {
             return await new HyperNodeHttpClient(
                 TargetEndpoint

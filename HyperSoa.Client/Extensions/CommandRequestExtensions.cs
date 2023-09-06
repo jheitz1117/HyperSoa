@@ -5,106 +5,29 @@ namespace HyperSoa.Client.Extensions
 {
     public static class CommandRequestExtensions
     {
-        public static HyperNodeMessageRequest ToHyperNodeMessageRequest<T>(this ICommandMetaData<T>? metaData, string commandName, bool runAsync)
-            where T : ICommandRequest
-        {
-            var optionFlags = MessageProcessOptionFlags.None;
-            if (metaData?.ReturnTaskTrace ?? false)
-                optionFlags |= MessageProcessOptionFlags.ReturnTaskTrace;
-            if (metaData?.CacheTaskProgress ?? false)
-                optionFlags |= MessageProcessOptionFlags.CacheTaskProgress;
-            if (runAsync)
-                optionFlags |= MessageProcessOptionFlags.RunConcurrently;
-
-            byte[]? commandRequestBytes = null;
-            if (metaData?.Serializer != null)
-                commandRequestBytes = metaData.Serializer.SerializeRequest(metaData.CommandRequest);
-
-            return new HyperNodeMessageRequest
-            {
-                CommandName = commandName,
-                CommandRequestBytes = commandRequestBytes,
-                CreatedByAgentName = metaData?.CreatedByAgentName,
-                ProcessOptionFlags = optionFlags
-            };
-        }
-
-        public static ICommandMetaData<T> CreatedBy<T>(this T request, string? createdByAgentName)
+        public static ICommandMetaData WithMetaData<T>(this T request)
             where T : ICommandRequest
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaData<T>(
+            return new CommandMetaDataImpl(request);
+        }
+
+        public static ICommandMetaData CreatedBy<T>(this T request, string? createdByAgentName)
+            where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return new CommandMetaDataImpl(
                 request
             ).CreatedBy(
                 createdByAgentName
             );
         }
 
-        public static ICommandMetaData<T> WithTaskTrace<T>(this T request, bool returnTaskTrace)
-            where T : ICommandRequest
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            return new CommandMetaData<T>(
-                request
-            ).WithTaskTrace(
-                returnTaskTrace
-            );
-        }
-
-        public static ICommandMetaData<T> WithProgressCaching<T>(this T request, bool cacheTaskProgress)
-            where T : ICommandRequest
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            return new CommandMetaData<T>(
-                request
-            ).WithProgressCaching(
-                cacheTaskProgress
-            );
-        }
-
-        public static ICommandMetaData<T> WithMetaData<T>(this T request)
-            where T : ICommandRequest
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            return request.WithMetaData(null, false, false);
-        }
-
-        public static ICommandMetaData<T> WithMetaData<T>(this T request, string? createdByAgentName, bool returnTaskTrace, bool cacheTaskProgress)
-            where T : ICommandRequest
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            return new CommandMetaData<T>(request)
-            {
-                CreatedByAgentName = createdByAgentName,
-                ReturnTaskTrace = returnTaskTrace,
-                CacheTaskProgress = cacheTaskProgress
-            };
-        }
-
-        public static ICommandMetaData<T> RegisterSuccessDelegate<T>(this T request, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onSuccess)
-            where T : ICommandRequest
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request));
-
-            return new CommandMetaData<T>(request)
-            {
-                OnSuccess = onSuccess
-            };
-        }
-
-        public static ICommandMetaData<T> CreatedBy<T>(this ICommandMetaData<T> metaData, string? createdByAgentName)
-            where T : ICommandRequest
+        public static ICommandMetaData CreatedBy(this ICommandMetaData metaData, string? createdByAgentName)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
@@ -114,8 +37,29 @@ namespace HyperSoa.Client.Extensions
             return metaData;
         }
 
-        public static ICommandMetaData<T> WithTaskTrace<T>(this ICommandMetaData<T> metaData)
+        public static ICommandMetaData WithTaskTrace<T>(this T request)
             where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return request.WithTaskTrace(true);
+        }
+
+        public static ICommandMetaData WithTaskTrace<T>(this T request, bool returnTaskTrace)
+            where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return new CommandMetaDataImpl(
+                request
+            ).WithTaskTrace(
+                returnTaskTrace
+            );
+        }
+
+        public static ICommandMetaData WithTaskTrace(this ICommandMetaData metaData)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
@@ -123,8 +67,7 @@ namespace HyperSoa.Client.Extensions
             return metaData.WithTaskTrace(true);
         }
 
-        public static ICommandMetaData<T> WithTaskTrace<T>(this ICommandMetaData<T> metaData, bool returnTaskTrace)
-            where T : ICommandRequest
+        public static ICommandMetaData WithTaskTrace(this ICommandMetaData metaData, bool returnTaskTrace)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
@@ -134,8 +77,29 @@ namespace HyperSoa.Client.Extensions
             return metaData;
         }
 
-        public static ICommandMetaData<T> WithProgressCaching<T>(this ICommandMetaData<T> metaData)
+        public static ICommandMetaData WithProgressCaching<T>(this T request)
             where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return request.WithProgressCaching(true);
+        }
+
+        public static ICommandMetaData WithProgressCaching<T>(this T request, bool cacheTaskProgress)
+            where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return new CommandMetaDataImpl(
+                request
+            ).WithProgressCaching(
+                cacheTaskProgress
+            );
+        }
+
+        public static ICommandMetaData WithProgressCaching(this ICommandMetaData metaData)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
@@ -143,8 +107,7 @@ namespace HyperSoa.Client.Extensions
             return metaData.WithProgressCaching(true);
         }
 
-        public static ICommandMetaData<T> WithProgressCaching<T>(this ICommandMetaData<T> metaData, bool cacheTaskProgress)
-            where T : ICommandRequest
+        public static ICommandMetaData WithProgressCaching(this ICommandMetaData metaData, bool cacheTaskProgress)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
@@ -154,8 +117,20 @@ namespace HyperSoa.Client.Extensions
             return metaData;
         }
 
-        public static ICommandMetaData<T> WithSerializer<T>(this ICommandMetaData<T> metaData, IClientContractSerializer? serializer)
+        public static ICommandMetaData WithSerializer<T>(this T request, IClientContractSerializer? serializer)
             where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return new CommandMetaDataImpl(
+                request
+            ).WithSerializer(
+                serializer
+            );
+        }
+
+        public static ICommandMetaData WithSerializer(this ICommandMetaData metaData, IClientContractSerializer? serializer)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
@@ -165,16 +140,40 @@ namespace HyperSoa.Client.Extensions
             return metaData;
         }
 
-        public static ICommandMetaData<T> RegisterSuccessDelegate<T>(this ICommandMetaData<T> metaData, Action<HyperNodeMessageRequest, HyperNodeMessageResponse> onSuccess)
+        public static ICommandMetaData WithResponseHandler<T>(this T request, HyperNodeResponseHandler? responseHandler)
             where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            return new CommandMetaDataImpl(
+                request
+            ).WithResponseHandler(
+                responseHandler
+            );
+        }
+
+        public static ICommandMetaData WithResponseHandler(this ICommandMetaData metaData, HyperNodeResponseHandler? responseHandler)
         {
             if (metaData == null)
                 throw new ArgumentNullException(nameof(metaData));
 
-            if (metaData.OnSuccess == null)
-                metaData.OnSuccess = onSuccess;
+            metaData.ResponseHandler = responseHandler;
+
+            return metaData;
+        }
+
+        public static ICommandMetaData AddResponseHandler(this ICommandMetaData metaData, HyperNodeResponseHandler responseHandler)
+        {
+            if (metaData == null)
+                throw new ArgumentNullException(nameof(metaData));
+            if (responseHandler == null)
+                throw new ArgumentNullException(nameof(responseHandler));
+
+            if (metaData.ResponseHandler == null)
+                metaData.ResponseHandler = responseHandler;
             else
-                metaData.OnSuccess += onSuccess;
+                metaData.ResponseHandler += responseHandler;
 
             return metaData;
         }

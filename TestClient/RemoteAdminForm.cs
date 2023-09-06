@@ -103,7 +103,7 @@ namespace TestClient
                 GetNodeStatusResponse? nodeStatus = null;
 
                 if (_client != null)
-                    nodeStatus = await _client.GetNodeStatusAsync(true);
+                    nodeStatus = await _client.GetNodeStatusAsync(new GetNodeStatusRequest(){ IncludeSelfTaskId = false});
 
                 bsLiveTasks.DataSource = nodeStatus?.LiveTasks?.Select(
                     t => new LiveTaskStatusViewModel
@@ -234,9 +234,11 @@ namespace TestClient
                     new EchoRequest
                     {
                         Prompt = "Hello!"
-                    }.WithMetaData(
-                        _client.ClientApplicationName,
-                        chkReturnTaskTrace.Checked,
+                    }.CreatedBy(
+                        _client.ClientApplicationName
+                    ).WithTaskTrace(
+                        chkReturnTaskTrace.Checked
+                    ).WithProgressCaching(
                         chkCacheProgressInfo.Checked
                     )
                 ).ConfigureAwait(false);
@@ -260,7 +262,7 @@ namespace TestClient
             GetNodeStatusResponse? nodeStatus = null;
 
             if (_client != null)
-                nodeStatus = await _client.GetNodeStatusAsync(true);
+                nodeStatus = await _client.GetNodeStatusAsync(new GetNodeStatusRequest());
 
             chkEnableDiagnostics.Checked = nodeStatus?.DiagnosticsEnabled ?? false;
             chkEnableProgressCache.Checked = nodeStatus?.TaskProgressCacheEnabled ?? false;

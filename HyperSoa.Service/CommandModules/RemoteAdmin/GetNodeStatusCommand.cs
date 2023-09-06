@@ -1,5 +1,6 @@
 ﻿using HyperSoa.Contracts;
 using HyperSoa.Contracts.RemoteAdmin;
+using HyperSoa.Service.Configuration;
 using HyperSoa.Service.Serialization;
 
 namespace HyperSoa.Service.CommandModules.RemoteAdmin
@@ -18,6 +19,9 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
 
         public ICommandResponse Execute(ICommandExecutionContext context)
         {
+            if (context.Request is not GetNodeStatusRequest request)
+                throw new InvalidCommandRequestTypeException(typeof(GetNodeStatusRequest), context.Request?.GetType());
+
             context.Activity.Track("Retrieving HyperNode status info.");
 
             return new GetNodeStatusResponse
@@ -28,14 +32,16 @@ namespace HyperSoa.Service.CommandModules.RemoteAdmin
                 MaxConcurrentTasks = _adminService.MaxConcurrentTasks,
                 Commands = _adminService.GetCommandStatuses().ToArray(),
                 ActivityMonitors = _adminService.GetActivityMonitorStatuses().ToArray(),
-                LiveTasks = _adminService.GetLiveTaskStatuses().ToArray(),
+                LiveTasks = _adminService.GetLiveTaskStatuses().Where(
+                    ts => request.IncludeSelfTaskId || ts.TaskId != context.TaskId
+                ).ToArray(),
                 ProcessStatusFlags = MessageProcessStatusFlags.Success
             };
         }
 
         public IServiceContractSerializer Create()
         {
-            return new ProtoContractSerializer<EmptyCommandRequest, GetNodeStatusResponse>();
+            return new ProtoContractSerializer<GetNodeStatusRequest, GetNodeStatusResponse>();
         }
     }
 }
