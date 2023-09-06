@@ -5,13 +5,30 @@ namespace HyperSoa.Client.Extensions
 {
     public static class CommandRequestExtensions
     {
-        public static ICommandMetaData WithMetaData<T>(this T request)
+        public static ICommandMetaData ToMetaData<T>(this T request)
             where T : ICommandRequest
         {
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaDataImpl(request);
+            return CommandMetaData.FromCommandRequest(request);
+        }
+
+        public static ICommandMetaData WithMetaData<T>(this T request, ICommandMetaData? sourceMetaData)
+            where T : ICommandRequest
+        {
+            if (request == null)
+                throw new ArgumentNullException(nameof(request));
+
+            var metaData = CommandMetaData.FromCommandRequest(request);
+
+            metaData.Serializer = sourceMetaData?.Serializer;
+            metaData.CacheTaskProgress = sourceMetaData?.CacheTaskProgress ?? false;
+            metaData.CreatedByAgentName = sourceMetaData?.CreatedByAgentName;
+            metaData.ResponseHandler = sourceMetaData?.ResponseHandler;
+            metaData.ReturnTaskTrace = sourceMetaData?.ReturnTaskTrace ?? false;
+
+            return metaData;
         }
 
         public static ICommandMetaData CreatedBy<T>(this T request, string? createdByAgentName)
@@ -20,7 +37,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaDataImpl(
+            return CommandMetaData.FromCommandRequest(
                 request
             ).CreatedBy(
                 createdByAgentName
@@ -52,7 +69,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaDataImpl(
+            return CommandMetaData.FromCommandRequest(
                 request
             ).WithTaskTrace(
                 returnTaskTrace
@@ -92,7 +109,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaDataImpl(
+            return CommandMetaData.FromCommandRequest(
                 request
             ).WithProgressCaching(
                 cacheTaskProgress
@@ -123,7 +140,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaDataImpl(
+            return CommandMetaData.FromCommandRequest(
                 request
             ).WithSerializer(
                 serializer
@@ -146,7 +163,7 @@ namespace HyperSoa.Client.Extensions
             if (request == null)
                 throw new ArgumentNullException(nameof(request));
 
-            return new CommandMetaDataImpl(
+            return CommandMetaData.FromCommandRequest(
                 request
             ).WithResponseHandler(
                 responseHandler

@@ -172,11 +172,7 @@ namespace HyperSoa.Client.RemoteAdmin
             ).ConfigureAwait(false);
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
+        public override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
         {
             // Always override the serializer since ours is the only valid one for remote admin commands
             return base.GetCommandResponseAsync<TRequest, TResponse>(
@@ -187,6 +183,6 @@ namespace HyperSoa.Client.RemoteAdmin
             );
         }
 
-        #endregion Protected Methods
+        #endregion Public Methods
     }
 }
