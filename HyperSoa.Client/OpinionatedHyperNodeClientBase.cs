@@ -18,7 +18,7 @@ namespace HyperSoa.Client
         }
     }
 
-    public delegate void HyperNodeResponseHandler(HyperNodeResponseContext args);
+    public delegate void HyperNodeResponseHandler(HyperNodeResponseContext context);
 
     public abstract class OpinionatedHyperNodeClientBase : IOpinionatedHyperNodeClient
     {
@@ -38,17 +38,13 @@ namespace HyperSoa.Client
             return await _underlyingService.ProcessMessageAsync(message).ConfigureAwait(false);
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         /// <summary>
         /// Starts the specified command on the remote server and returns the associated task ID without waiting for the command to complete.
         /// </summary>
         /// <param name="commandName">The name of the command to execute.</param>
         /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
         /// <returns></returns>
-        protected virtual async Task<string> RunCommandAsync(string commandName, ICommandMetaData? metaData = null)
+        public virtual async Task<string> RunCommandAsync(string commandName, ICommandMetaData? metaData = null)
         {
             string? taskId = null;
 
@@ -69,7 +65,7 @@ namespace HyperSoa.Client
         /// <param name="commandName">The name of the command to execute.</param>
         /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
         /// <returns></returns>
-        protected virtual async Task ExecuteCommandAsync(string commandName, ICommandMetaData? metaData = null)
+        public virtual async Task ExecuteCommandAsync(string commandName, ICommandMetaData? metaData = null)
         {
             await ProcessMessageAsync(
                 commandName,
@@ -85,7 +81,7 @@ namespace HyperSoa.Client
         /// <param name="commandName">The name of the command to execute.</param>
         /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
         /// <returns></returns>
-        protected virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
+        public virtual async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
             where TRequest : ICommandRequest
             where TResponse : ICommandResponse
         {
@@ -101,8 +97,8 @@ namespace HyperSoa.Client
             
             return commandResponse ?? throw new InvalidOperationException("Unable to deserialize command response.");
         }
-        
-        #endregion Protected Methods
+
+        #endregion Public Methods
 
         #region Private Methods
 

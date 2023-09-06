@@ -70,7 +70,7 @@ namespace HostingTest.Client
         public async Task NoContractCommandAsync()
         {
             await NoContractCommandAsync(
-                CommandMetaData.Empty().CreatedBy(ClientApplicationName)
+                CommandMetaData.Default().CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
@@ -85,7 +85,7 @@ namespace HostingTest.Client
         public async Task<string> RunNoContractCommandAsync()
         {
             return await RunNoContractCommandAsync(
-                CommandMetaData.Empty().CreatedBy(ClientApplicationName)
+                CommandMetaData.Default().CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
@@ -121,7 +121,7 @@ namespace HostingTest.Client
             return base.ExecuteCommandAsync(commandName, metaData);
         }
 
-        protected override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
+        public override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
         {
             // By default, use protobuf for serialization
             if (metaData is { Serializer: null })
