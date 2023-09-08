@@ -40,9 +40,9 @@ namespace HyperSoa.Contracts.Legacy
                             new XElement(xn_t + "message",
                                 new XAttribute(XNamespace.Xmlns + "a", xn_a.NamespaceName),
                                 new XAttribute(XNamespace.Xmlns + "i", xn_i.NamespaceName),
-                                new XElement(xn_a + "CommandName", CommandName),
-                                new XElement(xn_a + "CommandRequestString", CommandRequestString),
-                                new XElement(xn_a + "CreatedByAgentName", CreatedByAgentName),
+                                new XElement(xn_a + "CommandName", CommandName ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + "CommandRequestString", CommandRequestString ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + "CreatedByAgentName", CreatedByAgentName ?? (object?)new XAttribute(xn_i + "nil", true)),
                                 new XElement(xn_a + "ProcessOptionFlags", ProcessOptionFlags)
                             )
                         )
