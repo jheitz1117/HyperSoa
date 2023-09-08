@@ -1,13 +1,12 @@
 ﻿using HyperSoa.Contracts;
-using HyperSoa.Service;
 using HyperSoa.Service.Configuration;
-using HyperSoa.ServiceHosting.Configuration;
+using HyperSoa.Service.Host.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace HyperSoa.ServiceHosting.Extensions
+namespace HyperSoa.Service.Host.Extensions
 {
     public static class ServiceCollectionExtensions
     {

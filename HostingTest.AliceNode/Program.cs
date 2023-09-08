@@ -1,7 +1,7 @@
 ﻿using HyperSoa.Service.Configuration.Json;
-using HyperSoa.ServiceHosting;
-using HyperSoa.ServiceHosting.Configuration;
-using HyperSoa.ServiceHosting.Extensions;
+using HyperSoa.Service.Host;
+using HyperSoa.Service.Host.Configuration;
+using HyperSoa.Service.Host.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
