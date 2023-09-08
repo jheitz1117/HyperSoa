@@ -58,24 +58,26 @@ namespace HyperSoa.Contracts.Legacy {
                             new XElement(xn_t + "ProcessMessageResult",
                                 new XAttribute(XNamespace.Xmlns + "a", xn_a.NamespaceName),
                                 new XAttribute(XNamespace.Xmlns + "i", xn_i.NamespaceName),
-                                new XElement(xn_a + "CommandResponseString", CommandResponseString),
+                                new XElement(xn_a + "CommandResponseString", CommandResponseString ?? (object?)new XAttribute(xn_i + "nil", true)),
                                 new XElement(xn_a + "NodeAction", NodeAction),
                                 new XElement(xn_a + "NodeActionReason", NodeActionReason),
                                 new XElement(xn_a + "ProcessStatusFlags", ProcessStatusFlags),
-                                new XElement(xn_a + "RespondingNodeName", RespondingNodeName),
-                                new XElement(xn_a + "TaskId", TaskId),
+                                new XElement(xn_a + "RespondingNodeName", RespondingNodeName ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + "TaskId", TaskId ?? (object?)new XAttribute(xn_i + "nil", true)),
                                 new XElement(xn_a + "TaskTrace", TaskTrace?.Select(tt =>
-                                        new XElement(xn_a + "HyperNodeActivityItem",
-                                            new XElement(xn_a + "Agent", tt.Agent),
-                                            new XElement(xn_a + "Elapsed", (tt.Elapsed == null ? "" : XmlConvert.ToString((TimeSpan)tt.Elapsed)),
-                                            new XElement(xn_a + "EventDateTime", tt.EventDateTime),
-                                            new XElement(xn_a + "EventDescription", tt.EventDescription),
-                                            new XElement(xn_a + "EventDetail", tt.EventDetail),
-                                            new XElement(xn_a + "ProgressPart", tt.ProgressPart),
-                                            new XElement(xn_a + "ProgressTotal", tt.ProgressTotal)
-                                        )
-                                ))),
-                                new XElement(xn_a + "TotalRunTime", (TotalRunTime == null ? "" : XmlConvert.ToString((TimeSpan)TotalRunTime)))
+                                    new XElement(xn_a + "HyperNodeActivityItem",
+                                        new XElement(xn_a + "Agent", tt.Agent ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                        new XElement(xn_a + "Elapsed", (tt.Elapsed == null ? new XAttribute(xn_i + "nil", true) : XmlConvert.ToString((TimeSpan)tt.Elapsed))),
+                                        new XElement(xn_a + "EventDateTime", tt.EventDateTime),
+                                        new XElement(xn_a + "EventDescription", tt.EventDescription ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                        new XElement(xn_a + "EventDetail", tt.EventDetail ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                        new XElement(xn_a + "ProgressPart", tt.ProgressPart ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                        new XElement(xn_a + "ProgressTotal", tt.ProgressTotal ?? (object?)new XAttribute(xn_i + "nil", true))
+                                    )
+                                ) ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + "TotalRunTime",
+                                    (TotalRunTime == null ? new XAttribute(xn_i + "nil", true) : XmlConvert.ToString((TimeSpan)TotalRunTime))
+                                )
                             )
                         )
                     )
