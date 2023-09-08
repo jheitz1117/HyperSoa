@@ -1,4 +1,4 @@
-﻿namespace HyperSoa.ServiceHosting
+﻿namespace HyperSoa.Service.Host
 {
     public interface IHyperNodeChannel
     {

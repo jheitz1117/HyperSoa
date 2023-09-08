@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace HyperSoa.ServiceHosting.Configuration
+namespace HyperSoa.Service.Host.Configuration
 {
     public class HyperNodeHostOptionsValidator : IValidateOptions<HyperNodeHostOptions>
     {

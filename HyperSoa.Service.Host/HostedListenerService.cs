@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 
-namespace HyperSoa.ServiceHosting
+namespace HyperSoa.Service.Host
 {
     public class HostedListenerService : IHostedService
     {

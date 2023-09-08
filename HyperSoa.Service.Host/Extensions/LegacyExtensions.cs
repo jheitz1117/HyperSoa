@@ -1,9 +1,8 @@
 ﻿using System.Text;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.Legacy;
-using HyperSoa.ServiceHosting.Interop;
 
-namespace HyperSoa.ServiceHosting.Extensions
+namespace HyperSoa.Service.Host.Extensions
 {
     internal static class LegacyExtensions
     {

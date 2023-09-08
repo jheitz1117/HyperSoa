@@ -1,8 +1,7 @@
 ﻿using HyperSoa.Contracts;
-using HyperSoa.Service;
 using Microsoft.Extensions.Hosting;
 
-namespace HyperSoa.ServiceHosting
+namespace HyperSoa.Service.Host
 {
     public class HostedHyperNodeService : IHostedService
     {

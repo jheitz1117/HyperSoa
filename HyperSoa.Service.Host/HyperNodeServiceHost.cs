@@ -1,10 +1,10 @@
 ﻿using HyperSoa.Contracts;
-using HyperSoa.ServiceHosting.Configuration;
-using HyperSoa.ServiceHosting.Interop;
+using HyperSoa.Service.Host.Configuration;
+using HyperSoa.Service.Host.Interop;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace HyperSoa.ServiceHosting
+namespace HyperSoa.Service.Host
 {
     public class HyperNodeServiceHost : IHyperNodeServiceHost
     {

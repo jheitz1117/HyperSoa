@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using HyperSoa.Contracts;
-using HyperSoa.ServiceHosting.Configuration;
+using HyperSoa.Service.Host.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace HyperSoa.ServiceHosting
+namespace HyperSoa.Service.Host
 {
     internal class HyperNodeHttpChannel : IHyperNodeChannel
     {
