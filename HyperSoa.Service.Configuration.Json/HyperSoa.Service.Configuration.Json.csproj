@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <VersionPrefix>1.0.4</VersionPrefix>
+	  <VersionPrefix>1.0.5</VersionPrefix>
 	  <VersionSuffix>beta</VersionSuffix>
 	  <Authors>Josh Heitz</Authors>
 	  <Description>JSON configuration provider for HyperSoa services.</Description>
