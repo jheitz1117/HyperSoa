@@ -12,7 +12,7 @@ namespace HyperSoa.Service.Host.Extensions
             {
                 CommandName = legacyRequest.CommandName,
                 CommandRequestBytes = legacyRequest.CommandRequestString != null
-                    ? Convert.FromBase64String(legacyRequest.CommandRequestString)
+                    ? Encoding.UTF8.GetBytes(legacyRequest.CommandRequestString)
                     : null,
                 CreatedByAgentName = legacyRequest.CreatedByAgentName,
                 ProcessOptionFlags = legacyRequest.ProcessOptionFlags
@@ -33,7 +33,7 @@ namespace HyperSoa.Service.Host.Extensions
                     response.TaskTrace ?? Array.Empty<HyperNodeActivityItem>()
                 ),
                 CommandResponseString = response.CommandResponseBytes != null
-                    ? Convert.ToBase64String(response.CommandResponseBytes)
+                    ? Encoding.UTF8.GetString(response.CommandResponseBytes)
                     : null,
             };
         }

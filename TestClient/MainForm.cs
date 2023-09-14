@@ -14,6 +14,8 @@ namespace TestClient
 {
     public partial class MainForm : Form
     {
+        private readonly HttpClient _httpClient = new();
+
         internal const string ClientAgentName = "HyperNodeTestClient";
 
         private const bool EnableFiddler = false;
@@ -47,6 +49,7 @@ namespace TestClient
                 cboCommandNames.DataSource = null;
 
                 var client = new HyperNodeHttpClient(
+                    _httpClient,
                     TargetEndpoint
                 ).AsRemoteAdminClient(
                     ClientAgentName
@@ -130,7 +133,10 @@ namespace TestClient
             var targetTaskId = txtTaskId.Text;
             if (!string.IsNullOrWhiteSpace(targetTaskId))
             {
-                var client = new HyperNodeHttpClient(TargetEndpoint).AsRemoteAdminClient(ClientAgentName);
+                var client = new HyperNodeHttpClient(
+                    _httpClient,
+                    TargetEndpoint
+                ).AsRemoteAdminClient(ClientAgentName);
 
                 var cancelSuccess = (
                     await client.CancelTaskAsync(
@@ -263,7 +269,10 @@ namespace TestClient
 
                     var taskProgressInfo = new HyperNodeTaskProgressInfo();
 
-                    var client = new HyperNodeHttpClient(TargetEndpoint).AsRemoteAdminClient(ClientAgentName);
+                    var client = new HyperNodeHttpClient(
+                        _httpClient,
+                        TargetEndpoint
+                    ).AsRemoteAdminClient(ClientAgentName);
 
                     while (!taskProgressInfo.IsComplete && progressTimer.Elapsed <= TimeSpan.FromMinutes(2))
                     {
@@ -317,6 +326,7 @@ namespace TestClient
         {
             return await new HostingTestClient(
                 ClientAgentName,
+                _httpClient,
                 TargetEndpoint
             ).ComplexCommandAsync(
                 new ComplexCommandRequest
@@ -350,6 +360,7 @@ namespace TestClient
             );
 
             return await new HyperNodeHttpClient(
+                _httpClient,
                 TargetEndpoint
             ).ProcessMessageAsync(
                 new HyperNodeMessageRequest
@@ -376,6 +387,7 @@ namespace TestClient
             );
 
             return await new HyperNodeHttpClient(
+                _httpClient,
                 TargetEndpoint
             ).ProcessMessageAsync(
                 new HyperNodeMessageRequest
@@ -392,6 +404,7 @@ namespace TestClient
         {
             return await new HostingTestClient(
                 ClientAgentName,
+                _httpClient,
                 TargetEndpoint
             ).RunLongRunningCommandAsync(
                 new LongRunningCommandRequest
@@ -419,6 +432,7 @@ namespace TestClient
             );
 
             return await new HyperNodeHttpClient(
+                _httpClient,
                 TargetEndpoint
             ).ProcessMessageAsync(
                 new HyperNodeMessageRequest
@@ -431,10 +445,11 @@ namespace TestClient
             ).ConfigureAwait(false);
         }
 
-        private static async Task RunNoContractCommand(bool includeTaskTrace, bool cacheTaskProgress)
+        private async Task RunNoContractCommand(bool includeTaskTrace, bool cacheTaskProgress)
         {
             await new HostingTestClient(
                 ClientAgentName,
+                _httpClient,
                 TargetEndpoint
             ).NoContractCommandAsync(
                 new EmptyCommandRequest().CreatedBy(
@@ -450,6 +465,7 @@ namespace TestClient
         private async Task<HyperNodeMessageResponse> RunNoContractCommand(MessageProcessOptionFlags optionFlags)
         {
             return await new HyperNodeHttpClient(
+                _httpClient,
                 TargetEndpoint
             ).ProcessMessageAsync(
                 new HyperNodeMessageRequest

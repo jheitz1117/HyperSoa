@@ -14,8 +14,8 @@ namespace HyperSoa.Client.RemoteAdmin
                 ClientApplicationName = opinionatedClient.ClientApplicationName;
         }
 
-        public RemoteAdminHyperNodeClient(string clientApplicationName, string endpoint)
-            : this(new HyperNodeHttpClient(endpoint))
+        public RemoteAdminHyperNodeClient(string clientApplicationName, HttpClient httpClient, string endpoint)
+            : this(new HyperNodeHttpClient(httpClient, endpoint))
         {
             ClientApplicationName = clientApplicationName;
         }

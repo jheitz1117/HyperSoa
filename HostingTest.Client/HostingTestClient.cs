@@ -12,8 +12,8 @@ namespace HostingTest.Client
         public HostingTestClient(IHyperNodeService underlyingService)
             : base(underlyingService) { }
 
-        public HostingTestClient(string clientApplicationName, string endpoint)
-            : base(new HyperNodeHttpClient(endpoint))
+        public HostingTestClient(string clientApplicationName, HttpClient httpClient, string endpoint)
+            : base(new HyperNodeHttpClient(httpClient, endpoint))
         {
             ClientApplicationName = clientApplicationName;
         }

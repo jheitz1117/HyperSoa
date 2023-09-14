@@ -45,8 +45,6 @@ namespace HyperSoa.Service
         {
             if (configProvider == null)
                 throw new ArgumentNullException(nameof(configProvider));
-            if (serviceProvider == null)
-                throw new ArgumentNullException(nameof(serviceProvider));
 
             IHyperNodeConfiguration config;
 
@@ -75,7 +73,7 @@ namespace HyperSoa.Service
             InstanceName = config.InstanceName ?? DefaultInstanceName;
 
             ServiceProvider = serviceProvider;
-            Logger = serviceProvider.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance;
+            Logger = serviceProvider?.GetService<ILogger<HyperNodeService>>() ?? NullLogger<HyperNodeService>.Instance;
             EnableTaskProgressCache = config.EnableTaskProgressCache ?? DefaultTaskProgressCacheEnabled;
             EnableDiagnostics = config.EnableDiagnostics ?? DefaultDiagnosticsEnabled;
             TaskProgressCacheDuration = TimeSpan.FromMinutes(config.TaskProgressCacheDurationMinutes ?? DefaultProgressCacheDurationMinutes);

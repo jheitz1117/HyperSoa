@@ -4,12 +4,12 @@ namespace HyperSoa.Client
 {
     public class HyperNodeHttpClient : IHyperNodeService
     {
-        private static readonly HttpClient HttpClient = new();
-
+        private readonly HttpClient _httpClient;
         private readonly string _endpoint;
 
-        public HyperNodeHttpClient(string endpoint)
+        public HyperNodeHttpClient(HttpClient httpClient, string endpoint)
         {
+            _httpClient = httpClient;
             _endpoint = endpoint;
         }
 
@@ -24,7 +24,7 @@ namespace HyperSoa.Client
                     msgContent = new ByteArrayContent(ms.ToArray());
                 }
                 
-                var httpResponse = await HttpClient.PostAsync(
+                var httpResponse = await _httpClient.PostAsync(
                     _endpoint,
                     msgContent
                 ).ConfigureAwait(false);

@@ -10,7 +10,7 @@ namespace HyperSoa.Service.Host.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddHyperNodeServiceHosting<TServiceConfig>(this IServiceCollection services, IConfiguration namedConfigurationSection)
+        public static IServiceCollection AddHyperNodeServiceHosting<TServiceConfig>(this IServiceCollection services, IConfiguration namedConfigurationSection)
             where TServiceConfig : class, IHyperNodeConfigurationProvider
         {
             services.AddTransient<IHyperNodeConfigurationProvider, TServiceConfig>();
@@ -24,6 +24,8 @@ namespace HyperSoa.Service.Host.Extensions
             );
             services.AddSingleton<IHyperNodeServiceHost, HyperNodeServiceHost>();
             services.AddHostedService<HostedListenerService>();
+
+            return services;
         }
     }
 }
