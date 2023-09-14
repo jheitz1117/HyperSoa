@@ -8,6 +8,8 @@ namespace TestClient
 {
     public partial class RemoteAdminForm : Form
     {
+        private readonly HttpClient _httpClient = new();
+
         private bool _refreshingNodeStatus;
 
         private RemoteAdminHyperNodeClient? _client;
@@ -53,6 +55,7 @@ namespace TestClient
 
                 _client = new RemoteAdminHyperNodeClient(
                     MainForm.ClientAgentName,
+                    _httpClient,
                     txtEndpointUri.Text
                 );
 

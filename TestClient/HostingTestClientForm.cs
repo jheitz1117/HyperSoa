@@ -12,6 +12,7 @@ namespace TestClient
 {
     public partial class HostingTestClientForm : Form
     {
+        private readonly HttpClient _httpClient = new();
         private HostingTestClient? _client;
 
         public HostingTestClientForm()
@@ -55,6 +56,7 @@ namespace TestClient
 
                 _client = new HostingTestClient(
                     MainForm.ClientAgentName,
+                    _httpClient,
                     txtEndpointUri.Text
                 );
 
