@@ -2,29 +2,22 @@
 
 namespace HyperSoa.Contracts.Legacy
 {
-    public class LegacyHyperNodeMessageRequest
-    {
+    public class LegacyHyperNodeMessageRequest : LegacyHyperNodeMessage {
         public string? CreatedByAgentName { get; set; }
         public string? CommandName { get; set; }
         public string? CommandRequestString { get; set; }
         public MessageProcessOptionFlags ProcessOptionFlags { get; set; }
 
 
-
-        private static XNamespace xn_s = "http://schemas.xmlsoap.org/soap/envelope/";
-        private static XNamespace xn_t = "http://tempuri.org/";
-        private static XNamespace xn_a = "http://schemas.datacontract.org/2004/07/Hyper.NodeServices.Contracts";
-        private static XNamespace xn_i = "http://www.w3.org/2001/XMLSchema-instance";
-
         public LegacyHyperNodeMessageRequest() { }
         public LegacyHyperNodeMessageRequest(Stream reqStream) {
             XElement root = XElement.Load(reqStream);
             XElement? msg = root.Descendants(xn_s + "Body").Descendants(xn_t + "ProcessMessage").Descendants(xn_t + "message").FirstOrDefault();
             if (msg != null) {
-                CreatedByAgentName = msg.Element(xn_a + "CreatedByAgentName")?.Value ?? "";
-                CommandName = msg.Element(xn_a + "CommandName")?.Value ?? "";
-                CommandRequestString = msg.Element(xn_a + "CommandRequestString")?.Value ?? "";
-                ProcessOptionFlags = Enum.Parse<MessageProcessOptionFlags>(msg.Element(xn_a + "ProcessOptionFlags")?.Value ?? "None");
+                CreatedByAgentName = ParseElementValue<string?>(msg.Element(xn_a + nameof(CreatedByAgentName)));
+                CommandName = ParseElementValue<string?>(msg.Element(xn_a + nameof(CommandName)));
+                CommandRequestString = ParseElementValue<string?>(msg.Element(xn_a + nameof(CommandRequestString)));
+                ProcessOptionFlags = ParseElementValue<MessageProcessOptionFlags>(msg.Element(xn_a + nameof(ProcessOptionFlags)));
             } else {
                 throw new HttpRequestException("Soap message not found in request");
             }
@@ -40,10 +33,10 @@ namespace HyperSoa.Contracts.Legacy
                             new XElement(xn_t + "message",
                                 new XAttribute(XNamespace.Xmlns + "a", xn_a.NamespaceName),
                                 new XAttribute(XNamespace.Xmlns + "i", xn_i.NamespaceName),
-                                new XElement(xn_a + "CommandName", CommandName ?? (object?)new XAttribute(xn_i + "nil", true)),
-                                new XElement(xn_a + "CommandRequestString", CommandRequestString ?? (object?)new XAttribute(xn_i + "nil", true)),
-                                new XElement(xn_a + "CreatedByAgentName", CreatedByAgentName ?? (object?)new XAttribute(xn_i + "nil", true)),
-                                new XElement(xn_a + "ProcessOptionFlags", ProcessOptionFlags)
+                                new XElement(xn_a + nameof(CommandName), CommandName ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + nameof(CommandRequestString), CommandRequestString ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + nameof(CreatedByAgentName), CreatedByAgentName ?? (object?)new XAttribute(xn_i + "nil", true)),
+                                new XElement(xn_a + nameof(ProcessOptionFlags), ProcessOptionFlags)
                             )
                         )
                     )
