@@ -5,7 +5,7 @@ namespace HyperSoa.Service.Configuration
 {
     internal class FullRemoteAdminConfigurationCollection : IRemoteAdminConfigurationCollection
     {
-        private readonly IDictionary<string, RemoteAdminConfiguration> _remoteAdminCommands;
+        private readonly IDictionary<string, RemoteAdminCommandConfiguration> _remoteAdminCommands;
 
         public bool Enabled => true;
 
@@ -13,7 +13,11 @@ namespace HyperSoa.Service.Configuration
         {
             _remoteAdminCommands = RemoteAdminCommandName.GetAll().ToDictionary(
                 commandName => commandName,
-                commandName => new RemoteAdminConfiguration(commandName, true)
+                commandName => new RemoteAdminCommandConfiguration
+                {
+                    Name = commandName,
+                    Enabled = true
+                }
             );
         }
 

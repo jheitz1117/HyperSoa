@@ -1,12 +1,12 @@
 ﻿using System.Collections;
 
-namespace HyperSoa.Service.Configuration.Json.Models
+namespace HyperSoa.Service.Configuration
 {
-    internal class RemoteAdminConfigurationCollection : IRemoteAdminConfigurationCollection
+    public class RemoteAdminConfigurationCollection : IRemoteAdminConfigurationCollection
     {
         public bool Enabled { get; set; }
 
-        public RemoteAdminCommandConfiguration[] Commands { get; set; } = Array.Empty<RemoteAdminCommandConfiguration>();
+        public List<RemoteAdminCommandConfiguration> Commands { get; set; } = new();
 
         public IEnumerator<IRemoteAdminCommandConfiguration> GetEnumerator()
         {

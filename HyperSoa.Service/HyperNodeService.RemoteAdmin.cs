@@ -15,12 +15,12 @@ namespace HyperSoa.Service
 
         internal IEnumerable<CommandStatus> GetCommandStatuses()
         {
-            return _commandModuleConfigurations.Keys.Select(
+            return _commandModuleDescriptors.Keys.Select(
                 commandName => new CommandStatus
                 {
                     CommandName = commandName,
                     CommandType = (RemoteAdminCommandName.IsRemoteAdminCommand(commandName) ? HyperNodeCommandType.RemoteAdmin : HyperNodeCommandType.Custom),
-                    Enabled = _commandModuleConfigurations[commandName].Enabled
+                    Enabled = _commandModuleDescriptors[commandName].Enabled
                 }
             );
         }
@@ -51,7 +51,7 @@ namespace HyperSoa.Service
 
         internal bool IsKnownCommand(string? commandName)
         {
-            return _commandModuleConfigurations.ContainsKey(commandName ?? "");
+            return _commandModuleDescriptors.ContainsKey(commandName ?? "");
         }
 
         internal bool IsKnownActivityMonitor(string? activityMonitorName)
@@ -63,7 +63,7 @@ namespace HyperSoa.Service
         {
             var result = false;
 
-            if (!string.IsNullOrWhiteSpace(commandName) && _commandModuleConfigurations.TryGetValue(commandName, out var commandConfig))
+            if (!string.IsNullOrWhiteSpace(commandName) && _commandModuleDescriptors.TryGetValue(commandName, out var commandConfig))
             {
                 commandConfig.Enabled = enable;
                 result = true;

@@ -28,7 +28,9 @@ namespace HyperSoa.Service
         #region Defaults
 
         private static readonly IServiceContractSerializer DefaultContractSerializer = new NoOpContractSerializer();
-        private static readonly IHyperNodeConfigurationProvider DefaultConfigurationProvider = new InMemoryHyperNodeConfigurationProvider();
+        private static readonly IHyperNodeConfigurationProvider DefaultConfigurationProvider = new InMemoryHyperNodeConfigurationProvider(
+            new DefaultHyperNodeConfiguration()
+        );
 
         #endregion Defaults
 
@@ -36,7 +38,7 @@ namespace HyperSoa.Service
 
         private readonly TaskProgressCacheMonitor _taskProgressCacheMonitor = new();
         private readonly List<HyperNodeServiceActivityMonitor> _customActivityMonitors = new();
-        private readonly ConcurrentDictionary<string, CommandModuleConfiguration> _commandModuleConfigurations = new();
+        private readonly ConcurrentDictionary<string, CommandModuleDescriptor> _commandModuleDescriptors = new();
         private readonly CancellationTokenSource _masterTokenSource = new();
         private readonly ConcurrentDictionary<string, HyperNodeTaskInfo> _liveTasks = new();
 
@@ -596,14 +598,14 @@ namespace HyperSoa.Service
             ICommandResponse commandResponse;
 
             if (!string.IsNullOrWhiteSpace(args.Message.CommandName) &&
-                _commandModuleConfigurations.ContainsKey(args.Message.CommandName) &&
-                _commandModuleConfigurations.TryGetValue(args.Message.CommandName, out var commandModuleConfig) &&
-                commandModuleConfig is { Enabled: true, CommandModuleType: not null })
+                _commandModuleDescriptors.ContainsKey(args.Message.CommandName) &&
+                _commandModuleDescriptors.TryGetValue(args.Message.CommandName, out var commandModuleDescriptor) &&
+                commandModuleDescriptor is { Enabled: true, CommandModuleType: not null })
             {
                 // Create our command module instance (with DI if available)
                 var commandInstance = ServiceProvider != null
-                    ? ActivatorUtilities.CreateInstance(ServiceProvider, commandModuleConfig.CommandModuleType)
-                    : Activator.CreateInstance(commandModuleConfig.CommandModuleType);
+                    ? ActivatorUtilities.CreateInstance(ServiceProvider, commandModuleDescriptor.CommandModuleType)
+                    : Activator.CreateInstance(commandModuleDescriptor.CommandModuleType);
 
                 IServiceContractSerializer? contractSerializer = null;
 
@@ -612,7 +614,7 @@ namespace HyperSoa.Service
                     contractSerializer = contractSerializerFactory.Create();
 
                 // Allow the command module factory-created serializers to take precedence over the configured serializers
-                contractSerializer ??= commandModuleConfig.ContractSerializer ?? DefaultContractSerializer;
+                contractSerializer ??= commandModuleDescriptor.ContractSerializer ?? DefaultContractSerializer;
 
                 ICommandRequest? commandRequest;
                 try
@@ -629,7 +631,7 @@ namespace HyperSoa.Service
                 }
 
                 var loggerFactory = ServiceProvider?.GetService<ILoggerFactory>() ?? NullLoggerFactory.Instance;
-                var commandLogger = loggerFactory.CreateLogger(commandModuleConfig.CommandModuleType);
+                var commandLogger = loggerFactory.CreateLogger(commandModuleDescriptor.CommandModuleType);
 
                 TrackActivityEventHandler? commandActivityHandler = null;
 
@@ -702,18 +704,18 @@ namespace HyperSoa.Service
             args.Response.ProcessStatusFlags = commandResponse.ProcessStatusFlags;
         }
 
-        private void AddCommandModuleConfiguration(CommandModuleConfiguration commandConfig)
+        private void AddCommandModuleDescriptor(CommandModuleDescriptor commandDescriptor)
         {
-            if (commandConfig == null)
-                throw new ArgumentNullException(nameof(commandConfig));
+            if (commandDescriptor == null)
+                throw new ArgumentNullException(nameof(commandDescriptor));
 
-            if (string.IsNullOrWhiteSpace(commandConfig.CommandName))
-                throw new ArgumentException($"The {nameof(commandConfig.CommandName)} property of the {nameof(commandConfig)} parameter must not be null or whitespace.", nameof(commandConfig));
+            if (string.IsNullOrWhiteSpace(commandDescriptor.CommandName))
+                throw new ArgumentException($"The {nameof(commandDescriptor.CommandName)} property of the {nameof(commandDescriptor)} parameter must not be null or whitespace.", nameof(commandDescriptor));
 
-            if (!_commandModuleConfigurations.TryAdd(commandConfig.CommandName, commandConfig))
+            if (!_commandModuleDescriptors.TryAdd(commandDescriptor.CommandName, commandDescriptor))
             {
                 throw new DuplicateCommandException(
-                    $"A command already exists with the {nameof(commandConfig.CommandName)} '{commandConfig.CommandName}'."
+                    $"A command already exists with the {nameof(commandDescriptor.CommandName)} '{commandDescriptor.CommandName}'."
                 );
             }
         }

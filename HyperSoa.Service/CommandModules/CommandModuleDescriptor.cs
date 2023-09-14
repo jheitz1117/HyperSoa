@@ -2,7 +2,7 @@
 
 namespace HyperSoa.Service.CommandModules
 {
-    internal class CommandModuleConfiguration
+    internal class CommandModuleDescriptor
     {
         public string? CommandName { get; set; }
         public bool Enabled { get; set; }

@@ -1,10 +1,17 @@
 ﻿namespace HyperSoa.Service.Configuration
 {
-    internal class InMemoryHyperNodeConfigurationProvider : IHyperNodeConfigurationProvider
+    public class InMemoryHyperNodeConfigurationProvider : IHyperNodeConfigurationProvider
     {
+        private readonly IHyperNodeConfiguration _config;
+
+        public InMemoryHyperNodeConfigurationProvider(IHyperNodeConfiguration config)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+        }
+
         public IHyperNodeConfiguration GetConfiguration()
         {
-            return new InMemoryHyperNodeConfiguration();
+            return _config;
         }
     }
 }

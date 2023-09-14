@@ -1,7 +1,9 @@
-﻿namespace HyperSoa.Service.Configuration.Json.Models
+﻿namespace HyperSoa.Service.Configuration
 {
-    internal class HyperNodeConfiguration : IHyperNodeConfiguration
+    public class HyperNodeConfiguration : IHyperNodeConfiguration
     {
+        public const string ConfigurationSectionName = "HyperSoa:ServiceConfig";
+
         public string? InstanceName { get; set; }
         public bool? EnableTaskProgressCache { get; set; }
         public bool? EnableDiagnostics { get; set; }

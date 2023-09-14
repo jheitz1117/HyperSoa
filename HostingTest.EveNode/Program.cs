@@ -1,17 +1,11 @@
-﻿using HyperSoa.Service.Configuration.Json;
-using HyperSoa.Service.Host;
-using HyperSoa.Service.Host.Configuration;
+﻿using HyperSoa.Service.Host;
 using HyperSoa.Service.Host.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddHyperNodeServiceHosting<JsonHyperNodeConfigurationProvider>(
-    builder.Configuration.GetSection(
-        HyperNodeHostOptions.ConfigurationSectionName
-    )
-);
+builder.Services.AddHyperNodeServiceHosting(builder.Configuration);
 
 try
 {
