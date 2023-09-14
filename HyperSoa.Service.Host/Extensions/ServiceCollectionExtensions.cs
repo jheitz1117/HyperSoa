@@ -10,15 +10,14 @@ namespace HyperSoa.Service.Host.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddHyperNodeServiceHosting<TServiceConfig>(this IServiceCollection services, IConfiguration namedConfigurationSection)
-            where TServiceConfig : class, IHyperNodeConfigurationProvider
+        public static IServiceCollection AddHyperNodeServiceHosting(this IServiceCollection services, Func<IServiceProvider, IHyperNodeConfigurationProvider> configProviderFactory, IConfiguration hostConfigSection)
         {
-            services.AddTransient<IHyperNodeConfigurationProvider, TServiceConfig>();
+            services.AddTransient(configProviderFactory);
             services.AddSingleton<IHyperNodeService, HyperNodeService>();
             services.AddHostedService<HostedHyperNodeService>();
 
             services.Configure<HyperNodeHostOptions>(
-                namedConfigurationSection
+                hostConfigSection
             ).TryAddEnumerable(
                 ServiceDescriptor.Singleton<IValidateOptions<HyperNodeHostOptions>, HyperNodeHostOptionsValidator>()
             );
@@ -26,6 +25,28 @@ namespace HyperSoa.Service.Host.Extensions
             services.AddHostedService<HostedListenerService>();
 
             return services;
+        }
+
+        public static IServiceCollection AddHyperNodeServiceHosting(this IServiceCollection services, IConfiguration serviceConfigSection, IConfiguration hostConfigSection)
+        {
+            return services.AddHyperNodeServiceHosting(
+                _ => new InMemoryHyperNodeConfigurationProvider(
+                    serviceConfigSection.Get<HyperNodeConfiguration>() ?? throw new InvalidOperationException($"Unable to deserialize {nameof(HyperNodeConfiguration)} from configuration.")
+                ),
+                hostConfigSection
+            );
+        }
+
+        public static IServiceCollection AddHyperNodeServiceHosting(this IServiceCollection services, IConfigurationRoot configurationRoot)
+        {
+            return services.AddHyperNodeServiceHosting(
+                configurationRoot.GetSection(
+                    HyperNodeConfiguration.ConfigurationSectionName
+                ),
+                configurationRoot.GetSection(
+                    HyperNodeHostOptions.ConfigurationSectionName
+                )
+            );
         }
     }
 }

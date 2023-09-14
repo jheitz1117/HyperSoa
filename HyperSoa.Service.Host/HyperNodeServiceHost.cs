@@ -20,7 +20,7 @@ namespace HyperSoa.Service.Host
             {
                 IHyperNodeChannel httpChannel;
 
-                if (hostConfig.UseInteropHttpChannel)
+                if (hostConfig.EnableLegacySoapSupport)
                 {
                     httpChannel = new HyperNodeInteropHttpChannel(
                         hostConfig.HttpEndpoints,

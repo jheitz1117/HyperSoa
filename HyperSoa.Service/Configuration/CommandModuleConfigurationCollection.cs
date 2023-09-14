@@ -1,8 +1,8 @@
 ﻿using System.Collections;
 
-namespace HyperSoa.Service.Configuration.Json.Models
+namespace HyperSoa.Service.Configuration
 {
-    internal class CommandModuleConfigurationCollection : ICommandModuleConfigurationCollection
+    public class CommandModuleConfigurationCollection : ICommandModuleConfigurationCollection
     {
         public string? ContractSerializerType { get; set; }
         public List<CommandModuleConfiguration> Commands { get; set; } = new();

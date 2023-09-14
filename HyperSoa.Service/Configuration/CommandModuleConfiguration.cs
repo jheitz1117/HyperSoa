@@ -1,6 +1,6 @@
-﻿namespace HyperSoa.Service.Configuration.Json.Models
+﻿namespace HyperSoa.Service.Configuration
 {
-    internal class CommandModuleConfiguration : ICommandModuleConfiguration
+    public class CommandModuleConfiguration : ICommandModuleConfiguration
     {
         public string? Name { get; set; }
         public string? Type { get; set; }

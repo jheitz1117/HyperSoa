@@ -98,7 +98,7 @@ namespace HyperSoa.Service
             var actualDefaultEnabled = userDefinedRemoteAdminCommandsEnabledDefault ?? true;
 
             // Make all commands enabled or disabled according to the user-defined default, or the HyperNode's default if the user did not define a default
-            var remoteAdminCommandConfigs = new List<CommandModuleConfiguration>
+            var remoteAdminCommandDescriptors = new List<CommandModuleDescriptor>
             {
                 new()
                 {
@@ -162,18 +162,18 @@ namespace HyperSoa.Service
                 }
             };
 
-            foreach (var remoteAdminCommandConfig in remoteAdminCommandConfigs)
+            foreach (var remoteAdminCommandDescriptor in remoteAdminCommandDescriptors)
             {
                 // Allow each remote admin command to be enabled or disabled individually. This takes precedence over any defaults defined previously
-                if (config.RemoteAdminCommands != null && !string.IsNullOrWhiteSpace(remoteAdminCommandConfig.CommandName) && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandConfig.CommandName))
+                if (config.RemoteAdminCommands != null && !string.IsNullOrWhiteSpace(remoteAdminCommandDescriptor.CommandName) && config.RemoteAdminCommands.ContainsCommandName(remoteAdminCommandDescriptor.CommandName))
                 {
-                    var userConfig = config.RemoteAdminCommands.GetByCommandName(remoteAdminCommandConfig.CommandName);
+                    var userConfig = config.RemoteAdminCommands.GetByCommandName(remoteAdminCommandDescriptor.CommandName);
                     if (userConfig != null)
-                        remoteAdminCommandConfig.Enabled = userConfig.Enabled;
+                        remoteAdminCommandDescriptor.Enabled = userConfig.Enabled;
                 }
 
                 // Finally, try to add this remote admin command to our collection
-                AddCommandModuleConfiguration(remoteAdminCommandConfig);
+                AddCommandModuleDescriptor(remoteAdminCommandDescriptor);
             }
         }
 
@@ -282,7 +282,7 @@ namespace HyperSoa.Service
                     }
 
                     // Finally, construct our command module configuration
-                    var commandConfig = new CommandModuleConfiguration
+                    var commandDescriptor = new CommandModuleDescriptor
                     {
                         CommandName = commandModuleConfig.CommandName,
                         Enabled = commandModuleConfig.Enabled,
@@ -290,7 +290,7 @@ namespace HyperSoa.Service
                         ContractSerializer = configContractSerializer ?? DefaultContractSerializer
                     };
 
-                    AddCommandModuleConfiguration(commandConfig);
+                    AddCommandModuleDescriptor(commandDescriptor);
                 }
             }
         }
@@ -329,9 +329,9 @@ namespace HyperSoa.Service
         /// </summary>
         /// <param name="commandName">The name of the command.</param>
         /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
-        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType)
+        public void AddCommandModuleDescriptor(string commandName, Type commandModuleType)
         {
-            AddCommandModuleConfiguration(commandName, commandModuleType, true, null);
+            AddCommandModuleDescriptor(commandName, commandModuleType, true, null);
         }
 
         /// <summary>
@@ -341,10 +341,10 @@ namespace HyperSoa.Service
         /// <param name="commandModuleType">The <see cref="Type"/> of the command module.</param>
         /// <param name="enabled">Indicates whether the command will be enabled immediately.</param>
         /// <param name="contractSerializer">The <see cref="IServiceContractSerializer"/> implementation to use to serialize and deserialize request and response objects. This parameter can be null.</param>
-        public void AddCommandModuleConfiguration(string commandName, Type commandModuleType, bool enabled, IServiceContractSerializer? contractSerializer)
+        public void AddCommandModuleDescriptor(string commandName, Type commandModuleType, bool enabled, IServiceContractSerializer? contractSerializer)
         {
-            AddCommandModuleConfiguration(
-                new CommandModuleConfiguration
+            AddCommandModuleDescriptor(
+                new CommandModuleDescriptor
                 {
                     CommandName = commandName,
                     CommandModuleType = commandModuleType,

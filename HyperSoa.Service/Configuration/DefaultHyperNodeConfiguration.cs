@@ -1,12 +1,12 @@
 ﻿namespace HyperSoa.Service.Configuration
 {
-    internal class InMemoryHyperNodeConfiguration : IHyperNodeConfiguration
+    internal class DefaultHyperNodeConfiguration : IHyperNodeConfiguration
     {
         private readonly EmptyActivityMonitorConfigurationCollection _activityMonitors = new();
         private readonly EmptyCommandModuleConfigurationCollection _commandModules = new();
         private readonly FullRemoteAdminConfigurationCollection _remoteAdminCommands = new();
 
-        public string InstanceName => "InMemoryNode";
+        public string InstanceName => "DefaultNode";
         public bool? EnableTaskProgressCache => true;
         public bool? EnableDiagnostics => true;
         public int? TaskProgressCacheDurationMinutes => null;

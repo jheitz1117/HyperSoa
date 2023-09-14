@@ -1,11 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <VersionPrefix>1.0.2</VersionPrefix>
+	  <VersionPrefix>1.0.3</VersionPrefix>
 	  <VersionSuffix>beta</VersionSuffix>
 	  <Authors>Josh Heitz</Authors>
 	  <Description>Hosting support and DI extensions for HyperSoa services.</Description>
