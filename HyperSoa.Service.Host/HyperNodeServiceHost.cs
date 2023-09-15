@@ -10,7 +10,7 @@ namespace HyperSoa.Service.Host
     {
         private readonly IHyperNodeChannel[] _channels;
 
-        public HyperNodeServiceHost(IOptions<HyperNodeHostOptions> options, IHyperNodeService serviceInstance, ILoggerFactory loggerFactory)
+        public HyperNodeServiceHost(IOptions<HyperNodeHostConfiguration> options, IHyperNodeService serviceInstance, ILoggerFactory loggerFactory)
         {
             var channels = new List<IHyperNodeChannel>();
 
