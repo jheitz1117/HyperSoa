@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <VersionPrefix>1.0.3</VersionPrefix>
+	  <VersionPrefix>1.0.4</VersionPrefix>
 	  <VersionSuffix>beta</VersionSuffix>
 	  <Authors>Josh Heitz</Authors>
 	  <Description>Hosting support and DI extensions for HyperSoa services.</Description>

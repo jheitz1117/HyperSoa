@@ -16,10 +16,10 @@ namespace HyperSoa.Service.Host.Extensions
             services.AddSingleton<IHyperNodeService, HyperNodeService>();
             services.AddHostedService<HostedHyperNodeService>();
 
-            services.Configure<HyperNodeHostOptions>(
+            services.Configure<HyperNodeHostConfiguration>(
                 hostConfigSection
             ).TryAddEnumerable(
-                ServiceDescriptor.Singleton<IValidateOptions<HyperNodeHostOptions>, HyperNodeHostOptionsValidator>()
+                ServiceDescriptor.Singleton<IValidateOptions<HyperNodeHostConfiguration>, HyperNodeHostConfigurationValidator>()
             );
             services.AddSingleton<IHyperNodeServiceHost, HyperNodeServiceHost>();
             services.AddHostedService<HostedListenerService>();
@@ -37,14 +37,18 @@ namespace HyperSoa.Service.Host.Extensions
             );
         }
 
-        public static IServiceCollection AddHyperNodeServiceHosting(this IServiceCollection services, IConfigurationRoot configurationRoot)
+        public static IServiceCollection AddHyperNodeServiceHosting(this IServiceCollection services, IConfiguration configuration, bool configurationIsScoped = false)
         {
             return services.AddHyperNodeServiceHosting(
-                configurationRoot.GetSection(
-                    HyperNodeConfiguration.ConfigurationSectionName
+                configuration.GetSection(
+                    configurationIsScoped
+                        ? HyperNodeConfiguration.ScopedConfigurationSectionName
+                        : HyperNodeConfiguration.ConfigurationSectionName
                 ),
-                configurationRoot.GetSection(
-                    HyperNodeHostOptions.ConfigurationSectionName
+                configuration.GetSection(
+                    configurationIsScoped
+                        ? HyperNodeHostConfiguration.ScopedConfigurationSectionName
+                        : HyperNodeHostConfiguration.ConfigurationSectionName
                 )
             );
         }

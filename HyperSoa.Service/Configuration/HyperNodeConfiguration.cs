@@ -2,7 +2,8 @@
 {
     public class HyperNodeConfiguration : IHyperNodeConfiguration
     {
-        public const string ConfigurationSectionName = "HyperSoa:ServiceConfig";
+        public const string ConfigurationSectionName = $"{HyperSoaConfiguration.ConfigurationSectionName}:{ScopedConfigurationSectionName}";
+        public const string ScopedConfigurationSectionName = "ServiceConfig";
 
         public string? InstanceName { get; set; }
         public bool? EnableTaskProgressCache { get; set; }

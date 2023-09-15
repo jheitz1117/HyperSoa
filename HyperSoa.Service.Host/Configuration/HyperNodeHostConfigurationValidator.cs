@@ -2,9 +2,9 @@
 
 namespace HyperSoa.Service.Host.Configuration
 {
-    public class HyperNodeHostOptionsValidator : IValidateOptions<HyperNodeHostOptions>
+    public class HyperNodeHostConfigurationValidator : IValidateOptions<HyperNodeHostConfiguration>
     {
-        public ValidateOptionsResult Validate(string? name, HyperNodeHostOptions options)
+        public ValidateOptionsResult Validate(string? name, HyperNodeHostConfiguration options)
         {
             var errors = new List<string>();
 

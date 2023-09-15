@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <VersionPrefix>1.0.6</VersionPrefix>
+    <VersionPrefix>1.0.7</VersionPrefix>
     <VersionSuffix>beta</VersionSuffix>
 		<Authors>Josh Heitz</Authors>
     <Description>Task manager for user-defined command modules offering support for synchronous or asynchronous execution and remote administration, including remote task cancellation.</Description>
