@@ -5,8 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <VersionPrefix>1.0.4</VersionPrefix>
-	  <VersionSuffix>beta</VersionSuffix>
+	  <VersionPrefix>1.1.0</VersionPrefix>
 	  <Authors>Josh Heitz</Authors>
 	  <Description>Client library for communicating with HyperSoa services.</Description>
 	  <PackageProjectUrl>https://github.com/jheitz1117/HyperSoa</PackageProjectUrl>
