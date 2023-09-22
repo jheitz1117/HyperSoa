@@ -6,7 +6,7 @@ namespace HyperSoa.Client
     {
         public string? ClientApplicationName { get; set; }
 
-        public Task<string> RunCommandAsync(string commandName, ICommandMetaData? metaData = null);
+        public Task<string> ExecuteCommandRemoteAsync(string commandName, ICommandMetaData? metaData = null);
         public Task ExecuteCommandAsync(string commandName, ICommandMetaData? metaData = null);
         public Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
             where TRequest : ICommandRequest
