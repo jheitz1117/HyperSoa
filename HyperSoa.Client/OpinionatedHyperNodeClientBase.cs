@@ -44,7 +44,7 @@ namespace HyperSoa.Client
         /// <param name="commandName">The name of the command to execute.</param>
         /// <param name="metaData">Metadata describing how to execute the command. May optionally contain command request data.</param>
         /// <returns></returns>
-        public virtual async Task<string> RunCommandAsync(string commandName, ICommandMetaData? metaData = null)
+        public virtual async Task<string> ExecuteCommandRemoteAsync(string commandName, ICommandMetaData? metaData = null)
         {
             string? taskId = null;
 

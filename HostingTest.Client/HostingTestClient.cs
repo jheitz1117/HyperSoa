@@ -20,31 +20,31 @@ namespace HostingTest.Client
 
         #region Public Methods
 
-        public async Task<string> RunLongRunningCommandAsync(LongRunningCommandRequest request)
+        public async Task<string> LongRunningCommandRemoteAsync(LongRunningCommandRequest request)
         {
-            return await RunLongRunningCommandAsync(
+            return await LongRunningCommandRemoteAsync(
                 request.CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunLongRunningCommandAsync(ICommandMetaData metaData)
+        public async Task<string> LongRunningCommandRemoteAsync(ICommandMetaData metaData)
         {
-            return await RunCommandAsync<LongRunningCommandRequest>(
+            return await ExecuteCommandRemoteAsync<LongRunningCommandRequest>(
                 "LongRunningCommand",
                 metaData
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunLongRunningSingletonCommandAsync(LongRunningCommandRequest request)
+        public async Task<string> LongRunningSingletonCommandRemoteAsync(LongRunningCommandRequest request)
         {
-            return await RunLongRunningSingletonCommandAsync(
+            return await LongRunningSingletonCommandRemoteAsync(
                 request.CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunLongRunningSingletonCommandAsync(ICommandMetaData metaData)
+        public async Task<string> LongRunningSingletonCommandRemoteAsync(ICommandMetaData metaData)
         {
-            return await RunCommandAsync<LongRunningCommandRequest>(
+            return await ExecuteCommandRemoteAsync<LongRunningCommandRequest>(
                 "LongRunningSingletonCommand",
                 metaData
             ).ConfigureAwait(false);
@@ -54,7 +54,7 @@ namespace HostingTest.Client
         {
             return await ComplexCommandAsync(
                 request.CreatedBy(ClientApplicationName)
-            );
+            ).ConfigureAwait(false);
         }
 
         public async Task<ComplexCommandResponse> ComplexCommandAsync(ICommandMetaData metaData)
@@ -82,16 +82,16 @@ namespace HostingTest.Client
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunNoContractCommandAsync()
+        public async Task<string> NoContractCommandRemoteAsync()
         {
-            return await RunNoContractCommandAsync(
+            return await NoContractCommandRemoteAsync(
                 CommandMetaData.Default().CreatedBy(ClientApplicationName)
             ).ConfigureAwait(false);
         }
 
-        public async Task<string> RunNoContractCommandAsync(ICommandMetaData metaData)
+        public async Task<string> NoContractCommandRemoteAsync(ICommandMetaData metaData)
         {
-            return await RunCommandAsync(
+            return await ExecuteCommandRemoteAsync(
                 "NoContractCommand",
                 metaData
             ).ConfigureAwait(false);
@@ -101,33 +101,42 @@ namespace HostingTest.Client
 
         #region Protected Methods
 
-        protected Task<string> RunCommandAsync<T>(string commandName, ICommandMetaData? metaData = null)
+        protected async Task<string> ExecuteCommandRemoteAsync<T>(string commandName, ICommandMetaData? metaData = null)
             where T : ICommandRequest
         {
             // By default, use protobuf for serialization
             if (metaData is { Serializer: null })
                 metaData.Serializer = new ProtoContractSerializer<T, ICommandResponse>();
 
-            return base.RunCommandAsync(commandName, metaData);
+            return await base.ExecuteCommandRemoteAsync(
+                commandName,
+                metaData
+            ).ConfigureAwait(false);
         }
 
-        protected Task ExecuteCommandAsync<T>(string commandName, ICommandMetaData? metaData = null)
+        protected async Task ExecuteCommandAsync<T>(string commandName, ICommandMetaData? metaData = null)
             where T : ICommandRequest
         {
             // By default, use protobuf for serialization
             if (metaData is { Serializer: null })
                 metaData.Serializer = new ProtoContractSerializer<T, ICommandResponse>();
 
-            return base.ExecuteCommandAsync(commandName, metaData);
+            await base.ExecuteCommandAsync(
+                commandName,
+                metaData
+            ).ConfigureAwait(false);
         }
 
-        public override Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
+        public override async Task<TResponse> GetCommandResponseAsync<TRequest, TResponse>(string commandName, ICommandMetaData? metaData = null)
         {
             // By default, use protobuf for serialization
             if (metaData is { Serializer: null })
                 metaData.Serializer = new ProtoContractSerializer<TRequest, TResponse>();
 
-            return base.GetCommandResponseAsync<TRequest, TResponse>(commandName, metaData);
+            return await base.GetCommandResponseAsync<TRequest, TResponse>(
+                commandName,
+                metaData
+            ).ConfigureAwait(false);
         }
 
         #endregion Protected Methods

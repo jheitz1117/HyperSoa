@@ -105,7 +105,7 @@ namespace TestClient
 
                 if (_client != null)
                 {
-                    taskId = await _client.RunNoContractCommandAsync(
+                    taskId = await _client.NoContractCommandRemoteAsync(
                         CommandMetaData.Default().WithTaskTrace(
                             chkReturnTaskTrace.Checked
                         ).WithProgressCaching(
@@ -142,7 +142,7 @@ namespace TestClient
 
                 if (_client != null)
                 {
-                    taskId = await _client.RunLongRunningCommandAsync(
+                    taskId = await _client.LongRunningCommandRemoteAsync(
                         new LongRunningCommandRequest().WithTaskTrace(
                             chkReturnTaskTrace.Checked
                         ).WithProgressCaching(

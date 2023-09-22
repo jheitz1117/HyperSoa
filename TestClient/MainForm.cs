@@ -406,7 +406,7 @@ namespace TestClient
                 ClientAgentName,
                 _httpClient,
                 TargetEndpoint
-            ).RunLongRunningCommandAsync(
+            ).LongRunningCommandRemoteAsync(
                 new LongRunningCommandRequest
                 {
                     TotalRunTime = TimeSpan.FromHours(1),
