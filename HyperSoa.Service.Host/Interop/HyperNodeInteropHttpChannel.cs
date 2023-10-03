@@ -2,8 +2,8 @@
 using System.Text;
 using HyperSoa.Contracts;
 using HyperSoa.Contracts.Legacy;
+using HyperSoa.Contracts.Legacy.Extensions;
 using HyperSoa.Service.Host.Configuration;
-using HyperSoa.Service.Host.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace HyperSoa.Service.Host.Interop
