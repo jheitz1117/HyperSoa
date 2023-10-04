@@ -18,8 +18,6 @@ namespace HyperSoa.Service.Host.Configuration
                         errors.Add($"The {nameof(HyperNodeHttpEndpoint)}.{nameof(HyperNodeHttpEndpoint.Name)} property is required and must not be blank.");
                     if (string.IsNullOrWhiteSpace(httpEndpoint.Uri))
                         errors.Add($"The {nameof(HyperNodeHttpEndpoint)}.{nameof(HyperNodeHttpEndpoint.Uri)} property is required and must be a valid HTTP or HTTPS URI.");
-                    else if (!Uri.TryCreate(httpEndpoint.Uri, UriKind.Absolute, out var uri) || !(uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
-                        errors.Add($"Invalid {nameof(HyperNodeHttpEndpoint)}.{nameof(HyperNodeHttpEndpoint.Uri)} value \"{httpEndpoint.Uri}\". The value must be a valid HTTP or HTTPS URI.");
                 }
             }
 
