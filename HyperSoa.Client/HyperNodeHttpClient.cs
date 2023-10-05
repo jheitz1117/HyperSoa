@@ -6,7 +6,6 @@ namespace HyperSoa.Client
     {
         private readonly HttpClient _httpClient;
         private readonly string _endpoint;
-        private readonly bool _useLegacy;
 
         public HyperNodeHttpClient(HttpClient httpClient, string endpoint)
         {
@@ -14,20 +13,10 @@ namespace HyperSoa.Client
             _endpoint = endpoint;
         }
 
-        public HyperNodeHttpClient(HttpClient httpClient, string endpoint, bool useLegacy) {
-            _httpClient = httpClient;
-            _endpoint = endpoint;
-            _useLegacy = useLegacy;
-        }
-
         public async Task<HyperNodeMessageResponse> ProcessMessageAsync(HyperNodeMessageRequest message)
         {
             try
             {
-                if (_useLegacy) {
-                    return await HyperNodeInteropHttpClient.ProcessMessageAsync(_httpClient, _endpoint, message);
-                }
-
                 ByteArrayContent? msgContent;
                 using (var ms = new MemoryStream())
                 {
