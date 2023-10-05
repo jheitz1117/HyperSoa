@@ -67,7 +67,10 @@ namespace HostingTest.Modules.CommandModules
 
                 try
                 {
-                    await Task.Delay(sleepMilliseconds, context.Token);
+                    await Task.Delay(
+                        sleepMilliseconds,
+                        context.Token
+                    ).ConfigureAwait(false);
 
                     // Avoid reporting more than 100% or reporting 100% multiple times
                     if (stopwatch.ElapsedMilliseconds < totalRunTime.TotalMilliseconds)

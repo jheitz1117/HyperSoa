@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -25,13 +20,15 @@ namespace HyperSoa.Contracts.Legacy {
                 if (typeof(T).IsEnum) {
                     return (T)Enum.Parse(typeof(T), xel.Value);
                 }
+                if (typeof(T) == typeof(TimeSpan)) {
+                    if (string.IsNullOrWhiteSpace(xel.Value)) {
+                        return default;
+                    } else {
+                        return (T)(object)XmlConvert.ToTimeSpan(xel.Value);
+                    }
+                }
 
                 return (T?)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(xel.Value);
-                //if (typeof(T) == typeof(TimeSpan)) {
-                //    return (T)XmlConvert.ToTimeSpan(xel.Value);
-                //}
-
-                //return (T)xel.Value;
             }
             return default;
         }

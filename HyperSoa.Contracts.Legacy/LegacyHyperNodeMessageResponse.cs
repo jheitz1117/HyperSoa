@@ -14,7 +14,6 @@ namespace HyperSoa.Contracts.Legacy {
 
 
         public LegacyHyperNodeMessageResponse() { }
-
         public LegacyHyperNodeMessageResponse(Stream respStream) {
             XElement root = XElement.Load(respStream);
             XElement? msg = root.Descendants(xn_s + "Body").Descendants(xn_t + "ProcessMessageResponse").Descendants(xn_t + "ProcessMessageResult").FirstOrDefault();
@@ -69,7 +68,7 @@ namespace HyperSoa.Contracts.Legacy {
                                         new XElement(xn_a + nameof(HyperNodeActivityItem.ProgressTotal), tt.ProgressTotal ?? (object?)new XAttribute(xn_i + nil, true))
                                     )
                                 ) ?? (object?)new XAttribute(xn_i + nil, true)),
-                                new XElement(xn_a + nameof(TotalRunTime), (TotalRunTime == null ? new XAttribute(xn_i + "nil", true) : XmlConvert.ToString((TimeSpan)TotalRunTime)))
+                                new XElement(xn_a + nameof(TotalRunTime), (TotalRunTime == null ? new XAttribute(xn_i + nil, true) : XmlConvert.ToString((TimeSpan)TotalRunTime)))
                             )
                         )
                     )

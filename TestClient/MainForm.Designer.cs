@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             pnlLeft = new Panel();
+            btnHostingTestForm = new Button();
             btnLaunchRemoteAdmin = new Button();
             grpRealTimeResponse = new GroupBox();
             lstRealTimeResponse = new ListBox();
@@ -53,7 +54,6 @@
             txtTaskId = new TextBox();
             btnCancelCurrentTask = new Button();
             lblTaskId = new Label();
-            btnHostingTestForm = new Button();
             pnlLeft.SuspendLayout();
             grpRealTimeResponse.SuspendLayout();
             grpRealTimeTaskTrace.SuspendLayout();
@@ -86,6 +86,16 @@
             pnlLeft.Name = "pnlLeft";
             pnlLeft.Size = new Size(369, 664);
             pnlLeft.TabIndex = 0;
+            // 
+            // btnHostingTestForm
+            // 
+            btnHostingTestForm.Location = new Point(3, 3);
+            btnHostingTestForm.Name = "btnHostingTestForm";
+            btnHostingTestForm.Size = new Size(141, 23);
+            btnHostingTestForm.TabIndex = 14;
+            btnHostingTestForm.Text = "Hosting Test Form";
+            btnHostingTestForm.UseVisualStyleBackColor = true;
+            btnHostingTestForm.Click += btnHostingTestForm_Click;
             // 
             // btnLaunchRemoteAdmin
             // 
@@ -340,16 +350,6 @@
             lblTaskId.TabIndex = 0;
             lblTaskId.Text = "Task ID";
             lblTaskId.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // btnHostingTestForm
-            // 
-            btnHostingTestForm.Location = new Point(3, 3);
-            btnHostingTestForm.Name = "btnHostingTestForm";
-            btnHostingTestForm.Size = new Size(141, 23);
-            btnHostingTestForm.TabIndex = 14;
-            btnHostingTestForm.Text = "Hosting Test Form";
-            btnHostingTestForm.UseVisualStyleBackColor = true;
-            btnHostingTestForm.Click += btnHostingTestForm_Click;
             // 
             // MainForm
             // 
