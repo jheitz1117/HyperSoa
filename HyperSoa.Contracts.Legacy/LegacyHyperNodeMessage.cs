@@ -11,24 +11,24 @@ namespace HyperSoa.Contracts.Legacy {
         protected static XNamespace xn_a = "http://schemas.datacontract.org/2004/07/Hyper.NodeServices.Contracts";
         protected static XNamespace xn_i = "http://www.w3.org/2001/XMLSchema-instance";
 
-        protected T? ParseElementValue<T>(XElement? xel) {
-            if (xel != null) {
-                XAttribute? xatt = xel.Attribute(xn_i + nil);
-                if (xatt != null && xatt.Value != "true") {
+        protected T? ParseElementValue<T>(XElement? element) {
+            if (element != null) {
+                var attribute = element.Attribute(xn_i + nil);
+                if (attribute != null && attribute.Value != "true") {
                     return default;
                 }
                 if (typeof(T).IsEnum) {
-                    return (T)Enum.Parse(typeof(T), xel.Value);
+                    return (T)Enum.Parse(typeof(T), element.Value.Replace(" ", ", ")); // Hack to handle multiple values in flags enums
                 }
                 if (typeof(T) == typeof(TimeSpan)) {
-                    if (string.IsNullOrWhiteSpace(xel.Value)) {
+                    if (string.IsNullOrWhiteSpace(element.Value)) {
                         return default;
                     } else {
-                        return (T)(object)XmlConvert.ToTimeSpan(xel.Value);
+                        return (T)(object)XmlConvert.ToTimeSpan(element.Value);
                     }
                 }
 
-                return (T?)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(xel.Value);
+                return (T?)TypeDescriptor.GetConverter(typeof(T)).ConvertFromString(element.Value);
             }
             return default;
         }
