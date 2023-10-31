@@ -54,7 +54,7 @@ namespace HyperSoa.Contracts.Legacy {
                                 new XElement(xn_a + nameof(CommandResponseString), CommandResponseString ?? (object?)new XAttribute(xn_i + nil, true)),
                                 new XElement(xn_a + nameof(NodeAction), NodeAction),
                                 new XElement(xn_a + nameof(NodeActionReason), NodeActionReason),
-                                new XElement(xn_a + nameof(ProcessStatusFlags), ProcessStatusFlags),
+                                new XElement(xn_a + nameof(ProcessStatusFlags), ProcessStatusFlags.ToString().Replace(",", "")),
                                 new XElement(xn_a + nameof(RespondingNodeName), RespondingNodeName ?? (object?)new XAttribute(xn_i + nil, true)),
                                 new XElement(xn_a + nameof(TaskId), TaskId ?? (object?)new XAttribute(xn_i + nil, true)),
                                 new XElement(xn_a + nameof(TaskTrace), TaskTrace?.Select(tt =>
