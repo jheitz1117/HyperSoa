@@ -36,7 +36,7 @@ namespace HyperSoa.Contracts.Legacy
                                 new XElement(xn_a + nameof(CommandName), CommandName ?? (object?)new XAttribute(xn_i + nil, true)),
                                 new XElement(xn_a + nameof(CommandRequestString), CommandRequestString ?? (object?)new XAttribute(xn_i + nil, true)),
                                 new XElement(xn_a + nameof(CreatedByAgentName), CreatedByAgentName ?? (object?)new XAttribute(xn_i + nil, true)),
-                                new XElement(xn_a + nameof(ProcessOptionFlags), ProcessOptionFlags)
+                                new XElement(xn_a + nameof(ProcessOptionFlags), ProcessOptionFlags.ToString().Replace(",", ""))
                             )
                         )
                     )
